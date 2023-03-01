@@ -25,14 +25,14 @@ impl StringStore {
 
 #[test]
 fn test_signal_dep() {
-    let rt = Runtime::from_pool();
+    let cx = Runtime::from_pool().create_scope();
 
-    let num_sig = create_data_signal(rt, 5);
+    let num_sig = create_data_signal(cx, 5);
 
     let output = Rc::new(StringStore::new());
     let out = output.clone();
 
-    let str_sig = create_func_signal(rt, move || out.push(format!("val: {}", num_sig.get())));
+    let str_sig = create_func_signal(cx, move || out.push(format!("val: {}", num_sig.get())));
 
     str_sig.subscribe(num_sig);
 
@@ -43,20 +43,20 @@ fn test_signal_dep() {
 
 #[test]
 fn test_signal_func_val() {
-    let rt = Runtime::from_pool();
+    let cx = Runtime::from_pool().create_scope();
 
-    let num_sig = create_data_signal(rt, 5);
+    let num_sig = create_data_signal(cx, 5);
 
     let output = Rc::new(StringStore::new());
 
-    let a_sig = create_func_signal(rt, move || format!("a{}", num_sig.get()));
-    let b_sig = create_func_signal(rt, move || format!("b{}", num_sig.get()));
+    let a_sig = create_func_signal(cx, move || format!("a{}", num_sig.get()));
+    let b_sig = create_func_signal(cx, move || format!("b{}", num_sig.get()));
 
     a_sig.subscribe(num_sig);
     b_sig.subscribe(num_sig);
 
     let out = output.clone();
-    let str_sig = create_func_signal(rt, move || {
+    let str_sig = create_func_signal(cx, move || {
         out.push(format!("{}-{}", a_sig.get(), b_sig.get()))
     });
 

@@ -2,7 +2,7 @@ use std::{fmt::Debug, marker::PhantomData};
 
 use slotmap::new_key_type;
 
-use crate::{RuntimeId, SignalInner};
+use crate::{scope::Scope, signal_inner::SignalInner, RuntimeId};
 
 new_key_type! { pub struct SignalId; }
 
@@ -41,22 +41,22 @@ where
     }
 }
 
-pub fn create_data_signal<T: 'static>(rt: RuntimeId, value: T) -> Signal<T> {
+pub fn create_data_signal<T: 'static>(cx: Scope, value: T) -> Signal<T> {
     Signal {
-        rt,
-        id: rt.insert_signal(SignalInner::new_data(value)),
+        rt: cx.rt,
+        id: cx.rt.insert_signal(SignalInner::new_data(cx.id, value)),
         ty: PhantomData,
     }
 }
 
-pub fn create_func_signal<F, T>(rt: RuntimeId, func: F) -> Signal<T>
+pub fn create_func_signal<F, T>(cx: Scope, func: F) -> Signal<T>
 where
     F: Fn() -> T + 'static,
     T: 'static,
 {
     Signal {
-        rt,
-        id: rt.insert_signal(SignalInner::new_func(func)),
+        rt: cx.rt,
+        id: cx.rt.insert_signal(SignalInner::new_func(cx.id, func)),
         ty: PhantomData,
     }
 }
