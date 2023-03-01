@@ -2,10 +2,9 @@
 
 use std::cell::{Cell, RefCell};
 
-use signal::{SignalContent, SignalId};
 use slotmap::SlotMap;
 
-use crate::signal;
+use crate::{SignalId, SignalInner};
 
 thread_local! {
     pub(crate) static RUNTIMES: RuntimePool = Default::default();
@@ -25,7 +24,7 @@ impl RuntimeId {
         Self(idx as u32)
     }
 
-    pub fn insert_signal(&self, signal: SignalContent) -> SignalId {
+    pub fn insert_signal(&self, signal: SignalInner) -> SignalId {
         RUNTIMES.with(|pool| {
             let rt = &pool.0.borrow()[self.0 as usize];
             rt.insert_signal(signal)
@@ -34,7 +33,7 @@ impl RuntimeId {
 
     pub fn with_signal<F, T>(&self, id: SignalId, f: F) -> T
     where
-        F: FnOnce(&Runtime, &SignalContent) -> T,
+        F: FnOnce(&Runtime, &SignalInner) -> T,
     {
         RUNTIMES.with(|pool| {
             let rt = &pool.0.borrow()[self.0 as usize];
@@ -46,7 +45,7 @@ impl RuntimeId {
 
     pub fn with_signal_mut<F, T>(&self, id: SignalId, f: F) -> T
     where
-        F: FnOnce(&Runtime, &mut SignalContent) -> T,
+        F: FnOnce(&Runtime, &mut SignalInner) -> T,
     {
         RUNTIMES.with(|pool| {
             let rt = &pool.0.borrow()[self.0 as usize];
@@ -81,7 +80,7 @@ impl RuntimePool {
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct Runtime {
     in_use: Cell<bool>,
-    pub(crate) signals: RefCell<SlotMap<SignalId, SignalContent>>,
+    pub(crate) signals: RefCell<SlotMap<SignalId, SignalInner>>,
 }
 
 impl Runtime {
@@ -111,7 +110,7 @@ impl Runtime {
         self.signals.borrow_mut().clear();
     }
 
-    pub fn insert_signal(&self, signal: SignalContent) -> SignalId {
+    pub fn insert_signal(&self, signal: SignalInner) -> SignalId {
         let mut signals = self.signals.borrow_mut();
         signals.insert(signal)
     }
