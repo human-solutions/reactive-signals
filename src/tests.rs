@@ -1,6 +1,6 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, mem, rc::Rc};
 
-use crate::{create_data_signal, create_func_signal, Runtime};
+use crate::{create_data_signal, create_func_signal, Runtime, Signal};
 
 struct StringStore(RefCell<Vec<String>>);
 
@@ -25,14 +25,14 @@ impl StringStore {
 
 #[test]
 fn test_signal_dep() {
-    let rt: &'static Runtime = Box::leak(Box::new(Runtime::new()));
+    let rt = Runtime::from_pool();
 
-    let num_sig = create_data_signal(&rt, 5);
+    let num_sig = create_data_signal(rt, 5);
 
     let output = Rc::new(StringStore::new());
     let out = output.clone();
 
-    let str_sig = create_func_signal(&rt, move || out.push(format!("val: {}", num_sig.get())));
+    let str_sig = create_func_signal(rt, move || out.push(format!("val: {}", num_sig.get())));
 
     str_sig.subscribe(num_sig);
 
@@ -43,20 +43,20 @@ fn test_signal_dep() {
 
 #[test]
 fn test_signal_func_val() {
-    let rt: &'static Runtime = Box::leak(Box::new(Runtime::new()));
+    let rt = Runtime::from_pool();
 
-    let num_sig = create_data_signal(&rt, 5);
+    let num_sig = create_data_signal(rt, 5);
 
     let output = Rc::new(StringStore::new());
 
-    let a_sig = create_func_signal(&rt, move || format!("a{}", num_sig.get()));
-    let b_sig = create_func_signal(&rt, move || format!("b{}", num_sig.get()));
+    let a_sig = create_func_signal(rt, move || format!("a{}", num_sig.get()));
+    let b_sig = create_func_signal(rt, move || format!("b{}", num_sig.get()));
 
     a_sig.subscribe(num_sig);
     b_sig.subscribe(num_sig);
 
     let out = output.clone();
-    let str_sig = create_func_signal(&rt, move || {
+    let str_sig = create_func_signal(rt, move || {
         out.push(format!("{}-{}", a_sig.get(), b_sig.get()))
     });
 
@@ -66,4 +66,10 @@ fn test_signal_func_val() {
     num_sig.set(4);
 
     assert_eq!(output.values(), "a5-b5, a4-b5, a4-b4");
+}
+
+#[test]
+fn test_sizes() {
+    assert_eq!(12, mem::size_of::<Signal<String>>());
+    assert_eq!(12, mem::size_of::<Signal<usize>>());
 }

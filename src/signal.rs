@@ -2,7 +2,7 @@ use std::{any::Any, cell::RefCell, fmt::Debug, marker::PhantomData, ops::Deref, 
 
 use slotmap::new_key_type;
 
-use crate::{any_func::AnyFunc, runtime::Runtime};
+use crate::{any_func::AnyFunc, runtime::Runtime, RuntimeId};
 
 new_key_type! { pub struct SignalId; }
 
@@ -13,9 +13,11 @@ pub struct SignalListeners(Vec<SignalId>);
 impl SignalListeners {
     pub fn notify_all(&self, rt: &Runtime) {
         for listener in self.0.iter() {
-            let sig = rt.signals.borrow();
-            let signal = sig.get(*listener).unwrap();
-            signal.update(rt);
+            {
+                let sig = rt.signals.borrow();
+                let signal = sig.get(*listener).unwrap();
+                signal.update(rt);
+            }
         }
     }
 }
@@ -83,7 +85,6 @@ impl SignalContent {
         F: Fn() -> T + 'static,
         T: 'static,
     {
-        println!("Creating new func signal");
         Self::Func(FuncSignal::new(func), SignalListeners::default())
     }
 
@@ -138,7 +139,7 @@ impl SignalContent {
 }
 
 pub struct Signal<T> {
-    rt: &'static Runtime,
+    rt: RuntimeId,
     id: SignalId,
     ty: PhantomData<T>,
 }
@@ -159,25 +160,20 @@ where
     T: Clone + Debug + 'static,
 {
     pub fn subscribe<S>(&self, sig: Signal<S>) {
-        let mut signals = self.rt.signals.borrow_mut();
-        let signal = signals.get_mut(sig.id).unwrap();
-        signal.add_listener(self.id);
+        self.rt
+            .with_signal_mut(sig.id, |_, signal| signal.add_listener(self.id));
     }
 
     pub fn get(&self) -> T {
-        let signals = self.rt.signals.borrow();
-        let signal = signals.get(self.id).unwrap();
-        signal.get()
+        self.rt.with_signal(self.id, |_, sig| sig.get())
     }
 
     pub fn set(&self, val: T) {
-        let signals = self.rt.signals.borrow();
-        let signal = signals.get(self.id).unwrap();
-        signal.set(self.rt, val);
+        self.rt.with_signal(self.id, |rt, sig| sig.set(rt, val))
     }
 }
 
-pub fn create_data_signal<T: 'static>(rt: &'static Runtime, value: T) -> Signal<T> {
+pub fn create_data_signal<T: 'static>(rt: RuntimeId, value: T) -> Signal<T> {
     Signal {
         rt,
         id: rt.insert_signal(SignalContent::new_data(value)),
@@ -185,16 +181,14 @@ pub fn create_data_signal<T: 'static>(rt: &'static Runtime, value: T) -> Signal<
     }
 }
 
-pub fn create_func_signal<F, T>(rt: &'static Runtime, func: F) -> Signal<T>
+pub fn create_func_signal<F, T>(rt: RuntimeId, func: F) -> Signal<T>
 where
     F: Fn() -> T + 'static,
     T: 'static,
 {
-    let id = rt.insert_signal(SignalContent::new_func(func));
-
     Signal {
         rt,
-        id,
+        id: rt.insert_signal(SignalContent::new_func(func)),
         ty: PhantomData,
     }
 }
