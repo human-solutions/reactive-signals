@@ -1,2 +1,2 @@
 [workspace]
-members = ["effective"]
+members = ["effective", "benchmarks"]
