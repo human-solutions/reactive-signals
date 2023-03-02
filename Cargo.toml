@@ -1,2 +1,2 @@
 [workspace]
-members = ["effective", "benchmarks"]
+members = ["effective", "benchmarks", "arena-link-tree"]
