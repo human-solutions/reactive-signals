@@ -83,6 +83,10 @@ impl<T: Default> Tree<T> {
         }
     }
 
+    pub fn discard_all(&mut self) {
+        self.reset(self.root());
+    }
+
     pub fn root(&self) -> NodeId {
         NodeId::root()
     }
@@ -126,10 +130,6 @@ impl<T: Default> Tree<T> {
     }
 
     pub fn reset(&mut self, node: NodeId) {
-        if node.is_root() {
-            panic!("cannot reset root node");
-        }
-
         if let Some(first_child) = self[node].last_child {
             let mut stack = vec![first_child];
             while let Some(id) = stack.pop() {

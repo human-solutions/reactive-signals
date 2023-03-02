@@ -18,10 +18,6 @@ impl NodeId {
         u32::MAX as usize - 1
     }
 
-    pub(crate) fn is_root(self) -> bool {
-        self.0.get() == 1
-    }
-
     pub(crate) fn root() -> Self {
         Self(unsafe { NonZeroU32::new_unchecked(1) })
     }
