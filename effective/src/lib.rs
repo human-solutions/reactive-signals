@@ -4,6 +4,7 @@ mod tests;
 mod any_func;
 mod runtime;
 mod scope;
+mod scope_inner;
 mod signal;
 mod signal_inner;
 
