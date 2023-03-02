@@ -2,6 +2,7 @@ use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 use crate::{availability::NodeSlotAvailability, Node, NodeId};
 
+#[derive(Debug)]
 pub struct Tree<T> {
     pub(crate) nodes: Vec<Node<T>>,
     pub(crate) availability: NodeSlotAvailability,

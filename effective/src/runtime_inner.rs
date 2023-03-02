@@ -1,13 +1,11 @@
-use std::cell::{Cell, RefCell};
-
-use slotmap::SlotMap;
-
-use crate::{
-    scope::{Scope, ScopeId},
-    signal::SignalId,
-    signal_inner::SignalInner,
-    Runtime,
+use std::{
+    cell::{Cell, RefCell},
+    ops::{Index, IndexMut},
 };
+
+use arena_link_tree::{NodeId, Tree};
+
+use crate::{scope_inner::ScopeInner, signal_id::SignalId, Runtime};
 
 thread_local! {
   pub(crate) static RUNTIMES: RuntimePool = Default::default();
@@ -17,19 +15,21 @@ thread_local! {
 pub(crate) struct RuntimePool(pub(crate) RefCell<Vec<RuntimeInner>>);
 
 impl RuntimePool {
-    pub(crate) fn borrow(&self) -> Runtime {
+    pub(crate) fn borrow(&self) -> (Runtime, NodeId) {
         {
-            for (idx, rt) in self.0.borrow().iter().enumerate() {
+            for rt in self.0.borrow().iter() {
                 if !rt.in_use.get() {
                     rt.in_use.set(true);
-                    return Runtime::from(idx);
+                    return (rt.id, rt.root_scope);
                 }
             }
         }
         let mut vec = self.0.borrow_mut();
         let id = Runtime::from(vec.len());
-        vec.push(RuntimeInner::new(id));
-        id
+        let rti = RuntimeInner::new(id);
+        let sx = rti.scopes.root();
+        vec.push(rti);
+        (id, sx)
     }
 
     pub(crate) fn return_to_pool(&self, runtime: &Runtime) {
@@ -43,55 +43,38 @@ impl RuntimePool {
 pub(crate) struct RuntimeInner {
     pub(crate) id: Runtime,
     in_use: Cell<bool>,
-    scope_counter: Cell<u32>,
-    pub(crate) signals: RefCell<SlotMap<SignalId, SignalInner>>,
+    pub(crate) scopes: Tree<ScopeInner>,
+    pub(crate) root_scope: NodeId,
 }
 
 impl RuntimeInner {
-    // pub fn with<F, T>(rt: Runtime, f: F) -> T
-    // where
-    //     F: FnOnce(&RuntimeInner) -> T,
-    // {
-    //     RUNTIMES.with(|pool| {
-    //         let rt = &pool.0.borrow()[rt.0 as usize];
-    //         f(&rt)
-    //     })
-    // }
-
     fn new(id: Runtime) -> Self {
+        let scopes = Tree::new_with_root(ScopeInner::default());
+        let root_scope = scopes.root();
         Self {
             id,
             in_use: Cell::new(true),
-            scope_counter: Cell::new(0),
-            signals: RefCell::new(SlotMap::with_key()),
+            scopes,
+            root_scope,
         }
     }
 
-    pub(crate) fn create_scope(&self) -> Scope {
-        let count = self.scope_counter.get();
-        self.scope_counter.set(count + 1);
-        Scope::new(ScopeId(count), &self)
-    }
-
-    pub(crate) fn discard_scope(&self, cx: Scope) {
-        self.signals
-            .borrow_mut()
-            .values_mut()
-            .filter(|s| s.scope() == cx.id)
-            .for_each(|signal| signal.discard(&self));
-    }
-
-    pub fn discard(&self) {
+    pub fn discard(&mut self) {
         self.in_use.set(false);
-        self.signals.borrow_mut().clear();
+        self.scopes.discard_all();
     }
+}
 
-    pub fn insert_signal(&self, signal: SignalInner) -> SignalId {
-        let mut signals = self.signals.borrow_mut();
-        let id = signals.insert(signal);
-        unsafe {
-            signals.get_unchecked_mut(id).set_id(id);
-        }
-        id
+impl Index<SignalId> for RuntimeInner {
+    type Output = ScopeInner;
+
+    fn index(&self, index: SignalId) -> &Self::Output {
+        &self.scopes[index.sx.sx].data
+    }
+}
+
+impl IndexMut<SignalId> for RuntimeInner {
+    fn index_mut(&mut self, index: SignalId) -> &mut Self::Output {
+        &mut self.scopes[index.sx.sx].data
     }
 }

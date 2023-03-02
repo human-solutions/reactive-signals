@@ -1,6 +1,6 @@
 use crate::NodeId;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Node<T> {
     pub data: T,
     pub parent: Option<NodeId>,

@@ -1,6 +1,6 @@
 use std::{cell::RefCell, mem, rc::Rc};
 
-use crate::{create_data_signal, create_func_signal, Runtime, Signal};
+use crate::{create_data_signal, create_func_signal, scope::Scope, Signal};
 
 struct StringStore(RefCell<Vec<String>>);
 
@@ -25,7 +25,7 @@ impl StringStore {
 
 #[test]
 fn test_signal_dep() {
-    let cx = Runtime::from_pool().create_scope();
+    let cx = Scope::create_root_scope();
 
     let num_sig = create_data_signal(cx, 5);
 
@@ -43,7 +43,7 @@ fn test_signal_dep() {
 
 #[test]
 fn test_signal_func_val() {
-    let cx = Runtime::from_pool().create_scope();
+    let cx = Scope::create_root_scope();
 
     let num_sig = create_data_signal(cx, 5);
 
@@ -65,7 +65,7 @@ fn test_signal_func_val() {
 
     num_sig.set(4);
 
-    assert_eq!(output.values(), "a5-b5, a4-b5, a4-b4");
+    assert_eq!(output.values(), "a5-b5, a5-b4, a4-b4");
 }
 
 #[test]

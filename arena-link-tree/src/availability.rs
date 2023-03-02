@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use crate::{Node, NodeId};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub(crate) struct NodeSlotAvailability(pub(crate) Vec<u8>);
 
 const FULL: u8 = u8::MAX;

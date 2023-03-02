@@ -1,13 +1,11 @@
 use std::{fmt::Debug, marker::PhantomData};
 
-use slotmap::new_key_type;
-
-use crate::{scope::Scope, signal_inner::SignalInner, Runtime};
-
-new_key_type! { pub struct SignalId; }
+use crate::{
+    runtime_inner::RuntimeInner, scope::Scope, signal_id::SignalId, signal_inner::SignalInner,
+    updater::propagate_change,
+};
 
 pub struct Signal<T> {
-    rt: Runtime,
     id: SignalId,
     ty: PhantomData<T>,
 }
@@ -15,7 +13,6 @@ pub struct Signal<T> {
 impl<T> Clone for Signal<T> {
     fn clone(&self) -> Self {
         Self {
-            rt: self.rt,
             id: self.id,
             ty: self.ty,
         }
@@ -28,35 +25,57 @@ where
     T: Clone + Debug + 'static,
 {
     pub fn subscribe<S>(&self, sig: Signal<S>) {
-        self.rt
-            .with_signal_mut(sig.id, |_, signal| signal.add_listener(self.id));
+        self.id.rt_mut(|rt| self.subscribe_rt(sig, rt));
+    }
+
+    pub(crate) fn subscribe_rt<S>(&self, sig: Signal<S>, rt: &mut RuntimeInner) {
+        rt[sig.id].with_signal_mut(sig.id, |signal| signal.listeners.push(self.id));
     }
 
     pub fn get(&self) -> T {
-        self.rt.with_signal(self.id, |_, sig| sig.get())
+        self.id.rt_ref(|rt| self.get_rt(rt))
+    }
+
+    pub(crate) fn get_rt(&self, rt: &RuntimeInner) -> T {
+        rt[self.id].with_signal(self.id, |sig| sig.get())
     }
 
     pub fn set(&self, val: T) {
-        self.rt.with_signal(self.id, |rt, sig| sig.set(rt, val))
+        self.id.rt_ref(|rt| self.set_rt(val, rt));
+    }
+
+    pub(crate) fn set_rt(&self, val: T, rt: &RuntimeInner) {
+        rt[self.id].with_signal(self.id, |sig| sig.set(val));
+
+        propagate_change(rt, self.id);
     }
 }
 
-pub fn create_data_signal<T: 'static>(cx: Scope, value: T) -> Signal<T> {
+pub fn create_data_signal<T: 'static>(sx: Scope, value: T) -> Signal<T> {
+    let id = sx.rt.with_mut(|rt| {
+        let scope = &rt.scopes[sx.sx].data;
+        scope.insert_signal(sx, SignalInner::new_data(value))
+    });
     Signal {
-        rt: cx.rt,
-        id: cx.rt.insert_signal(SignalInner::new_data(cx.id, value)),
+        id,
         ty: PhantomData,
     }
 }
 
-pub fn create_func_signal<F, T>(cx: Scope, func: F) -> Signal<T>
+pub fn create_func_signal<F, T>(sx: Scope, func: F) -> Signal<T>
 where
     F: Fn() -> T + 'static,
     T: 'static,
 {
+    // When creating a signal it also runs once to get the initial value
+    // We need to keep this out of the rt so there's no mut ref.
+    let signal = SignalInner::new_func(func);
+    let id = sx.rt.with_mut(|rt| {
+        let scope = &rt.scopes[sx.sx].data;
+        scope.insert_signal(sx, signal)
+    });
     Signal {
-        rt: cx.rt,
-        id: cx.rt.insert_signal(SignalInner::new_func(cx.id, func)),
+        id,
         ty: PhantomData,
     }
 }

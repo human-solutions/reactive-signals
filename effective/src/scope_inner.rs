@@ -1,36 +1,48 @@
 #![allow(dead_code)]
 use std::cell::RefCell;
 
-use crate::signal_inner::SignalInner;
+use crate::{scope::Scope, signal_id::SignalId, signal_inner::SignalInner};
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub(crate) struct ScopeInner {
-    signals: RefCell<Vec<SignalInner>>,
+    pub(crate) signals: RefCell<Vec<SignalInner>>,
 }
 
 impl ScopeInner {
-    pub fn insert_signal(&self, signal: SignalInner) -> usize {
+    pub fn insert_signal(&self, sx: Scope, signal: SignalInner) -> SignalId {
         let mut signals = self.signals.borrow_mut();
         let idx = signals.len();
         signals.push(signal);
-        idx
+        SignalId::new(idx, sx)
     }
 
-    pub fn with_signal<F, T>(&self, id: usize, f: F) -> T
+    pub fn with_signal<F, T>(&self, id: SignalId, f: F) -> T
     where
         F: FnOnce(&SignalInner) -> T,
     {
         let signals = self.signals.borrow();
-        let signal = signals.get(id).unwrap();
+        let signal = signals.get(id.index()).unwrap();
         f(&signal)
     }
 
-    pub fn with_signal_mut<F, T>(&self, id: usize, f: F) -> T
+    pub fn with_signal_mut<F, T>(&self, id: SignalId, f: F) -> T
     where
         F: FnOnce(&mut SignalInner) -> T,
     {
         let mut signals = self.signals.borrow_mut();
-        let mut signal = signals.get_mut(id).unwrap();
+        let mut signal = signals.get_mut(id.index()).unwrap();
         f(&mut signal)
+    }
+
+    pub(crate) fn new_child_scope(&self) -> ScopeInner {
+        ScopeInner::default()
+    }
+
+    pub(crate) fn discard(&self) {
+        todo!()
+        // self.signals
+        //     .borrow_mut()
+        //     .iter()
+        //     .for_each(|signal| signal.discard(&self));
     }
 }
