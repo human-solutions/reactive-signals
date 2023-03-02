@@ -33,8 +33,9 @@ fn reuse_ids() {
      └─ 3
     "###);
     assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [3] 3");
-
+    assert_snapshot!(format!("{:?}", tree.availability.0), @"[2]");
     let _ = tree.add_child(c1, 11);
+    assert_snapshot!(format!("{:?}", tree.availability.0), @"[4]");
     let _ = tree.add_child(c3, 31);
 
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"

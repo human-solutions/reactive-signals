@@ -1,9 +1,10 @@
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
-use crate::{Node, NodeId};
+use crate::{availability::NodeSlotAvailability, Node, NodeId};
 
 pub struct Tree<T> {
     pub(crate) nodes: Vec<Node<T>>,
+    pub(crate) availability: NodeSlotAvailability,
 }
 
 impl<T> Index<NodeId> for Tree<T> {
@@ -36,6 +37,7 @@ impl<T: Clone> Clone for Tree<T> {
     fn clone(&self) -> Self {
         Self {
             nodes: self.nodes.clone(),
+            availability: Default::default(),
         }
     }
 }
@@ -55,23 +57,30 @@ impl<T: Default> Tree<T> {
         None
     }
 
-    fn new_node_id(&mut self) -> NodeId {
-        for (idx, node) in self.nodes.iter().enumerate() {
-            if idx != 0 && !node.is_used() {
-                return idx.into();
+    fn add_node(&mut self) -> NodeId {
+        if let Some(id) = self.availability.get_available(&self.nodes) {
+            debug_assert!(
+                !self[id].is_used(),
+                "BUG: node {} is already used",
+                id.index()
+            );
+            return id;
+        } else {
+            let idx = self.len();
+            if idx > NodeId::max() {
+                panic!("too many nodes");
             }
+            self.push(Default::default());
+            idx.into()
         }
-        let idx = self.len();
-        if idx > NodeId::max() {
-            panic!("too many nodes");
-        }
-        self.push(Default::default());
-        idx.into()
     }
 
     pub fn new_with_root(data: T) -> Self {
         let node = Node::new(data);
-        Self { nodes: vec![node] }
+        Self {
+            nodes: vec![node],
+            availability: Default::default(),
+        }
     }
 
     pub fn root(&self) -> NodeId {
@@ -80,7 +89,7 @@ impl<T: Default> Tree<T> {
 
     pub fn add_child(&mut self, to: NodeId, data: T) -> NodeId {
         let prev_sibling = self[to].last_child;
-        let new_id = self.new_node_id();
+        let new_id = self.add_node();
         {
             let node = &mut self[new_id];
             node.data = data;
@@ -92,7 +101,7 @@ impl<T: Default> Tree<T> {
         new_id
     }
 
-    pub fn detach_child(&mut self, parent: NodeId, remove: NodeId) -> bool {
+    fn detach_child(&mut self, parent: NodeId, remove: NodeId) -> bool {
         let Some(mut curr_id) = self[parent].last_child else {
           return false;
         };
@@ -131,6 +140,7 @@ impl<T: Default> Tree<T> {
                     stack.push(first_child);
                 }
                 self[id].reset();
+                self.availability.set_available(id);
             }
         }
 
@@ -142,5 +152,6 @@ impl<T: Default> Tree<T> {
             }
         }
         self[node].reset();
+        self.availability.set_available(node);
     }
 }

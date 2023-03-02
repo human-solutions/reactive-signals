@@ -4,6 +4,7 @@ mod tests;
 #[cfg(feature = "ascii-tree")]
 mod ascii;
 
+mod availability;
 mod node;
 mod node_id;
 mod tree;
