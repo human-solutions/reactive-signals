@@ -9,7 +9,13 @@ edition = "2021"
 
 [dev-dependencies]
 insta = "1.28"
+criterion = { version = "0.4", features = ["html_reports"] }
 
 [features]
 default = ["ascii-tree"]
 ascii-tree = []
+
+
+[[bench]]
+name = "tree_bench"
+harness = false
