@@ -1,14 +1,14 @@
-use crate::{Runtime, RuntimeId};
+use crate::{Runtime, RuntimeInner};
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Scope {
     pub(crate) id: ScopeId,
-    pub(crate) rt: RuntimeId,
+    pub(crate) rt: Runtime,
 }
 
 impl Scope {
-    pub(crate) fn new(id: ScopeId, rt: &Runtime) -> Self {
+    pub(crate) fn new(id: ScopeId, rt: &RuntimeInner) -> Self {
         Scope { id, rt: rt.id }
     }
 }

@@ -2,12 +2,12 @@ use std::{fmt::Debug, marker::PhantomData};
 
 use slotmap::new_key_type;
 
-use crate::{scope::Scope, signal_inner::SignalInner, RuntimeId};
+use crate::{scope::Scope, signal_inner::SignalInner, Runtime};
 
 new_key_type! { pub struct SignalId; }
 
 pub struct Signal<T> {
-    rt: RuntimeId,
+    rt: Runtime,
     id: SignalId,
     ty: PhantomData<T>,
 }

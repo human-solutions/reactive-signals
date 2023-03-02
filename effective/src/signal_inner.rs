@@ -1,13 +1,13 @@
 use std::{any::Any, cell::RefCell, fmt::Debug, ops::Deref, slice};
 
-use crate::{any_func::AnyFunc, runtime::Runtime, scope::ScopeId, signal::SignalId};
+use crate::{any_func::AnyFunc, runtime_inner::RuntimeInner, scope::ScopeId, signal::SignalId};
 
 #[derive(Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct SignalListeners(Vec<SignalId>);
 
 impl SignalListeners {
-    pub fn notify_all(&self, rt: &Runtime) {
+    pub(crate) fn notify_all(&self, rt: &RuntimeInner) {
         for listener in self.0.iter() {
             {
                 let sig = rt.signals.borrow();
@@ -166,7 +166,7 @@ impl SignalInner {
         self.value().cloned()
     }
 
-    pub fn set<T: 'static>(&self, rt: &Runtime, new_value: T) {
+    pub(crate) fn set<T: 'static>(&self, rt: &RuntimeInner, new_value: T) {
         {
             let mut val = self.value().borrow_mut();
             *val = Box::new(new_value);
@@ -174,7 +174,7 @@ impl SignalInner {
         self.update(rt);
     }
 
-    pub fn update(&self, rt: &Runtime) {
+    pub(crate) fn update(&self, rt: &RuntimeInner) {
         let list = match self {
             Self::Data { listeners, .. } => listeners,
             Self::Func {
@@ -187,7 +187,7 @@ impl SignalInner {
         list.notify_all(rt);
     }
 
-    pub fn discard(&self, rt: &Runtime) {
+    pub(crate) fn discard(&self, rt: &RuntimeInner) {
         let mut sig = rt.signals.borrow_mut();
         for listener in self.listeners_iter() {
             let listener = sig.get_mut(*listener).unwrap();
