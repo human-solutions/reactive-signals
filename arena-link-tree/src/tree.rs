@@ -41,21 +41,16 @@ impl<T: Clone> Clone for Tree<T> {
 }
 
 impl<T: Default> Tree<T> {
-    fn last_sibling(&self, mut id: NodeId) -> NodeId {
-        while let Some(next_sibling) = self[id].next_sibling {
-            id = next_sibling;
-        }
-        id
-    }
-
-    fn previous_child(&self, id: NodeId) -> Option<NodeId> {
+    /// A node doesn't have the id of the next child
+    /// so we have to find it by iterating over the parent's children
+    fn next_child(&self, id: NodeId) -> Option<NodeId> {
         let parent = self[id].parent?;
-        let mut child = self[parent].first_child?;
-        while let Some(next_sibling) = self[child].next_sibling {
-            if next_sibling == id {
+        let mut child = self[parent].last_child?;
+        while let Some(prev) = self[child].prev_sibling {
+            if prev == id {
                 return Some(child);
             }
-            child = next_sibling;
+            child = prev;
         }
         None
     }
@@ -84,36 +79,32 @@ impl<T: Default> Tree<T> {
     }
 
     pub fn add_child(&mut self, to: NodeId, data: T) -> NodeId {
+        let prev_sibling = self[to].last_child;
         let new_id = self.new_node_id();
         {
             let node = &mut self[new_id];
             node.data = data;
             node.parent = Some(to);
+            node.prev_sibling = prev_sibling;
         }
-        let last_child = self[to].first_child.map(|id| self.last_sibling(id));
 
-        if let Some(child_id) = last_child {
-            self[child_id].next_sibling = Some(new_id);
-        } else {
-            debug_assert!(self[to].first_child.is_none());
-            self[to].first_child = Some(new_id);
-        }
+        self[to].last_child = Some(new_id);
         new_id
     }
 
     pub fn detach_child(&mut self, parent: NodeId, remove: NodeId) -> bool {
-        let Some(mut curr_id) = self[parent].first_child else {
+        let Some(mut curr_id) = self[parent].last_child else {
           return false;
         };
         let mut prev_id: Option<NodeId> = None;
         loop {
-            match (prev_id, curr_id, self[curr_id].next_sibling) {
+            match (prev_id, curr_id, self[curr_id].prev_sibling) {
                 (Some(prev), curr, next) if curr == remove => {
-                    self[prev].next_sibling = next;
+                    self[prev].prev_sibling = next;
                     return true;
                 }
                 (None, curr, next) if curr == remove => {
-                    self[parent].first_child = next;
+                    self[parent].last_child = next;
                     return true;
                 }
                 (_, _, Some(next)) => {
@@ -130,21 +121,21 @@ impl<T: Default> Tree<T> {
             panic!("cannot reset root node");
         }
 
-        if let Some(first_child) = self[node].first_child {
+        if let Some(first_child) = self[node].last_child {
             let mut stack = vec![first_child];
             while let Some(id) = stack.pop() {
-                if let Some(next_sibling) = self[id].next_sibling {
+                if let Some(next_sibling) = self[id].prev_sibling {
                     stack.push(next_sibling);
                 }
-                if let Some(first_child) = self[id].first_child {
+                if let Some(first_child) = self[id].last_child {
                     stack.push(first_child);
                 }
                 self[id].reset();
             }
         }
 
-        if let Some(previous_child) = self.previous_child(node) {
-            self[previous_child].next_sibling = self[node].next_sibling;
+        if let Some(previous_child) = self.next_child(node) {
+            self[previous_child].prev_sibling = self[node].prev_sibling;
         } else if let Some(parent_id) = self[node].parent {
             if !self.detach_child(parent_id, node) {
                 panic!("BUG")

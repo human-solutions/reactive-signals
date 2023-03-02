@@ -4,8 +4,8 @@ use crate::NodeId;
 pub struct Node<T> {
     pub data: T,
     pub parent: Option<NodeId>,
-    pub first_child: Option<NodeId>,
-    pub next_sibling: Option<NodeId>,
+    pub last_child: Option<NodeId>,
+    pub prev_sibling: Option<NodeId>,
 }
 
 impl<T> Node<T> {
@@ -18,15 +18,15 @@ impl<T> Node<T> {
         Self {
             data,
             parent: None,
-            first_child: None,
-            next_sibling: None,
+            last_child: None,
+            prev_sibling: None,
         }
     }
 
     pub fn reset(&mut self) {
         self.parent = None;
-        self.first_child = None;
-        self.next_sibling = None;
+        self.last_child = None;
+        self.prev_sibling = None;
     }
 }
 
@@ -35,8 +35,8 @@ impl<T: Clone> Clone for Node<T> {
         Self {
             data: self.data.clone(),
             parent: self.parent,
-            first_child: self.first_child,
-            next_sibling: self.next_sibling,
+            last_child: self.last_child,
+            prev_sibling: self.prev_sibling,
         }
     }
 }

@@ -18,7 +18,7 @@ impl<T: Default> Tree<T> {
 
     fn siblings(&self, mut id: NodeId) -> Vec<NodeId> {
         let mut children = vec![id];
-        while let Some(next_sibling) = self[id].next_sibling {
+        while let Some(next_sibling) = self[id].prev_sibling {
             children.push(next_sibling);
             id = next_sibling;
         }
@@ -58,9 +58,10 @@ impl<T: Default> Tree<T> {
             }
         }
         let title = (*data_fmt)(&self[id].data);
-        match self[id].first_child {
+        match self[id].last_child {
             Some(child) => {
-                let children = self.siblings(child);
+                let mut children = self.siblings(child);
+                children.reverse();
                 let mut d = children.len();
                 if level.len() == 0 {
                     write!(f, "{}\n", title)?;

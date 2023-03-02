@@ -7,8 +7,8 @@
 # Arena Link Tree
 
 An arena-based tree, where a vector contains all the allocated nodes and
-each node contains the optional id of their parent, first child and
-sibling. This constitutes the minimal information necessary for a tree.
+each node contains the optional id of their parent, last child and
+previous sibling. This constitutes the minimal information necessary for a tree.
 
 Each node is 12 bytes + the size of the data.
 
