@@ -48,7 +48,7 @@ fn iter() {
     let tree = create_tree();
     let mut visits = vec![];
     for node in tree.iter_from(tree.root()) {
-        visits.push(format!("{}", tree[node].data));
+        visits.push(format!("{}", tree.nodes[node.index()].data));
     }
 
     assert_eq!(visits.join(", "), ITER_ORDER);
@@ -61,7 +61,7 @@ fn iter_single_node() {
     let c1 = tree.add_child(tree.root(), 1);
     let mut visits = vec![];
     for node in tree.iter_from(c1) {
-        visits.push(format!("{}", tree[node].data));
+        visits.push(format!("{}", tree.nodes[node.index()].data));
     }
 
     assert_eq!(visits.join(", "), "1");
@@ -81,7 +81,7 @@ fn iter_single_with_sibling() {
     "###);
     let mut visits = vec![];
     for node in tree.iter_from(c1) {
-        visits.push(format!("{}", tree[node].data));
+        visits.push(format!("{}", tree.nodes[node.index()].data));
     }
 
     assert_eq!(visits.join(", "), "1");
@@ -93,9 +93,9 @@ fn mut_iter() {
 
     let visits = StringStore::new();
     tree.iter_mut_from(tree.root()).for_each(|tree, node| {
-        visits.push(format!("{}", tree[node].data));
+        visits.push(format!("{}", tree.nodes[node.index()].data));
         // just to make sure we can write to it
-        tree[node].data += 1;
+        tree.nodes[node.index()].data += 1;
     });
 
     assert_eq!(visits.values(), ITER_ORDER);

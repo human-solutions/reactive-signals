@@ -13,15 +13,15 @@ pub struct Tree<T> {
 }
 
 impl<T> Index<NodeId> for Tree<T> {
-    type Output = Node<T>;
+    type Output = T;
     fn index(&self, id: NodeId) -> &Self::Output {
-        &self.nodes[id.index()]
+        &self.nodes[id.index()].data
     }
 }
 
 impl<T> IndexMut<NodeId> for Tree<T> {
     fn index_mut(&mut self, id: NodeId) -> &mut Self::Output {
-        &mut self.nodes[id.index()]
+        &mut self.nodes[id.index()].data
     }
 }
 
@@ -51,9 +51,9 @@ impl<T: Default> Tree<T> {
     /// A node doesn't have the id of the next child
     /// so we have to find it by iterating over the parent's children
     fn next_child(&self, id: NodeId) -> Option<NodeId> {
-        let parent = self[id].parent?;
-        let mut child = self[parent].last_child?;
-        while let Some(prev) = self[child].prev_sibling {
+        let parent = self.nodes[id.index()].parent?;
+        let mut child = self.nodes[parent.index()].last_child?;
+        while let Some(prev) = self.nodes[child.index()].prev_sibling {
             if prev == id {
                 return Some(child);
             }
@@ -65,7 +65,7 @@ impl<T: Default> Tree<T> {
     fn add_node(&mut self) -> NodeId {
         if let Some(id) = self.availability.get_available(&self.nodes) {
             debug_assert!(
-                !self[id].is_used(),
+                !self.nodes[id.index()].is_used(),
                 "BUG: node {} is already used",
                 id.index()
             );
@@ -105,32 +105,32 @@ impl<T: Default> Tree<T> {
     }
 
     pub fn add_child(&mut self, to: NodeId, data: T) -> NodeId {
-        let prev_sibling = self[to].last_child;
+        let prev_sibling = self.nodes[to.index()].last_child;
         let new_id = self.add_node();
         {
-            let node = &mut self[new_id];
+            let node = &mut self.nodes[new_id.index()];
             node.data = data;
             node.parent = Some(to);
             node.prev_sibling = prev_sibling;
         }
 
-        self[to].last_child = Some(new_id);
+        self.nodes[to.index()].last_child = Some(new_id);
         new_id
     }
 
     fn detach_child(&mut self, parent: NodeId, remove: NodeId) -> bool {
-        let Some(mut curr_id) = self[parent].last_child else {
+        let Some(mut curr_id) = self.nodes[parent.index()].last_child else {
           return false;
         };
         let mut prev_id: Option<NodeId> = None;
         loop {
-            match (prev_id, curr_id, self[curr_id].prev_sibling) {
+            match (prev_id, curr_id, self.nodes[curr_id.index()].prev_sibling) {
                 (Some(prev), curr, next) if curr == remove => {
-                    self[prev].prev_sibling = next;
+                    self.nodes[prev.index()].prev_sibling = next;
                     return true;
                 }
                 (None, curr, next) if curr == remove => {
-                    self[parent].last_child = next;
+                    self.nodes[parent.index()].last_child = next;
                     return true;
                 }
                 (_, _, Some(next)) => {
@@ -143,28 +143,28 @@ impl<T: Default> Tree<T> {
     }
 
     pub fn reset(&mut self, node: NodeId) {
-        if let Some(first_child) = self[node].last_child {
+        if let Some(first_child) = self.nodes[node.index()].last_child {
             let mut stack = vec![first_child];
             while let Some(id) = stack.pop() {
-                if let Some(next_sibling) = self[id].prev_sibling {
+                if let Some(next_sibling) = self.nodes[id.index()].prev_sibling {
                     stack.push(next_sibling);
                 }
-                if let Some(first_child) = self[id].last_child {
+                if let Some(first_child) = self.nodes[id.index()].last_child {
                     stack.push(first_child);
                 }
-                self[id].reset();
+                self.nodes[id.index()].reset();
                 self.availability.set_available(id);
             }
         }
 
         if let Some(previous_child) = self.next_child(node) {
-            self[previous_child].prev_sibling = self[node].prev_sibling;
-        } else if let Some(parent_id) = self[node].parent {
+            self.nodes[previous_child.index()].prev_sibling = self.nodes[node.index()].prev_sibling;
+        } else if let Some(parent_id) = self.nodes[node.index()].parent {
             if !self.detach_child(parent_id, node) {
                 panic!("BUG")
             }
         }
-        self[node].reset();
+        self.nodes[node.index()].reset();
         self.availability.set_available(node);
     }
 }

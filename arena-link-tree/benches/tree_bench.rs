@@ -59,7 +59,7 @@ pub fn sum_tree_with_1000_nodes(c: &mut Criterion) {
         b.iter(|| {
             wide_tree
                 .iter_from(wide_tree.root())
-                .map(|n| wide_tree[n].data)
+                .map(|n| wide_tree[n])
                 .sum::<i32>()
         });
     });
@@ -71,7 +71,7 @@ pub fn sum_tree_with_1000_nodes(c: &mut Criterion) {
         b.iter(|| {
             deep_tree
                 .iter_from(wide_tree.root())
-                .map(|n| wide_tree[n].data)
+                .map(|n| wide_tree[n])
                 .sum::<i32>()
         });
     });

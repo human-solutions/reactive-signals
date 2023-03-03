@@ -69,12 +69,12 @@ impl Index<SignalId> for RuntimeInner {
     type Output = ScopeInner;
 
     fn index(&self, index: SignalId) -> &Self::Output {
-        &self.scopes[index.sx.sx].data
+        &self.scopes[index.sx.sx]
     }
 }
 
 impl IndexMut<SignalId> for RuntimeInner {
     fn index_mut(&mut self, index: SignalId) -> &mut Self::Output {
-        &mut self.scopes[index.sx.sx].data
+        &mut self.scopes[index.sx.sx]
     }
 }

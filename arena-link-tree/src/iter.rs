@@ -18,7 +18,7 @@ impl<'a, T> DepthFirstIter<'a, T> {
 }
 
 fn drill_down<T>(tree: &Tree<T>, mut node: NodeId) -> NodeId {
-    while let Some(child) = tree[node].last_child {
+    while let Some(child) = tree.nodes[node.index()].last_child {
         node = child;
     }
     node
@@ -33,12 +33,12 @@ fn next<T>(
         return (None, None);
     };
 
-    if let Some(node) = tree[next].prev_sibling {
+    if let Some(node) = tree.nodes[next.index()].prev_sibling {
         // we found a previous sibling, let's start at that sibling's deepest child
         current = Some(drill_down(tree, node));
     } else if next == start {
         return (None, Some(start));
-    } else if let Some(parent) = tree[next].parent {
+    } else if let Some(parent) = tree.nodes[next.index()].parent {
         // there's no previous sibling so we have to go up knowing
         // that all the children of the parent have been visited
         if parent == start {
