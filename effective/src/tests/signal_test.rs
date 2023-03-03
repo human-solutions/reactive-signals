@@ -1,27 +1,6 @@
-use std::{cell::RefCell, mem, rc::Rc};
+use std::{mem, rc::Rc};
 
-use crate::{create_data_signal, create_func_signal, scope::Scope, Signal};
-
-struct StringStore(RefCell<Vec<String>>);
-
-impl StringStore {
-    fn new() -> Self {
-        Self(RefCell::new(Vec::new()))
-    }
-
-    fn push(&self, value: String) {
-        self.0.borrow_mut().push(value);
-    }
-
-    fn values(&self) -> String {
-        self.0
-            .borrow()
-            .iter()
-            .map(|s| s.to_owned())
-            .collect::<Vec<String>>()
-            .join(", ")
-    }
-}
+use crate::{create_data_signal, create_func_signal, scope::Scope, tests::StringStore, Signal};
 
 #[test]
 fn test_signal_dep() {

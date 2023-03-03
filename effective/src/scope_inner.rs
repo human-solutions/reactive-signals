@@ -39,10 +39,9 @@ impl ScopeInner {
     }
 
     pub(crate) fn discard(&self) {
-        todo!()
-        // self.signals
-        //     .borrow_mut()
-        //     .iter()
-        //     .for_each(|signal| signal.discard(&self));
+        self.signals
+            .borrow_mut()
+            .iter_mut()
+            .for_each(|signal| signal.listeners.clear());
     }
 }
