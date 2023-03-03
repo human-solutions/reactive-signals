@@ -1,6 +1,10 @@
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
-use crate::{availability::NodeSlotAvailability, Node, NodeId};
+use crate::{
+    availability::NodeSlotAvailability,
+    iter::{DepthFirstIter, MutDepthFirstIter},
+    Node, NodeId,
+};
 
 #[derive(Debug)]
 pub struct Tree<T> {
@@ -90,6 +94,14 @@ impl<T: Default> Tree<T> {
 
     pub fn root(&self) -> NodeId {
         NodeId::root()
+    }
+
+    pub fn iter_from(&self, id: NodeId) -> DepthFirstIter<T> {
+        DepthFirstIter::new(self, id)
+    }
+
+    pub fn iter_mut_from(&mut self, id: NodeId) -> MutDepthFirstIter<T> {
+        MutDepthFirstIter::new(self, id)
     }
 
     pub fn add_child(&mut self, to: NodeId, data: T) -> NodeId {

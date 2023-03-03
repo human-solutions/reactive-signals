@@ -1,8 +1,7 @@
-#[cfg(feature = "ascii-tree")]
+use insta::assert_snapshot;
+
 #[test]
 fn reuse_ids() {
-    use insta::assert_snapshot;
-
     use crate::Tree;
 
     let mut tree = Tree::new_with_root(0);

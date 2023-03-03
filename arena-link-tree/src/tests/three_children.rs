@@ -1,10 +1,8 @@
 use crate::Tree;
+use insta::assert_snapshot;
 
-#[cfg(feature = "ascii-tree")]
 #[test]
 fn three_children() {
-    use insta::assert_snapshot;
-
     let mut tree = Tree::new_with_root(0);
 
     let c1 = tree.add_child(tree.root(), 1);
