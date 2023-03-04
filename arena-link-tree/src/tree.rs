@@ -1,10 +1,10 @@
-use std::ops::{Deref, DerefMut, Index, IndexMut};
-
 use crate::{
     availability::NodeSlotAvailability,
     iter::{DepthFirstIter, MutDepthFirstIter},
     Node, NodeId,
 };
+use bitvec::prelude::*;
+use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 #[derive(Debug)]
 pub struct Tree<T> {
@@ -133,15 +133,21 @@ impl<T: Default> Tree<T> {
         self.reuse(self.root(), f);
     }
 
-    pub fn reuse(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) {
+    pub fn reuse(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) -> BitVec<u32, Msb0> {
         self.detach(node);
 
-        self.iter_mut_from(node, None).for_each(|tree, id| {
-            tree.nodes[id.index()].reuse();
-            tree.availability.set_available(id);
-            reuse_data(&mut tree.nodes[id.index()].data);
-        });
+        let ids = bitvec![u32, Msb0; 0; self.nodes.len()];
+        let ids = self
+            .iter_mut_from(node, None)
+            .fold(ids, |tree, mut ids, id| {
+                tree.nodes[id.index()].reuse();
+                tree.availability.set_available(id);
+                reuse_data(&mut tree.nodes[id.index()].data);
+                ids.set(id.index(), true);
+                ids
+            });
         self.nodes[node.index()].reuse();
         self.availability.set_available(node);
+        ids
     }
 }

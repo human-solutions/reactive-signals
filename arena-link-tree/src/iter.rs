@@ -115,4 +115,12 @@ impl<'a, T> MutDepthFirstIter<'a, T> {
             f(self.tree, current);
         }
     }
+
+    pub fn fold<Acc>(&mut self, mut acc: Acc, f: impl Fn(&mut Tree<T>, Acc, NodeId) -> Acc) -> Acc {
+        while let (next, Some(current)) = next(self.tree, self.start, self.next, self.skip) {
+            self.next = next;
+            acc = f(self.tree, acc, current);
+        }
+        acc
+    }
 }
