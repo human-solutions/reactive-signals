@@ -37,6 +37,11 @@ impl RuntimePool {
         let rt = &mut pool[runtime.0 as usize];
         rt.discard();
     }
+
+    pub(crate) fn bench_clean_all(&self) {
+        let mut pool = self.0.borrow_mut();
+        pool.clear();
+    }
 }
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]

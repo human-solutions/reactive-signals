@@ -4,7 +4,7 @@ use crate::{create_data_signal, create_func_signal, scope::Scope, tests::StringS
 
 #[test]
 fn test_signal_dep() {
-    let cx = Scope::create_root_scope();
+    let cx = Scope::new_root();
 
     let num_sig = create_data_signal(cx, 5);
 
@@ -22,7 +22,7 @@ fn test_signal_dep() {
 
 #[test]
 fn test_signal_func_val() {
-    let cx = Scope::create_root_scope();
+    let cx = Scope::new_root();
 
     let num_sig = create_data_signal(cx, 5);
 

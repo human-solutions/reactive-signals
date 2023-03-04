@@ -10,11 +10,17 @@ pub struct Scope {
 }
 
 impl Scope {
-    pub fn create_root_scope() -> Self {
+    #[allow(unused)]
+    pub fn bench_root() -> Self {
+        RUNTIMES.with(|pool| pool.bench_clean_all());
+        Self::new_root()
+    }
+
+    pub fn new_root() -> Self {
         let (rt, sx) = RUNTIMES.with(|rt| rt.borrow());
         Self { sx, rt }
     }
-    pub fn new_child_scope(&self) -> Self {
+    pub fn new_child(&self) -> Self {
         self.rt.with_mut(|rt| {
             let sx = rt.scopes.add_child(self.sx, Default::default());
             Self { sx, rt: rt.id }

@@ -14,3 +14,15 @@ bitvec = { version = "1.0", no-default-features = true }
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }
+
+[[bench]]
+name = "create_scopes"
+harness = false
+
+[[bench]]
+name = "signal_propagation"
+harness = false
+
+[[bench]]
+name = "delete_scopes"
+harness = false
