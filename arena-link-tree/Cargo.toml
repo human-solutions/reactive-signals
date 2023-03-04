@@ -17,5 +17,13 @@ insta = "1.28"
 criterion = { version = "0.4", features = ["html_reports"] }
 
 [[bench]]
-name = "tree_bench"
+name = "create"
+harness = false
+
+[[bench]]
+name = "sum"
+harness = false
+
+[[bench]]
+name = "delete"
 harness = false
