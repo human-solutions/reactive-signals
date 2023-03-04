@@ -78,12 +78,12 @@ impl<T: Default> Tree<T> {
         NodeId::root()
     }
 
-    pub fn iter_from(&self, id: NodeId) -> DepthFirstIter<T> {
-        DepthFirstIter::new(self, id)
+    pub fn iter_from(&self, id: NodeId, skip: Option<NodeId>) -> DepthFirstIter<T> {
+        DepthFirstIter::new(self, id, skip)
     }
 
-    pub fn iter_mut_from(&mut self, id: NodeId) -> MutDepthFirstIter<T> {
-        MutDepthFirstIter::new(self, id)
+    pub fn iter_mut_from(&mut self, id: NodeId, skip: Option<NodeId>) -> MutDepthFirstIter<T> {
+        MutDepthFirstIter::new(self, id, skip)
     }
 
     pub fn add_child(&mut self, to: NodeId, data: T) -> NodeId {
@@ -100,12 +100,12 @@ impl<T: Default> Tree<T> {
         new_id
     }
 
-    fn detach(&mut self, node: NodeId) -> bool {
+    fn detach(&mut self, node: NodeId) {
         let Some(parent) = self.nodes[node.index()].parent else {
-            return false;
+            return;
         };
         let Some(mut curr_id) = self.nodes[parent.index()].last_child else {
-          return false;
+            return;
         };
         let mut prev_id: Option<NodeId> = None;
         // iterate through the parent's children until we find the node
@@ -114,11 +114,11 @@ impl<T: Default> Tree<T> {
             match (prev_id, curr_id, self.nodes[curr_id.index()].prev_sibling) {
                 (Some(prev), curr, next) if curr == node => {
                     self.nodes[prev.index()].prev_sibling = next;
-                    return true;
+                    break;
                 }
                 (None, curr, next) if curr == node => {
                     self.nodes[parent.index()].last_child = next;
-                    return true;
+                    break;
                 }
                 (_, _, Some(next)) => {
                     prev_id = Some(curr_id);
@@ -134,11 +134,9 @@ impl<T: Default> Tree<T> {
     }
 
     pub fn reuse(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) {
-        if !self.detach(node) {
-            panic!("BUG could not detach node")
-        }
+        self.detach(node);
 
-        self.iter_mut_from(node).for_each(|tree, id| {
+        self.iter_mut_from(node, None).for_each(|tree, id| {
             tree.nodes[id.index()].reuse();
             tree.availability.set_available(id);
             reuse_data(&mut tree.nodes[id.index()].data);

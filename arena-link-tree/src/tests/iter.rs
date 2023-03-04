@@ -1,4 +1,4 @@
-use crate::Tree;
+use crate::{NodeId, Tree};
 use insta::assert_snapshot;
 
 use super::StringStore;
@@ -47,7 +47,7 @@ const ITER_ORDER: &str = "4, 3, 221, 220, 22, 21, 20, 2, 11, 1, 0";
 fn iter() {
     let tree = create_tree();
     let mut visits = vec![];
-    for node in tree.iter_from(tree.root()) {
+    for node in tree.iter_from(tree.root(), None) {
         visits.push(format!("{}", tree.nodes[node.index()].data));
     }
 
@@ -60,7 +60,7 @@ fn iter_single_node() {
 
     let c1 = tree.add_child(tree.root(), 1);
     let mut visits = vec![];
-    for node in tree.iter_from(c1) {
+    for node in tree.iter_from(c1, None) {
         visits.push(format!("{}", tree.nodes[node.index()].data));
     }
 
@@ -80,7 +80,7 @@ fn iter_single_with_sibling() {
      └─ 2
     "###);
     let mut visits = vec![];
-    for node in tree.iter_from(c1) {
+    for node in tree.iter_from(c1, None) {
         visits.push(format!("{}", tree.nodes[node.index()].data));
     }
 
@@ -92,11 +92,28 @@ fn mut_iter() {
     let mut tree = create_tree();
 
     let visits = StringStore::new();
-    tree.iter_mut_from(tree.root()).for_each(|tree, node| {
-        visits.push(format!("{}", tree.nodes[node.index()].data));
-        // just to make sure we can write to it
-        tree.nodes[node.index()].data += 1;
-    });
+    tree.iter_mut_from(tree.root(), None)
+        .for_each(|tree, node| {
+            visits.push(format!("{}", tree.nodes[node.index()].data));
+            // just to make sure we can write to it
+            tree.nodes[node.index()].data += 1;
+        });
 
     assert_eq!(visits.values(), ITER_ORDER);
+}
+
+#[test]
+fn iter_skip() {
+    let tree = create_tree();
+
+    assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [2] 11, [3] 2, [4] 20, [5] 21, [6] 22, [7] 220, [8] 221, [9] 3, [10] 4");
+    // we know that node 6 is the one with value 22
+    let skip: Option<NodeId> = Some(6.into());
+
+    let mut visits = vec![];
+    for node in tree.iter_from(tree.root(), skip) {
+        visits.push(format!("{}", tree.nodes[node.index()].data));
+    }
+
+    assert_eq!(visits.join(", "), "4, 3, 21, 20, 2, 11, 1, 0");
 }
