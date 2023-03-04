@@ -53,6 +53,7 @@ impl FuncSignal {
 pub enum SignalValue {
     Data(DataSignal),
     Func(FuncSignal),
+    Reuse,
 }
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
@@ -83,6 +84,7 @@ impl SignalInner {
     fn value(&self) -> &DataSignal {
         match self.value {
             SignalValue::Data(ref value) | SignalValue::Func(FuncSignal { ref value, .. }) => value,
+            SignalValue::Reuse => panic!("BUG: using a reused signal"),
         }
     }
 
@@ -98,8 +100,7 @@ impl SignalInner {
     pub(crate) fn reuse(&mut self) {
         self.listeners.clear();
         if cfg!(debug_assertions) {
-            self.value =
-                SignalValue::Func(FuncSignal::new(|| panic!("BUG: using a reused signal")));
+            self.value = SignalValue::Reuse;
         }
     }
 }

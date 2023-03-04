@@ -5,17 +5,16 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = ["ascii-tree"]
+ascii-tree = []
+
 [dependencies]
 bitvec = { version = "1.0", no-default-features = true }
 
 [dev-dependencies]
 insta = "1.28"
 criterion = { version = "0.4", features = ["html_reports"] }
-
-[features]
-default = ["ascii-tree"]
-ascii-tree = []
-
 
 [[bench]]
 name = "tree_bench"

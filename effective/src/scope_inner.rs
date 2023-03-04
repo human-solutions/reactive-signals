@@ -1,5 +1,6 @@
-#![allow(dead_code)]
 use std::cell::RefCell;
+
+use arena_link_tree::NodeBitVec;
 
 use crate::{scope::Scope, signal_id::SignalId, signal_inner::SignalInner};
 
@@ -34,8 +35,11 @@ impl ScopeInner {
         f(&mut signal)
     }
 
-    pub(crate) fn new_child_scope(&self) -> ScopeInner {
-        ScopeInner::default()
+    pub(crate) fn remove_scopes(&mut self, discarded_scopes: &NodeBitVec) {
+        let mut signals = self.signals.borrow_mut();
+        signals
+            .iter_mut()
+            .for_each(|signal| signal.listeners.retain(|s| !discarded_scopes[s.sx.sx]));
     }
 
     pub(crate) fn reuse(&self) {

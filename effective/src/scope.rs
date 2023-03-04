@@ -22,11 +22,12 @@ impl Scope {
     }
 
     pub fn discard(self) {
-        let (_discarded_scope_ids, is_root) = self.rt.with_mut(|rt| {
-            (
-                rt.scopes.reuse(self.sx, |s| s.reuse()),
-                rt.scopes.root() == self.sx,
-            )
+        let is_root = self.rt.with_mut(|rt| {
+            let discarded = rt.scopes.reuse(self.sx, |s| s.reuse());
+            rt.scopes
+                .iter_mut_from(rt.scopes.root())
+                .for_each(|tree, node| tree[node].remove_scopes(&discarded));
+            rt.scopes.root() == self.sx
         });
         if is_root {
             RUNTIMES.with(|rt| rt.return_to_pool(&self.rt));

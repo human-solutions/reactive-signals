@@ -58,7 +58,7 @@ pub fn sum_tree_with_1000_nodes(c: &mut Criterion) {
     c.bench_function("Sum tree 1,000 nodes wide", |b| {
         b.iter(|| {
             wide_tree
-                .iter_from(wide_tree.root(), None)
+                .iter_from(wide_tree.root())
                 .map(|n| wide_tree[n])
                 .sum::<i32>()
         });
@@ -70,7 +70,7 @@ pub fn sum_tree_with_1000_nodes(c: &mut Criterion) {
     c.bench_function("Sum tree 1,000 nodes deep", |b| {
         b.iter(|| {
             deep_tree
-                .iter_from(wide_tree.root(), None)
+                .iter_from(wide_tree.root())
                 .map(|n| wide_tree[n])
                 .sum::<i32>()
         });
