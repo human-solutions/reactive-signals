@@ -52,7 +52,7 @@ impl<T> Node<T> {
         }
     }
 
-    pub fn reset(&mut self) {
+    pub fn reuse(&mut self) {
         self.parent = None;
         self.last_child = None;
         self.prev_sibling = None;

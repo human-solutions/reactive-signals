@@ -28,7 +28,7 @@ fn sub_tree() {
 
     let orig_tree = tree.clone();
 
-    tree.reset(c1);
+    tree.reuse(c1);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 2
@@ -39,7 +39,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c2);
+    tree.reuse(c2);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -48,7 +48,7 @@ fn sub_tree() {
     assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [3] 3");
 
     tree = orig_tree.clone();
-    tree.reset(c3);
+    tree.reuse(c3);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -59,7 +59,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c2_0);
+    tree.reuse(c2_0);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -70,7 +70,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c2_1);
+    tree.reuse(c2_1);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -81,7 +81,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c2_2);
+    tree.reuse(c2_2);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -92,9 +92,9 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c2_0);
-    tree.reset(c2_1);
-    tree.reset(c2_2);
+    tree.reuse(c2_0);
+    tree.reuse(c2_1);
+    tree.reuse(c2_2);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1

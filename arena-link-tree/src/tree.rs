@@ -48,20 +48,6 @@ impl<T: Clone> Clone for Tree<T> {
 }
 
 impl<T: Default> Tree<T> {
-    /// A node doesn't have the id of the next child
-    /// so we have to find it by iterating over the parent's children
-    fn next_child(&self, id: NodeId) -> Option<NodeId> {
-        let parent = self.nodes[id.index()].parent?;
-        let mut child = self.nodes[parent.index()].last_child?;
-        while let Some(prev) = self.nodes[child.index()].prev_sibling {
-            if prev == id {
-                return Some(child);
-            }
-            child = prev;
-        }
-        None
-    }
-
     fn add_node(&mut self) -> NodeId {
         if let Some(id) = self.availability.get_available(&self.nodes) {
             debug_assert!(
@@ -89,7 +75,7 @@ impl<T: Default> Tree<T> {
     }
 
     pub fn discard_all(&mut self) {
-        self.reset(self.root());
+        self.reuse(self.root());
     }
 
     pub fn root(&self) -> NodeId {
@@ -118,18 +104,23 @@ impl<T: Default> Tree<T> {
         new_id
     }
 
-    fn detach_child(&mut self, parent: NodeId, remove: NodeId) -> bool {
+    fn detach(&mut self, node: NodeId) -> bool {
+        let Some(parent) = self.nodes[node.index()].parent else {
+            return false;
+        };
         let Some(mut curr_id) = self.nodes[parent.index()].last_child else {
           return false;
         };
         let mut prev_id: Option<NodeId> = None;
+        // iterate through the parent's children until we find the node
+        // we want to remove, together with its previous sibling
         loop {
             match (prev_id, curr_id, self.nodes[curr_id.index()].prev_sibling) {
-                (Some(prev), curr, next) if curr == remove => {
+                (Some(prev), curr, next) if curr == node => {
                     self.nodes[prev.index()].prev_sibling = next;
                     return true;
                 }
-                (None, curr, next) if curr == remove => {
+                (None, curr, next) if curr == node => {
                     self.nodes[parent.index()].last_child = next;
                     return true;
                 }
@@ -142,29 +133,16 @@ impl<T: Default> Tree<T> {
         }
     }
 
-    pub fn reset(&mut self, node: NodeId) {
-        if let Some(first_child) = self.nodes[node.index()].last_child {
-            let mut stack = vec![first_child];
-            while let Some(id) = stack.pop() {
-                if let Some(next_sibling) = self.nodes[id.index()].prev_sibling {
-                    stack.push(next_sibling);
-                }
-                if let Some(first_child) = self.nodes[id.index()].last_child {
-                    stack.push(first_child);
-                }
-                self.nodes[id.index()].reset();
-                self.availability.set_available(id);
-            }
+    pub fn reuse(&mut self, node: NodeId) {
+        if !self.detach(node) {
+            panic!("BUG could not detach node")
         }
 
-        if let Some(previous_child) = self.next_child(node) {
-            self.nodes[previous_child.index()].prev_sibling = self.nodes[node.index()].prev_sibling;
-        } else if let Some(parent_id) = self.nodes[node.index()].parent {
-            if !self.detach_child(parent_id, node) {
-                panic!("BUG")
-            }
-        }
-        self.nodes[node.index()].reset();
+        self.iter_mut_from(node).for_each(|tree, id| {
+            tree.nodes[id.index()].reuse();
+            tree.availability.set_available(id);
+        });
+        self.nodes[node.index()].reuse();
         self.availability.set_available(node);
     }
 }

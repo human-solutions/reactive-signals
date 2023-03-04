@@ -19,7 +19,7 @@ fn three_children() {
 
     let orig_tree = tree.clone();
 
-    tree.reset(c1);
+    tree.reuse(c1);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 2
@@ -27,7 +27,7 @@ fn three_children() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c2);
+    tree.reuse(c2);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -35,7 +35,7 @@ fn three_children() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c3);
+    tree.reuse(c3);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -43,31 +43,31 @@ fn three_children() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c1);
-    tree.reset(c2);
+    tree.reuse(c1);
+    tree.reuse(c2);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      └─ 3
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c3);
-    tree.reset(c2);
+    tree.reuse(c3);
+    tree.reuse(c2);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      └─ 1
     "###);
 
     tree = orig_tree.clone();
-    tree.reset(c3);
-    tree.reset(c2);
-    tree.reset(c1);
+    tree.reuse(c3);
+    tree.reuse(c2);
+    tree.reuse(c1);
     assert_eq!(tree.ascii(&|d| d.to_string()), " 0\n");
     assert_snapshot!(tree.dump_used(), @"[0] 0");
 
     tree = orig_tree.clone();
-    tree.reset(c1);
-    tree.reset(c2);
-    tree.reset(c3);
+    tree.reuse(c1);
+    tree.reuse(c2);
+    tree.reuse(c3);
     assert_eq!(tree.ascii(&|d| d.to_string()), " 0\n");
 }

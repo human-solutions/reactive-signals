@@ -41,7 +41,7 @@ fn show_tree() {
     "###);
 }
 
-const ITER_ORDER: &str = "4, 3, 221, 220, 22, 21, 20, 2, 11, 0";
+const ITER_ORDER: &str = "4, 3, 221, 220, 22, 21, 20, 2, 11, 1, 0";
 
 #[test]
 fn iter() {

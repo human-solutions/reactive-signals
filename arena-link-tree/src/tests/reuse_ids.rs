@@ -25,7 +25,7 @@ fn reuse_ids() {
     "###);
     assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [2] 2, [3] 3, [4] 20, [5] 21, [6] 22");
 
-    tree.reset(c2);
+    tree.reuse(c2);
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
