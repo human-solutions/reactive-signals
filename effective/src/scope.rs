@@ -23,7 +23,7 @@ impl Scope {
 
     pub fn discard(self) {
         let is_root = self.rt.with_mut(|rt| {
-            rt.scopes.reuse(self.sx);
+            rt.scopes.reuse(self.sx, |s| s.reuse());
             rt.scopes.root() == self.sx
         });
         if is_root {

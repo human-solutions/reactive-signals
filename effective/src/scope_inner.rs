@@ -38,10 +38,9 @@ impl ScopeInner {
         ScopeInner::default()
     }
 
-    pub(crate) fn discard(&self) {
-        self.signals
-            .borrow_mut()
-            .iter_mut()
-            .for_each(|signal| signal.listeners.clear());
+    pub(crate) fn reuse(&self) {
+        let mut signals = self.signals.borrow_mut();
+        signals.iter_mut().for_each(|signal| signal.reuse());
+        signals.clear();
     }
 }

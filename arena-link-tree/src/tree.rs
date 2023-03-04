@@ -74,10 +74,6 @@ impl<T: Default> Tree<T> {
         }
     }
 
-    pub fn discard_all(&mut self) {
-        self.reuse(self.root());
-    }
-
     pub fn root(&self) -> NodeId {
         NodeId::root()
     }
@@ -133,7 +129,11 @@ impl<T: Default> Tree<T> {
         }
     }
 
-    pub fn reuse(&mut self, node: NodeId) {
+    pub fn reuse_tree(&mut self, f: impl Fn(&mut T)) {
+        self.reuse(self.root(), f);
+    }
+
+    pub fn reuse(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) {
         if !self.detach(node) {
             panic!("BUG could not detach node")
         }
@@ -141,6 +141,7 @@ impl<T: Default> Tree<T> {
         self.iter_mut_from(node).for_each(|tree, id| {
             tree.nodes[id.index()].reuse();
             tree.availability.set_available(id);
+            reuse_data(&mut tree.nodes[id.index()].data);
         });
         self.nodes[node.index()].reuse();
         self.availability.set_available(node);

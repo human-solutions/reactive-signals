@@ -94,4 +94,12 @@ impl SignalInner {
         let mut val = self.value().borrow_mut();
         *val = Box::new(new_value);
     }
+
+    pub(crate) fn reuse(&mut self) {
+        self.listeners.clear();
+        if cfg!(debug_assertions) {
+            self.value =
+                SignalValue::Func(FuncSignal::new(|| panic!("BUG: using a reused signal")));
+        }
+    }
 }

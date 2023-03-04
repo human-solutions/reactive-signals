@@ -25,7 +25,7 @@ fn wide() {
     "###);
     assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [2] 2, [3] 3, [4] 4, [5] 5, [6] 6, [7] 7, [8] 8, [9] 9");
 
-    tree.reuse(start);
+    tree.reuse(start, |_| {});
 
     assert_eq!(tree.ascii(&|d| d.to_string()), " 0\n");
     assert_snapshot!(tree.dump_used(), @"[0] 0");

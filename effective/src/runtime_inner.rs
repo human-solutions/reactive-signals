@@ -61,7 +61,7 @@ impl RuntimeInner {
 
     pub fn discard(&mut self) {
         self.in_use.set(false);
-        self.scopes.discard_all();
+        self.scopes.reuse_tree(|s| s.reuse());
     }
 }
 

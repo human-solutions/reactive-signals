@@ -26,7 +26,7 @@ pub fn delete_tree_with_1000_nodes(c: &mut Criterion) {
     c.bench_function("Delete tree with 1,000 nodes wide", |b| {
         b.iter(|| {
             let mut tree = wide_tree.clone();
-            tree.discard_all();
+            tree.reuse_tree(|_| {});
         });
     });
 
@@ -37,7 +37,7 @@ pub fn delete_tree_with_1000_nodes(c: &mut Criterion) {
     c.bench_function("Delete tree with 1,000 nodes deep", |b| {
         b.iter(|| {
             let mut tree = deep_tree.clone();
-            tree.discard_all();
+            tree.reuse_tree(|_| {});
         });
     });
 }
