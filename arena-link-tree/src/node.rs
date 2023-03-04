@@ -1,11 +1,11 @@
-use std::{fmt, num::NonZeroU32};
+use std::{fmt, num::NonZeroU16};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NodeId(NonZeroU32);
+pub struct NodeId(NonZeroU16);
 
 impl From<usize> for NodeId {
     fn from(id: usize) -> Self {
-        Self(unsafe { NonZeroU32::new_unchecked(id as u32 + 1) })
+        Self(unsafe { NonZeroU16::new_unchecked(id as u16 + 1) })
     }
 }
 
@@ -15,11 +15,11 @@ impl NodeId {
     }
 
     pub(crate) fn max() -> usize {
-        u32::MAX as usize - 1
+        u16::MAX as usize - 1
     }
 
     pub(crate) fn root() -> Self {
-        Self(unsafe { NonZeroU32::new_unchecked(1) })
+        Self(unsafe { NonZeroU16::new_unchecked(1) })
     }
 }
 
@@ -73,5 +73,5 @@ impl<T: Clone> Clone for Node<T> {
 #[test]
 fn test_node_size() {
     let node = Node::<u32>::default();
-    assert_eq!(std::mem::size_of_val(&node), 16);
+    assert_eq!(std::mem::size_of_val(&node), 12);
 }
