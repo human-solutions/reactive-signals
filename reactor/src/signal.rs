@@ -45,8 +45,7 @@ where
     }
 
     pub(crate) fn set_rt(&self, val: T, rt: &RuntimeInner) {
-        rt[self.id].with_signal(self.id, |sig| sig.set(val));
-
+        rt[self.id].with_signal_mut(self.id, |sig| sig.set(val));
         propagate_change(rt, self.id);
     }
 }

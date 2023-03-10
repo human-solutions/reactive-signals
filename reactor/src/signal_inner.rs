@@ -1,24 +1,22 @@
-use std::{any::Any, cell::RefCell, fmt::Debug, ops::Deref};
+use std::{any::Any, fmt::Debug, ops::Deref};
 
 use crate::{any_func::AnyFunc, signal_id::SignalId};
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
-pub struct DataSignal(RefCell<Box<dyn Any>>);
+pub struct DataSignal(Box<dyn Any>);
 
 impl DataSignal {
     fn new<T: 'static>(value: T) -> Self {
-        Self(RefCell::new(Box::new(value)))
+        Self(Box::new(value))
     }
 
     pub fn cloned<T: 'static + Clone>(&self) -> T {
-        let value = self.0.borrow();
-
-        value.downcast_ref::<T>().unwrap().clone()
+        self.0.downcast_ref::<T>().unwrap().clone()
     }
 }
 
 impl Deref for DataSignal {
-    type Target = RefCell<Box<dyn Any>>;
+    type Target = Box<dyn Any>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -43,9 +41,15 @@ impl FuncSignal {
         }
     }
 
-    pub(crate) fn run(&self) {
-        let mut value = self.value.borrow_mut();
-        *value = self.func.run_any();
+    /// when running a signal, other signals are accessed (.get())
+    /// so first we run with a non mutable reference and with a
+    /// second step we set the value.
+    pub(crate) fn run(&self) -> Box<dyn Any> {
+        self.func.run_any()
+    }
+
+    pub(crate) fn set_value(&mut self, new_value: Box<dyn Any>) {
+        self.value.0 = new_value;
     }
 }
 
@@ -92,9 +96,14 @@ impl SignalInner {
         self.value().cloned()
     }
 
-    pub(crate) fn set<T: 'static>(&self, new_value: T) {
-        let mut val = self.value().borrow_mut();
-        *val = Box::new(new_value);
+    pub(crate) fn set<T: 'static>(&mut self, new_value: T) {
+        match self.value {
+            SignalValue::Data(ref mut value)
+            | SignalValue::Func(FuncSignal { ref mut value, .. }) => {
+                *value = DataSignal::new(new_value)
+            }
+            SignalValue::Reuse => panic!("BUG: using a reused signal"),
+        }
     }
 
     pub(crate) fn reuse(&mut self) {
@@ -103,4 +112,11 @@ impl SignalInner {
             self.value = SignalValue::Reuse;
         }
     }
+}
+
+#[test]
+fn size_of_ref_cell_box() {
+    use std::cell::RefCell;
+    assert_eq!(std::mem::size_of::<RefCell<Box<usize>>>(), 16);
+    assert_eq!(std::mem::size_of::<Box<usize>>(), 8);
 }
