@@ -5,6 +5,7 @@ use crate::Tree;
 mod deep;
 mod iter;
 mod reuse_ids;
+mod reuse_tree;
 mod sub_tree;
 mod three_children;
 mod wide;

@@ -4,7 +4,7 @@ use insta::assert_snapshot;
 fn sub_tree() {
     use crate::Tree;
 
-    let mut tree = Tree::new_with_root(0);
+    let mut tree = Tree::create_and_init(0);
 
     let c1 = tree.add_child(tree.root(), 1);
     let c2 = tree.add_child(tree.root(), 2);
@@ -28,7 +28,7 @@ fn sub_tree() {
 
     let orig_tree = tree.clone();
 
-    tree.reuse(c1, |_| {});
+    tree.discard(c1, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 2
@@ -39,7 +39,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c2, |_| {});
+    tree.discard(c2, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -48,7 +48,7 @@ fn sub_tree() {
     assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [3] 3");
 
     tree = orig_tree.clone();
-    tree.reuse(c3, |_| {});
+    tree.discard(c3, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -59,7 +59,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c2_0, |_| {});
+    tree.discard(c2_0, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -70,7 +70,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c2_1, |_| {});
+    tree.discard(c2_1, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -81,7 +81,7 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c2_2, |_| {});
+    tree.discard(c2_2, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -92,9 +92,9 @@ fn sub_tree() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c2_0, |_| {});
-    tree.reuse(c2_1, |_| {});
-    tree.reuse(c2_2, |_| {});
+    tree.discard(c2_0, |_| {});
+    tree.discard(c2_1, |_| {});
+    tree.discard(c2_2, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1

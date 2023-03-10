@@ -8,6 +8,7 @@ use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 #[derive(Debug)]
 pub struct Tree<T> {
+    pub(crate) initialized: bool,
     pub(crate) nodes: Vec<Node<T>>,
     pub(crate) availability: NodeSlotAvailability,
 }
@@ -41,9 +42,16 @@ impl<T> DerefMut for Tree<T> {
 impl<T: Clone> Clone for Tree<T> {
     fn clone(&self) -> Self {
         Self {
+            initialized: self.initialized,
             nodes: self.nodes.clone(),
             availability: Default::default(),
         }
+    }
+}
+
+impl<T: Default> Default for Tree<T> {
+    fn default() -> Self {
+        Self::create()
     }
 }
 
@@ -66,12 +74,34 @@ impl<T: Default> Tree<T> {
         }
     }
 
-    pub fn new_with_root(data: T) -> Self {
-        let node = Node::new(data);
+    pub fn is_initialized(&self) -> bool {
+        self.initialized
+    }
+
+    pub fn create() -> Self {
         Self {
-            nodes: vec![node],
+            initialized: false,
+            nodes: vec![],
             availability: Default::default(),
         }
+    }
+
+    pub fn create_and_init(data: T) -> Tree<T> {
+        let mut me = Self::create();
+        me.init(data);
+        me
+    }
+
+    pub fn init(&mut self, data: T) -> NodeId {
+        debug_assert!(
+            !self.initialized,
+            "tree already initialized. did you forget to discard it before reusing it?"
+        );
+        let root_id = self.availability.init();
+
+        self.push(Node::new(data));
+        self.initialized = true;
+        root_id
     }
 
     pub fn root(&self) -> NodeId {
@@ -87,6 +117,11 @@ impl<T: Default> Tree<T> {
     }
 
     pub fn add_child(&mut self, to: NodeId, data: T) -> NodeId {
+        debug_assert!(
+            self.initialized,
+            "cannot add a child to a tree that is not initialized"
+        );
+
         let prev_sibling = self.nodes[to.index()].last_child;
         let new_id = self.add_node();
         {
@@ -129,11 +164,18 @@ impl<T: Default> Tree<T> {
         }
     }
 
-    pub fn reuse_tree(&mut self, f: impl Fn(&mut T)) {
-        self.reuse(self.root(), f);
+    pub fn discard_all(&mut self, f: impl Fn(&mut T)) {
+        debug_assert!(
+            self.initialized,
+            "tree cannot be discarded because it is not initialized"
+        );
+        self.discard(self.root(), f);
+        self.availability.discard();
+        self.nodes.clear();
+        self.initialized = false;
     }
 
-    pub fn reuse(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) -> NodeBitVec {
+    pub fn discard(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) -> NodeBitVec {
         self.detach(node);
 
         let ids = NodeBitVec(bitvec![u32, Msb0; 0; self.nodes.len()]);

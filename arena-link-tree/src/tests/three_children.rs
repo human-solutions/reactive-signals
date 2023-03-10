@@ -3,7 +3,7 @@ use insta::assert_snapshot;
 
 #[test]
 fn three_children() {
-    let mut tree = Tree::new_with_root(0);
+    let mut tree = Tree::create_and_init(0);
 
     let c1 = tree.add_child(tree.root(), 1);
     let c2 = tree.add_child(tree.root(), 2);
@@ -19,7 +19,7 @@ fn three_children() {
 
     let orig_tree = tree.clone();
 
-    tree.reuse(c1, |_| {});
+    tree.discard(c1, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 2
@@ -27,7 +27,7 @@ fn three_children() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c2, |_| {});
+    tree.discard(c2, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -35,7 +35,7 @@ fn three_children() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c3, |_| {});
+    tree.discard(c3, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      ├─ 1
@@ -43,31 +43,31 @@ fn three_children() {
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c1, |_| {});
-    tree.reuse(c2, |_| {});
+    tree.discard(c1, |_| {});
+    tree.discard(c2, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      └─ 3
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c3, |_| {});
-    tree.reuse(c2, |_| {});
+    tree.discard(c3, |_| {});
+    tree.discard(c2, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
      └─ 1
     "###);
 
     tree = orig_tree.clone();
-    tree.reuse(c3, |_| {});
-    tree.reuse(c2, |_| {});
-    tree.reuse(c1, |_| {});
+    tree.discard(c3, |_| {});
+    tree.discard(c2, |_| {});
+    tree.discard(c1, |_| {});
     assert_eq!(tree.ascii(&|d| d.to_string()), " 0\n");
     assert_snapshot!(tree.dump_used(), @"[0] 0");
 
     tree = orig_tree.clone();
-    tree.reuse(c1, |_| {});
-    tree.reuse(c2, |_| {});
-    tree.reuse(c3, |_| {});
+    tree.discard(c1, |_| {});
+    tree.discard(c2, |_| {});
+    tree.discard(c3, |_| {});
     assert_eq!(tree.ascii(&|d| d.to_string()), " 0\n");
 }

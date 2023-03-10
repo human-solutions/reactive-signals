@@ -4,16 +4,18 @@ use criterion::{criterion_group, criterion_main, Criterion};
 pub fn create_tree_with_1000_nodes(c: &mut Criterion) {
     c.bench_function("Create tree with 1,000 nodes wide", |b| {
         b.iter(|| {
-            let mut tree = Tree::new_with_root(0);
+            let mut tree = Tree::create_and_init(0);
             let root = tree.root();
             (0..1000).for_each(|i| _ = tree.add_child(root, i));
+            tree.discard_all(|_| {})
         });
     });
     c.bench_function("Create tree with 1,000 nodes deep", |b| {
         b.iter(|| {
-            let mut tree = Tree::new_with_root(0);
+            let mut tree = Tree::create_and_init(0);
             let mut node = tree.root();
             (0..1000).for_each(|i| node = tree.add_child(node, i));
+            tree.discard_all(|_| {})
         });
     });
 }

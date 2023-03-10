@@ -4,7 +4,7 @@ use insta::assert_snapshot;
 use super::StringStore;
 
 fn create_tree() -> Tree<usize> {
-    let mut tree = Tree::new_with_root(0);
+    let mut tree = Tree::create_and_init(0);
 
     let c1 = tree.add_child(tree.root(), 1);
     let _c1_1 = tree.add_child(c1, 11);
@@ -56,7 +56,7 @@ fn iter() {
 
 #[test]
 fn iter_single_node() {
-    let mut tree = Tree::new_with_root(0);
+    let mut tree = Tree::create_and_init(0);
 
     let c1 = tree.add_child(tree.root(), 1);
     let mut visits = vec![];
@@ -69,7 +69,7 @@ fn iter_single_node() {
 
 #[test]
 fn iter_single_with_sibling() {
-    let mut tree = Tree::new_with_root(0);
+    let mut tree = Tree::create_and_init(0);
 
     let c1 = tree.add_child(tree.root(), 1);
     let _ = tree.add_child(tree.root(), 2);

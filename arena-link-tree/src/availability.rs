@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use crate::{Node, NodeId};
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub(crate) struct NodeSlotAvailability(pub(crate) Vec<u8>);
 
 const FULL: u8 = u8::MAX;
@@ -25,8 +25,35 @@ impl NodeSlotAvailability {
         })
         .map(NodeId::from)
     }
+
+    pub(crate) fn create() -> Self {
+        Self(Vec::new())
+    }
+
+    pub(crate) fn init(&mut self) -> NodeId {
+        debug_assert!(
+            self.0.len() == 0,
+            "initializing NodeSlotAvailability but it already contains {} ids",
+            self.0.len()
+        );
+
+        NodeId::root()
+    }
+
+    pub(crate) fn discard(&mut self) {
+        self.0.clear();
+        // reduce size if very big.
+        // 1000 entries with SLOT_SIZE of 100 gives a capacity of 10,000 node ids.
+        // and will have a size of 1000 bytes + vec overhead (normally 16 bytes on a 64-bit arch)
+        self.0.truncate(1000);
+    }
 }
 
+impl Default for NodeSlotAvailability {
+    fn default() -> Self {
+        Self::create()
+    }
+}
 #[inline]
 fn set_available(slot_size: usize, slots: &mut Vec<u8>, idx: usize) {
     debug_assert!(slot_size < u8::MAX as usize);
@@ -56,7 +83,7 @@ fn get_available(
     slots: &mut Vec<u8>,
     next_available_index: impl FnOnce(Range<usize>) -> Option<usize>,
 ) -> Option<usize> {
-    debug_assert!(slot_size < u8::MAX as usize);
+    debug_assert!(slot_size < u8::MAX as usize, "slot too big: {slot_size}");
     let slot = slots.iter().position(|&i| i != FULL)?;
 
     let sub_idx = slots[slot] as usize;

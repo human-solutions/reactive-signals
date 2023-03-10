@@ -1,5 +1,5 @@
 use std::{
-    cell::{Cell, RefCell},
+    cell::RefCell,
     ops::{Index, IndexMut},
 };
 
@@ -15,58 +15,60 @@ thread_local! {
 pub(crate) struct RuntimePool(pub(crate) RefCell<Vec<RuntimeInner>>);
 
 impl RuntimePool {
-    pub(crate) fn borrow(&self) -> (Runtime, NodeId) {
-        {
-            for rt in self.0.borrow().iter() {
-                if !rt.in_use.get() {
-                    rt.in_use.set(true);
-                    return (rt.id, rt.root_scope);
-                }
+    pub(crate) fn borrow_rt(&self) -> (Runtime, NodeId) {
+        let mut vec = self.0.borrow_mut();
+
+        for rt in &mut vec.iter_mut() {
+            if !rt.in_use() {
+                let id = rt.scope_tree.init(Default::default());
+                return (rt.id, id);
             }
         }
-        let mut vec = self.0.borrow_mut();
+
         let id = Runtime::from(vec.len());
-        let rti = RuntimeInner::new(id);
-        let sx = rti.scopes.root();
+        let mut rti = RuntimeInner::new(id);
+        rti.scope_tree.init(Default::default());
+        let sx = rti.scope_tree.root();
         vec.push(rti);
         (id, sx)
     }
 
-    pub(crate) fn return_to_pool(&self, runtime: &Runtime) {
+    pub(crate) fn return_rt(&self, runtime: &Runtime) {
         let mut pool = self.0.borrow_mut();
         let rt = &mut pool[runtime.0 as usize];
         rt.discard();
     }
 
     pub(crate) fn bench_clean_all(&self) {
-        let mut pool = self.0.borrow_mut();
-        pool.clear();
+        let mut vec = self.0.borrow_mut();
+        vec.iter_mut().for_each(|rt| rt.discard());
+        vec.clear();
     }
 }
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub(crate) struct RuntimeInner {
     pub(crate) id: Runtime,
-    in_use: Cell<bool>,
-    pub(crate) scopes: Tree<ScopeInner>,
-    pub(crate) root_scope: NodeId,
+    pub(crate) scope_tree: Tree<ScopeInner>,
 }
 
 impl RuntimeInner {
     fn new(id: Runtime) -> Self {
-        let scopes = Tree::new_with_root(ScopeInner::default());
-        let root_scope = scopes.root();
         Self {
             id,
-            in_use: Cell::new(true),
-            scopes,
-            root_scope,
+            scope_tree: Tree::create(),
         }
     }
 
+    fn in_use(&self) -> bool {
+        self.scope_tree.is_initialized()
+    }
+
     pub fn discard(&mut self) {
-        self.in_use.set(false);
-        self.scopes.reuse_tree(|s| s.reuse());
+        if self.in_use() {
+            // also sets the tree to not initialized
+            self.scope_tree.discard_all(|s| s.reuse());
+        }
     }
 }
 
@@ -74,12 +76,12 @@ impl Index<SignalId> for RuntimeInner {
     type Output = ScopeInner;
 
     fn index(&self, index: SignalId) -> &Self::Output {
-        &self.scopes[index.sx.sx]
+        &self.scope_tree[index.sx.sx]
     }
 }
 
 impl IndexMut<SignalId> for RuntimeInner {
     fn index_mut(&mut self, index: SignalId) -> &mut Self::Output {
-        &mut self.scopes[index.sx.sx]
+        &mut self.scope_tree[index.sx.sx]
     }
 }

@@ -53,7 +53,7 @@ where
 
 pub fn create_data_signal<T: 'static>(sx: Scope, value: T) -> Signal<T> {
     let id = sx.rt.with_mut(|rt| {
-        let scope = &rt.scopes[sx.sx];
+        let scope = &rt.scope_tree[sx.sx];
         scope.insert_signal(sx, SignalInner::new_data(value))
     });
     Signal {
@@ -71,7 +71,7 @@ where
     // We need to keep this out of the rt so there's no mut ref.
     let signal = SignalInner::new_func(func);
     let id = sx.rt.with_mut(|rt| {
-        let scope = &rt.scopes[sx.sx];
+        let scope = &rt.scope_tree[sx.sx];
         scope.insert_signal(sx, signal)
     });
     Signal {
