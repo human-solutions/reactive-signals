@@ -1,16 +1,16 @@
-use crate::{primitives::u31Bool, runtime_inner::RuntimeInner, scope::Scope};
+use crate::{primitives::u15Bool, runtime_inner::RuntimeInner, scope::Scope};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SignalId {
+    id: u15Bool,
     pub(crate) sx: Scope,
-    id: u31Bool,
 }
 
 impl SignalId {
     pub(crate) fn new(id: usize, sx: Scope) -> Self {
         Self {
             sx,
-            id: u31Bool::new(id, false),
+            id: u15Bool::new(id, false),
         }
     }
 
@@ -37,7 +37,7 @@ impl SignalId {
 
 impl std::fmt::Debug for SignalId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}{}ˢⁱᵍ", self.sx.sx, self.id.u31())
+        write!(f, "{:?}{}ˢⁱᵍ", self.sx.sx, self.id.u15())
     }
 }
 
