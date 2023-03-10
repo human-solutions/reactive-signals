@@ -76,12 +76,12 @@ impl Index<SignalId> for RuntimeInner {
     type Output = ScopeInner;
 
     fn index(&self, index: SignalId) -> &Self::Output {
-        &self.scope_tree[index.sx.sx]
+        &self.scope_tree[index.sx]
     }
 }
 
 impl IndexMut<SignalId> for RuntimeInner {
     fn index_mut(&mut self, index: SignalId) -> &mut Self::Output {
-        &mut self.scope_tree[index.sx.sx]
+        &mut self.scope_tree[index.sx]
     }
 }

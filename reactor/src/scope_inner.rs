@@ -39,7 +39,7 @@ impl ScopeInner {
         let mut signals = self.signals.borrow_mut();
         signals
             .iter_mut()
-            .for_each(|signal| signal.listeners.retain(|s| !discarded_scopes[s.sx.sx]));
+            .for_each(|signal| signal.listeners.retain(|s| !discarded_scopes[s.sx]));
     }
 
     pub(crate) fn reuse(&self) {

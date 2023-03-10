@@ -49,8 +49,8 @@ fn test_signal_func_val() {
 
 #[test]
 fn test_sizes() {
-    assert_eq!(12, mem::size_of::<Signal<String>>());
-    assert_eq!(12, mem::size_of::<Signal<usize>>());
+    assert_eq!(8, mem::size_of::<Signal<String>>());
+    assert_eq!(8, mem::size_of::<Signal<usize>>());
 }
 
 #[allow(dead_code, non_camel_case_types)]
