@@ -2,6 +2,7 @@
 mod tests;
 
 mod any_func;
+mod primitives;
 mod runtime;
 mod runtime_inner;
 mod scope;
