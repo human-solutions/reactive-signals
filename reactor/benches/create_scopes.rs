@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use effective::{create_data_signal, create_func_signal, Scope};
+use reactor::{create_data_signal, create_func_signal, Scope};
 
 pub fn create_scopes_with_signal(c: &mut Criterion) {
     c.bench_function("Create 1,000 nested scopes with 1 func signal each", |b| {

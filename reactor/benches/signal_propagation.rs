@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use effective::{create_data_signal, create_func_signal, Scope};
+use reactor::{create_data_signal, create_func_signal, Scope};
 
 pub fn signal_propagation(c: &mut Criterion) {
     let mut scope = Scope::bench_root();
