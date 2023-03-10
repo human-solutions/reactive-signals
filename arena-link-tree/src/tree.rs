@@ -164,12 +164,11 @@ impl<T: Default> Tree<T> {
         }
     }
 
-    pub fn discard_all(&mut self, f: impl Fn(&mut T)) {
+    pub fn discard_all(&mut self) {
         debug_assert!(
             self.initialized,
             "tree cannot be discarded because it is not initialized"
         );
-        self.discard(self.root(), f);
         self.availability.discard();
         self.nodes.clear();
         self.initialized = false;

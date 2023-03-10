@@ -67,7 +67,7 @@ impl RuntimeInner {
     pub fn discard(&mut self) {
         if self.in_use() {
             // also sets the tree to not initialized
-            self.scope_tree.discard_all(|s| s.reuse());
+            self.scope_tree.discard_all();
         }
     }
 }

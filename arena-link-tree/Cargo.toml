@@ -25,5 +25,5 @@ name = "sum"
 harness = false
 
 [[bench]]
-name = "delete"
+name = "discard"
 harness = false

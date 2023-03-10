@@ -20,7 +20,7 @@ fn reuse_ids() {
         assert_eq!(tree.dump_used(), TREE_NODES);
         assert_eq!(tree.ascii(&|d| d.to_string()), ASCII_REF);
 
-        tree.discard_all(|_| {});
+        tree.discard_all();
         assert_eq!(tree.dump_used(), EMPTY_NODES);
     }
 }
