@@ -1,0 +1,29 @@
+
+name: Test
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test and build benches
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repo"
+        uses: actions/checkout@v3
+
+      - name: "Use rust-cache"
+        uses: Swatinem/rust-cache@v2
+
+      - name: "Run tests"
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+
+      - name: "Check that benches compile"
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+          args: dd
