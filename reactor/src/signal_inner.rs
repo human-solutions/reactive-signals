@@ -1,6 +1,6 @@
 use std::{any::Any, fmt::Debug, ops::Deref};
 
-use crate::{any_func::AnyFunc, signal_id::SignalId};
+use crate::{primitives::AnyFunc, signal_id::SignalId};
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct DataSignal(Box<dyn Any>);
