@@ -7,13 +7,21 @@ edition = "2021"
 [features]
 default = ["extra-traits"]
 extra-traits = []
+flamegraph = ["inferno"]
 
 [dependencies]
 arena-link-tree = { path = "../arena-link-tree" }
-bitvec = { version = "1.0", no-default-features = true }
+bitvec = "1.0"
+
+# Optional: used only when running example through Criterion & pprof
+criterion = { version = "0.4", optional = true }
+inferno = { version = "0.11", default-features = false, features = [
+  "nameattr",
+], optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }
+pprof = { version = "0.11", features = ["flamegraph", "criterion"] }
 
 [[bench]]
 name = "create_scopes"
@@ -26,3 +34,7 @@ harness = false
 [[bench]]
 name = "discard_scopes"
 harness = false
+
+[[example]]
+name = "propagation_perf"
+required-features = ["flamegraph", "criterion"]
