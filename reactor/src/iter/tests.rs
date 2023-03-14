@@ -1,0 +1,45 @@
+use insta::assert_snapshot;
+
+use super::{ChildVecResolver, IdVec, VecTreeIter};
+
+impl<'a> ChildVecResolver<'a> for Vec<Vec<usize>> {
+    type Elem = &'a [usize];
+    type Id = usize;
+
+    fn child_vec(&'a self, id: Self::Id) -> Self::Elem {
+        &self[id]
+    }
+}
+
+impl IdVec for &[usize] {
+    type Output = usize;
+    fn get(&self, idx: usize) -> Self::Output {
+        self[idx]
+    }
+    fn len(&self) -> usize {
+        (*self).len()
+    }
+    fn is_empty(&self) -> bool {
+        (*self).is_empty()
+    }
+}
+
+#[test]
+fn test_num_tree() {
+    let resolver: Vec<Vec<usize>> = vec![
+        vec![1, 4], // 0
+        vec![2, 3], // 1
+        vec![],     // 2
+        vec![],     // 3
+        vec![5],    // 4
+        vec![],     // 5
+    ];
+
+    let iter = VecTreeIter::new(&resolver, 0);
+    let order = iter
+        .map(|n| n.to_string())
+        .collect::<Vec<String>>()
+        .join(", ");
+
+    assert_snapshot!(order, @"1, 2, 3, 4, 5");
+}

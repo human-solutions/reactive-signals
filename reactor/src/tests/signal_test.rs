@@ -44,7 +44,7 @@ fn test_signal_func_val() {
 
     num_sig.set(4);
 
-    assert_eq!(output.values(), "a5-b5, a5-b4, a4-b4");
+    assert_eq!(output.values(), "a5-b5, a4-b5, a4-b4");
 }
 
 #[test]

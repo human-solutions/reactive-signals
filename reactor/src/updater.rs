@@ -1,20 +1,17 @@
-use crate::{runtime_inner::RuntimeInner, signal_id::SignalId, signal_inner::SignalValue};
+use crate::{
+    iter::{ChildVecResolver, VecTreeIter},
+    runtime_inner::RuntimeInner,
+    signal_id::SignalId,
+    signal_inner::SignalValue,
+};
 
 pub(crate) fn propagate_change(rt: &RuntimeInner, sig: SignalId) {
-    let mut queue = rt.scope_tree[sig.sx].signals.borrow()[sig.index()]
-        .listeners
-        .clone();
+    let tree = &rt.scope_tree;
+    let mut iter = VecTreeIter::new(tree, sig);
 
-    while let Some(sig) = queue.pop() {
-        let scope = &rt.scope_tree[sig.sx];
-
-        let signal = &scope.signals.borrow()[sig.index()];
-
-        if let SignalValue::Func(func) = &signal.value {
-            let did_change = func.run();
-            if did_change {
-                queue.extend(signal.listeners.clone());
-            }
+    while let Some(next) = iter.next() {
+        if let SignalValue::Func(func) = &tree.child_vec(next).value {
+            func.run();
         }
     }
 }
