@@ -1,62 +1,14 @@
-use std::{any::Any, fmt::Debug, ops::Deref};
+use std::fmt::Debug;
 
-use crate::{primitives::AnyFunc, signal_id::SignalId};
-
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
-pub struct DataSignal(Box<dyn Any>);
-
-impl DataSignal {
-    fn new<T: 'static>(value: T) -> Self {
-        Self(Box::new(value))
-    }
-
-    pub fn cloned<T: 'static + Clone>(&self) -> T {
-        self.0.downcast_ref::<T>().unwrap().clone()
-    }
-}
-
-impl Deref for DataSignal {
-    type Target = Box<dyn Any>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
-pub struct FuncSignal {
-    value: DataSignal,
-    func: AnyFunc,
-}
-
-impl FuncSignal {
-    fn new<F, T>(func: F) -> Self
-    where
-        F: Fn() -> T + 'static,
-        T: 'static,
-    {
-        Self {
-            value: DataSignal::new(func()),
-            func: AnyFunc::new(func),
-        }
-    }
-
-    /// when running a signal, other signals are accessed (.get())
-    /// so first we run with a non mutable reference and with a
-    /// second step we set the value.
-    pub(crate) fn run(&self) -> Box<dyn Any> {
-        self.func.run_any()
-    }
-
-    pub(crate) fn set_value(&mut self, new_value: Box<dyn Any>) {
-        self.value.0 = new_value;
-    }
-}
+use crate::{
+    primitives::{AnyData, DynFunc},
+    signal_id::SignalId,
+};
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub enum SignalValue {
-    Data(DataSignal),
-    Func(FuncSignal),
+    Data(AnyData),
+    Func(DynFunc),
     Reuse,
 }
 
@@ -69,7 +21,7 @@ pub struct SignalInner {
 impl SignalInner {
     pub(crate) fn new_data<T: 'static>(value: T) -> Self {
         Self {
-            value: SignalValue::Data(DataSignal::new(value)),
+            value: SignalValue::Data(AnyData::new(value)),
             listeners: Vec::default(),
         }
     }
@@ -80,14 +32,14 @@ impl SignalInner {
         T: 'static,
     {
         Self {
-            value: SignalValue::Func(FuncSignal::new(func)),
+            value: SignalValue::Func(DynFunc::new(func)),
             listeners: Vec::default(),
         }
     }
 
-    fn value(&self) -> &DataSignal {
+    fn value(&self) -> &AnyData {
         match self.value {
-            SignalValue::Data(ref value) | SignalValue::Func(FuncSignal { ref value, .. }) => value,
+            SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => value,
             SignalValue::Reuse => panic!("BUG: using a reused signal"),
         }
     }
@@ -98,9 +50,8 @@ impl SignalInner {
 
     pub(crate) fn set<T: 'static>(&mut self, new_value: T) {
         match self.value {
-            SignalValue::Data(ref mut value)
-            | SignalValue::Func(FuncSignal { ref mut value, .. }) => {
-                *value = DataSignal::new(new_value)
+            SignalValue::Data(ref mut value) | SignalValue::Func(DynFunc { ref mut value, .. }) => {
+                *value = AnyData::new(new_value)
             }
             SignalValue::Reuse => panic!("BUG: using a reused signal"),
         }
