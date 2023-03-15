@@ -1,9 +1,9 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use reactor::{create_data_signal, create_func_signal, Scope};
+use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion};
+use reactor::{create_data_signal, create_func_signal, Scope, Signal};
 
-pub fn signal_propagation(c: &mut Criterion) {
+fn create_1000_nested() -> (Scope, Signal<usize>, Signal<usize>) {
     let mut scope = Scope::bench_root();
-    let start_sig = create_data_signal(scope, 0u32);
+    let start_sig = create_data_signal(scope, 0usize);
     let mut next_sig = create_func_signal(scope, move || start_sig.get() + 1);
     next_sig.subscribe(start_sig);
 
@@ -15,21 +15,12 @@ pub fn signal_propagation(c: &mut Criterion) {
     });
 
     let end_sig = next_sig;
-    c.bench_function(
-        "Propagate a change through 1000 signals, each in a nested scope",
-        |b| {
-            b.iter(|| {
-                start_sig.set(2);
-                black_box(end_sig.get())
-            });
-        },
-    );
-    // if end_sig.get() != 1001 {
-    //     panic!("end_sig.get() {}", end_sig.get());
-    // }
+    (scope, start_sig, end_sig)
+}
 
+fn create_1000_siblings() -> (Scope, Signal<usize>, Signal<usize>) {
     let scope = Scope::bench_root();
-    let start_sig = create_data_signal(scope, 0u32);
+    let start_sig = create_data_signal(scope, 0usize);
     let mut next_sig = create_func_signal(scope, move || start_sig.get() + 1);
     next_sig.subscribe(start_sig);
 
@@ -41,13 +32,38 @@ pub fn signal_propagation(c: &mut Criterion) {
     });
 
     let end_sig = next_sig;
+    (scope, start_sig, end_sig)
+}
+
+pub fn signal_propagation(c: &mut Criterion) {
+    c.bench_function(
+        "Propagate a change through 1000 signals, each in a nested scope",
+        |b| {
+            b.iter_batched(
+                create_1000_nested,
+                |(_scope, start_sig, end_sig)| {
+                    start_sig.set(2);
+                    black_box(end_sig.get())
+                },
+                BatchSize::SmallInput,
+            );
+        },
+    );
+    // if end_sig.get() != 1001 {
+    //     panic!("end_sig.get() {}", end_sig.get());
+    // }
+
     c.bench_function(
         "Propagate a change through 1000 signals, each in a sibling scope",
         |b| {
-            b.iter(|| {
-                start_sig.set(2);
-                black_box(end_sig.get())
-            });
+            b.iter_batched(
+                create_1000_siblings,
+                |(_scope, start_sig, end_sig)| {
+                    start_sig.set(2);
+                    black_box(end_sig.get())
+                },
+                BatchSize::SmallInput,
+            );
         },
     );
 
