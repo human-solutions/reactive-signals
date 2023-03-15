@@ -1,5 +1,5 @@
 use crate::{
-    iter::{ChildVecResolver, VecTreeIter},
+    iter::{NodeResolver, VecTreeIter},
     runtime_inner::RuntimeInner,
     signal_id::SignalId,
 };
@@ -10,7 +10,7 @@ pub(crate) fn propagate_change(rt: &RuntimeInner, sig: SignalId) {
 
     while let Some(next) = iter.next() {
         // println!("upd: {next:?}");
-        if !tree.child_vec(next).run(rt, next) {
+        if !tree.node(next).run(rt, next) {
             iter.skip_children();
         }
     }

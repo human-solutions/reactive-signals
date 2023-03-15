@@ -8,6 +8,6 @@ mod vec_tree_iter;
 
 pub(crate) use id_vec::{IdVec, IdVecIter};
 pub(crate) use ref_vec_elem::RefVecElem;
-pub(crate) use vec_tree_iter::{ChildVecResolver, VecTreeIter};
+pub(crate) use vec_tree_iter::{NodeResolver, VecTreeIter};
 
 const DEBUG: bool = false;

@@ -3,15 +3,15 @@ use std::{fmt::Debug, mem};
 use super::DEBUG;
 use crate::iter::{IdVec, IdVecIter};
 
-pub(crate) trait ChildVecResolver<'a> {
+pub(crate) trait NodeResolver<'a> {
     type Id;
     type Elem;
-    fn child_vec(&'a self, id: Self::Id) -> Self::Elem;
+    fn node(&'a self, id: Self::Id) -> Self::Elem;
 }
 
 pub(crate) struct VecTreeIter<'a, R>
 where
-    R: ChildVecResolver<'a>,
+    R: NodeResolver<'a>,
     R::Elem: IdVec<Output = R::Id>,
 {
     resolver: &'a R,
@@ -23,12 +23,12 @@ where
 
 impl<'a, R> VecTreeIter<'a, R>
 where
-    R: ChildVecResolver<'a>,
+    R: NodeResolver<'a>,
     R::Elem: IdVec<Output = R::Id>,
     R::Id: Debug + Copy,
 {
     pub(crate) fn new(tree: &'a R, id: R::Id) -> Self {
-        let iter = IdVecIter::new(tree.child_vec(id));
+        let iter = IdVecIter::new(tree.node(id));
         Self {
             resolver: tree,
             parents: Vec::new(),
@@ -39,7 +39,7 @@ where
 
     fn next_and_queue_child(&mut self) -> Option<R::Id> {
         if let Some(next) = self.iter.next() {
-            let children = self.resolver.child_vec(next);
+            let children = self.resolver.node(next);
             if !children.is_empty() {
                 self.queued_children = Some(IdVecIter::new(children));
                 DEBUG.then(|| println!("Queued children for [next:?]"));
@@ -57,7 +57,7 @@ where
 
 impl<'a, R> Iterator for VecTreeIter<'a, R>
 where
-    R: ChildVecResolver<'a>,
+    R: NodeResolver<'a>,
     R::Elem: IdVec<Output = R::Id>,
     R::Id: Debug + Copy,
 {

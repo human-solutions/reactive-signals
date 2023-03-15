@@ -1,12 +1,12 @@
 use insta::assert_snapshot;
 
-use super::{ChildVecResolver, IdVec, VecTreeIter};
+use super::{IdVec, NodeResolver, VecTreeIter};
 
-impl<'a> ChildVecResolver<'a> for Vec<Vec<usize>> {
+impl<'a> NodeResolver<'a> for Vec<Vec<usize>> {
     type Elem = &'a [usize];
     type Id = usize;
 
-    fn child_vec(&'a self, id: Self::Id) -> Self::Elem {
+    fn node(&'a self, id: Self::Id) -> Self::Elem {
         &self[id]
     }
 }

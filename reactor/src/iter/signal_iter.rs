@@ -6,7 +6,7 @@ use crate::{
 };
 use arena_link_tree::Tree;
 
-use super::ChildVecResolver;
+use super::NodeResolver;
 
 impl<'a> IdVec for RefVecElem<'a, SignalInner> {
     type Output = SignalId;
@@ -24,10 +24,10 @@ impl<'a> IdVec for RefVecElem<'a, SignalInner> {
     }
 }
 
-impl<'a> ChildVecResolver<'a> for Tree<ScopeInner> {
+impl<'a> NodeResolver<'a> for Tree<ScopeInner> {
     type Id = SignalId;
     type Elem = RefVecElem<'a, SignalInner>;
-    fn child_vec(&'a self, id: SignalId) -> Self::Elem {
+    fn node(&'a self, id: SignalId) -> Self::Elem {
         RefVecElem::new(self[id.sx].signals.borrow(), id.id.usize())
     }
 }
