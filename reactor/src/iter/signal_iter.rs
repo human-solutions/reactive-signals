@@ -12,7 +12,7 @@ impl<'a> IdVec for RefVecElem<'a, SignalInner> {
     type Output = SignalId;
 
     fn get(&self, idx: usize) -> Self::Output {
-        self.listeners[idx]
+        self.listeners.get(idx)
     }
 
     fn len(&self) -> usize {

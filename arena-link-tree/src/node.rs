@@ -1,6 +1,6 @@
 use std::{fmt, num::NonZeroU16};
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct NodeId(NonZeroU16);
 
 impl From<usize> for NodeId {

@@ -2,7 +2,7 @@ use arena_link_tree::NodeId;
 
 use crate::{primitives::u15Bool, runtime_inner::RuntimeInner, scope::Scope, Runtime};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SignalId {
     pub(crate) id: u15Bool,
     pub(crate) sx: NodeId,

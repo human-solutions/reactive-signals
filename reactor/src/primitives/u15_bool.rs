@@ -3,7 +3,7 @@
 use std::num::NonZeroU16;
 
 #[allow(non_camel_case_types)]
-#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+#[derive(Copy, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct u15Bool(NonZeroU16);
 
 const LAST_BIT_ONLY: u16 = 0b0000_0000_0000_0001;

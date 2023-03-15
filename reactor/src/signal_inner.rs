@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use crate::{
-    primitives::{AnyData, DynFunc},
+    primitives::{AnyData, DynFunc, SortedVec},
     signal_id::SignalId,
 };
 
@@ -15,7 +15,7 @@ pub enum SignalValue {
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct SignalInner {
     pub(crate) value: SignalValue,
-    pub(crate) listeners: Vec<SignalId>,
+    pub(crate) listeners: SortedVec<SignalId>,
 }
 
 impl SignalInner {

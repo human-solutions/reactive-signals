@@ -1,6 +1,6 @@
 use crate::runtime_inner::{RuntimeInner, RUNTIMES};
 
-#[derive(Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct Runtime(pub(crate) u32);
 

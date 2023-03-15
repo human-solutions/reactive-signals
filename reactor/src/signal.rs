@@ -33,7 +33,7 @@ where
     }
 
     pub(crate) fn subscribe_rt<S>(&self, sig: Signal<S>, rt: &mut RuntimeInner) {
-        rt[sig.id].with_signal_mut(sig.id, |signal| signal.listeners.push(self.id));
+        rt[sig.id].with_signal(sig.id, |signal| signal.listeners.insert(self.id));
     }
 
     pub fn get(&self) -> T {
@@ -59,7 +59,7 @@ pub fn create_data_signal<T: 'static>(sx: Scope, value: T) -> Signal<T> {
         let scope = &rt.scope_tree[sx.sx];
         let signal = SignalInner {
             value: SignalValue::Data(AnyData::new(value)),
-            listeners: Vec::default(),
+            listeners: Default::default(),
         };
         scope.insert_signal(sx, signal)
     });
@@ -78,7 +78,7 @@ where
     // We need to keep this out of the rt so there's no mut ref.
     let signal = SignalInner {
         value: SignalValue::Func(DynFunc::new(func)),
-        listeners: Vec::default(),
+        listeners: Default::default(),
     };
     let id = sx.rt.with_mut(|rt| {
         let scope = &rt.scope_tree[sx.sx];
@@ -99,7 +99,7 @@ where
     // We need to keep this out of the rt so there's no mut ref.
     let signal = SignalInner {
         value: crate::signal_inner::SignalValue::Func(DynFunc::new_eq(func)),
-        listeners: Vec::default(),
+        listeners: Default::default(),
     };
     let id = sx.rt.with_mut(|rt| {
         let scope = &rt.scope_tree[sx.sx];
