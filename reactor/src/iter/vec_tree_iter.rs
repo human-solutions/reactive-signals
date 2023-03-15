@@ -49,6 +49,10 @@ where
             None
         }
     }
+
+    pub(crate) fn skip_children(&mut self) {
+        self.queued_children = None;
+    }
 }
 
 impl<'a, R> Iterator for VecTreeIter<'a, R>

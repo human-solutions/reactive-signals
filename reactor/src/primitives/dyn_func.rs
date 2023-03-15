@@ -31,7 +31,6 @@ impl DynFunc {
         Self { func, value: val }
     }
 
-    #[allow(dead_code)]
     pub fn new_eq<F, T>(func: F) -> Self
     where
         F: Fn() -> T + 'static,

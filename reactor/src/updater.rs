@@ -11,7 +11,10 @@ pub(crate) fn propagate_change(rt: &RuntimeInner, sig: SignalId) {
 
     while let Some(next) = iter.next() {
         if let SignalValue::Func(func) = &tree.child_vec(next).value {
-            func.run();
+            let changed = func.run();
+            if !changed {
+                iter.skip_children();
+            }
         }
     }
 }

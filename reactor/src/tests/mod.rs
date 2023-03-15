@@ -2,6 +2,7 @@ use std::cell::RefCell;
 
 mod scope_test;
 mod signal_test;
+mod size_test;
 
 struct StringStore(RefCell<Vec<String>>);
 

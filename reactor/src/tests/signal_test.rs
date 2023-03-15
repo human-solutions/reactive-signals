@@ -1,6 +1,8 @@
-use std::{mem, num::NonZeroU16, rc::Rc};
+use std::{cell::Cell, rc::Rc};
 
-use crate::{create_data_signal, create_func_signal, scope::Scope, tests::StringStore, Signal};
+use crate::{
+    create_data_signal, create_func_signal, create_func_signal_eq, scope::Scope, tests::StringStore,
+};
 
 #[test]
 fn test_signal_dep() {
@@ -48,90 +50,67 @@ fn test_signal_func_val() {
 }
 
 #[test]
-fn test_sizes() {
-    assert_eq!(8, mem::size_of::<Signal<String>>());
-    assert_eq!(8, mem::size_of::<Signal<usize>>());
+fn test_signal_func_skip_equal() {
+    let cx = Scope::new_root();
+
+    let num_sig = create_data_signal(cx, 10);
+
+    let a_call = Rc::new(Cell::new(0usize));
+    let a_sig = {
+        let a_call = a_call.clone();
+        create_func_signal_eq(cx, move || {
+            a_call.inc();
+            num_sig.get() + 1
+        })
+    };
+
+    let b_call = Rc::new(Cell::new(0usize));
+    let b_sig = {
+        let b_call = b_call.clone();
+        create_func_signal_eq(cx, move || {
+            b_call.inc();
+            100
+        })
+    };
+
+    let c_call = Rc::new(Cell::new(0usize));
+    let c_sig = {
+        let c_call = c_call.clone();
+        create_func_signal_eq(cx, move || {
+            c_call.inc();
+            b_sig.get() + 1
+        })
+    };
+    a_sig.subscribe(num_sig);
+    b_sig.subscribe(a_sig);
+    c_sig.subscribe(b_sig);
+
+    assert_eq!(a_sig.get(), 11);
+    assert_eq!(b_sig.get(), 100);
+    assert_eq!(c_sig.get(), 101);
+
+    assert_eq!(a_call.get(), 1);
+    assert_eq!(b_call.get(), 1);
+    assert_eq!(c_call.get(), 1);
+
+    num_sig.set(20);
+
+    assert_eq!(a_sig.get(), 21);
+    assert_eq!(b_sig.get(), 100);
+    assert_eq!(c_sig.get(), 101);
+
+    assert_eq!(a_call.get(), 2);
+    assert_eq!(b_call.get(), 2);
+    assert_eq!(c_call.get(), 1);
 }
 
-#[allow(dead_code, non_camel_case_types)]
-#[test]
-fn test_subscriber_size() {
-    use crate::signal_id::SignalId;
-    use std::mem::size_of;
-
-    // vec: a pointer, size and capacity
-    assert_eq!(size_of::<Vec<SignalId>>(), 24);
-    assert_eq!(size_of::<[(u16, u16); 1]>(), 4);
-
-    enum Store_u15_NoRT_big {
-        // uses more space if the NonZeroU16 is replaced with an ordinary u16
-        Arr([(u16, NonZeroU16); 8]),
-        Vec(Vec<(u16, u16)>),
-    }
-    assert_eq!(size_of::<Store_u15_NoRT_big>(), 32);
-
-    enum Store_u15_NoRT_small {
-        Arr([(u16, u16); 2]),
-        Vec(Vec<(u16, u16)>),
-    }
-    assert_eq!(size_of::<Store_u15_NoRT_small>(), 24);
-
-    // u15 NoRT
-    // When arr has 2 elements, then the enum size 24, the same as for a vec.
-    // When the arr has 3-8 element the size jumps to 32 bytes
-
-    enum Store_u15_RT_big {
-        Arr([(u16, u16, u16); 5]),
-        Vec(Vec<(u16, u16, u16)>),
-    }
-    assert_eq!(size_of::<Store_u15_RT_big>(), 32);
-
-    enum Store_u15_RT_small {
-        Arr([(u16, u16, u16); 1]),
-        Vec(Vec<(u16, u16, u16)>),
-    }
-    assert_eq!(size_of::<Store_u15_RT_small>(), 24);
+trait CellIncr {
+    fn inc(&self);
 }
 
-// Copy-paste into wasm and run
-
-// use std::mem::size_of;
-// use std::num::NonZeroU16;
-
-// // vec: a pointer, size and capacity: 12 bytes
-// log!("Vec<SignalId>: {}", size_of::<Vec<SignalId>>());
-// // 4 bytes
-// log!("[(u16, u16); 1]: {}", size_of::<[(u16, u16); 1]>());
-
-// enum Store_u15_NoRT_big {
-//     // uses more space if the NonZeroU16 is replaced with an ordinary u16
-//     Arr([(u16, NonZeroU16); 4]),
-//     Vec(Vec<(u16, u16)>),
-// }
-// log!("Store_u15_NoRT_big: {}", size_of::<Store_u15_NoRT_big>());
-
-// enum Store_u15_NoRT_small {
-//     Arr([(u16, u16); 1]),
-//     Vec(Vec<(u16, u16)>),
-// }
-// log!("Store_u15_NoRT_small: {}", size_of::<Store_u15_NoRT_small>());
-
-// // u15 NoRT
-// // When arr has 1 elements, then the enum size 12, the same as for a vec.
-// // When the arr has 2-4 element the size jumps to 16 bytes
-
-// enum Store_u15_RT_big {
-//     Arr([(u16, u16, u16); 3]),
-//     Vec(Vec<(u16, u16, u16)>),
-// }
-// log!("Store_u15_RT_big: {}", size_of::<Store_u15_RT_big>());
-
-// enum Store_u15_RT_small {
-//     Arr([(u16, u16, u16); 2]),
-//     Vec(Vec<(u16, u16, u16)>),
-// }
-// log!("Store_u15_RT_small: {}", size_of::<Store_u15_RT_small>());
-
-// // u15 RT
-// // When arr has 1-2 elements, then the enum size is 16
-// // for higher counts it grows with 4 bytes per
+impl CellIncr for Cell<usize> {
+    fn inc(&self) {
+        let val = self.get();
+        self.set(val + 1)
+    }
+}

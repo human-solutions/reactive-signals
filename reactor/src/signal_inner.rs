@@ -19,24 +19,6 @@ pub struct SignalInner {
 }
 
 impl SignalInner {
-    pub(crate) fn new_data<T: 'static>(value: T) -> Self {
-        Self {
-            value: SignalValue::Data(AnyData::new(value)),
-            listeners: Vec::default(),
-        }
-    }
-
-    pub(crate) fn new_func<F, T>(func: F) -> Self
-    where
-        F: Fn() -> T + 'static,
-        T: 'static,
-    {
-        Self {
-            value: SignalValue::Func(DynFunc::new(func)),
-            listeners: Vec::default(),
-        }
-    }
-
     fn value(&self) -> &AnyData {
         match self.value {
             SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => value,
@@ -63,11 +45,4 @@ impl SignalInner {
             self.value = SignalValue::Reuse;
         }
     }
-}
-
-#[test]
-fn size_of_ref_cell_box() {
-    use std::cell::RefCell;
-    assert_eq!(std::mem::size_of::<RefCell<Box<usize>>>(), 16);
-    assert_eq!(std::mem::size_of::<Box<usize>>(), 8);
 }

@@ -1,7 +1,11 @@
 use std::{fmt::Debug, marker::PhantomData};
 
 use crate::{
-    runtime_inner::RuntimeInner, scope::Scope, signal_id::SignalId, signal_inner::SignalInner,
+    primitives::{AnyData, DynFunc},
+    runtime_inner::RuntimeInner,
+    scope::Scope,
+    signal_id::SignalId,
+    signal_inner::{SignalInner, SignalValue},
     updater::propagate_change,
 };
 
@@ -53,7 +57,11 @@ where
 pub fn create_data_signal<T: 'static>(sx: Scope, value: T) -> Signal<T> {
     let id = sx.rt.with_mut(|rt| {
         let scope = &rt.scope_tree[sx.sx];
-        scope.insert_signal(sx, SignalInner::new_data(value))
+        let signal = SignalInner {
+            value: SignalValue::Data(AnyData::new(value)),
+            listeners: Vec::default(),
+        };
+        scope.insert_signal(sx, signal)
     });
     Signal {
         id,
@@ -68,7 +76,31 @@ where
 {
     // When creating a signal it also runs once to get the initial value
     // We need to keep this out of the rt so there's no mut ref.
-    let signal = SignalInner::new_func(func);
+    let signal = SignalInner {
+        value: SignalValue::Func(DynFunc::new(func)),
+        listeners: Vec::default(),
+    };
+    let id = sx.rt.with_mut(|rt| {
+        let scope = &rt.scope_tree[sx.sx];
+        scope.insert_signal(sx, signal)
+    });
+    Signal {
+        id,
+        ty: PhantomData,
+    }
+}
+
+pub fn create_func_signal_eq<F, T>(sx: Scope, func: F) -> Signal<T>
+where
+    F: Fn() -> T + 'static,
+    T: PartialEq + 'static,
+{
+    // When creating a signal it also runs once to get the initial value
+    // We need to keep this out of the rt so there's no mut ref.
+    let signal = SignalInner {
+        value: crate::signal_inner::SignalValue::Func(DynFunc::new_eq(func)),
+        listeners: Vec::default(),
+    };
     let id = sx.rt.with_mut(|rt| {
         let scope = &rt.scope_tree[sx.sx];
         scope.insert_signal(sx, signal)
