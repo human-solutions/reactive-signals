@@ -28,23 +28,24 @@ impl<T> Signal<T>
 where
     T: Clone + Debug + 'static,
 {
-    pub fn subscribe<S>(&self, sig: Signal<S>) {
-        self.id.rt_mut(|rt| self.subscribe_rt(sig, rt));
-    }
-
-    pub(crate) fn subscribe_rt<S>(&self, sig: Signal<S>, rt: &mut RuntimeInner) {
-        rt[sig.id].with_signal(sig.id, |signal| signal.listeners.insert(self.id));
-    }
-
     pub fn get(&self) -> T {
-        self.id.rt_ref(|rt| self.get_rt(rt))
-    }
+        let val = self.id.rt_ref(|rt| {
+            if let Some(listener) = rt.get_running_signal() {
+                rt[self.id].with_signal(self.id, |signal| {
+                    signal.listeners.insert(listener);
+                    signal.get()
+                })
+            } else {
+                rt[self.id].with_signal(self.id, |signal| signal.get())
+            }
+        });
+        // println!("got: {:?} - {val:?}", self.id);
 
-    pub(crate) fn get_rt(&self, rt: &RuntimeInner) -> T {
-        rt[self.id].with_signal(self.id, |sig| sig.get())
+        val
     }
 
     pub fn set(&self, val: T) {
+        // println!("set: {:?} - {val:?}", self.id);
         self.id.rt_ref(|rt| self.set_rt(val, rt));
     }
 
@@ -55,13 +56,15 @@ where
 }
 
 pub fn create_data_signal<T: 'static>(sx: Scope, value: T) -> Signal<T> {
-    let id = sx.rt.with_mut(|rt| {
+    let id = sx.rt.with_ref(|rt| {
         let scope = &rt.scope_tree[sx.sx];
+        let id = scope.next_signal_id(sx);
         let signal = SignalInner {
             value: SignalValue::Data(AnyData::new(value)),
             listeners: Default::default(),
         };
-        scope.insert_signal(sx, signal)
+        scope.insert_signal(signal);
+        id
     });
     Signal {
         id,
@@ -74,15 +77,18 @@ where
     F: Fn() -> T + 'static,
     T: 'static,
 {
-    // When creating a signal it also runs once to get the initial value
-    // We need to keep this out of the rt so there's no mut ref.
-    let signal = SignalInner {
-        value: SignalValue::Func(DynFunc::new(func)),
-        listeners: Default::default(),
-    };
-    let id = sx.rt.with_mut(|rt| {
+    let id = sx.rt.with_ref(|rt| {
         let scope = &rt.scope_tree[sx.sx];
-        scope.insert_signal(sx, signal)
+        let id = scope.next_signal_id(sx);
+
+        let previous = rt.set_running_signal(Some(id));
+        let signal = SignalInner {
+            value: SignalValue::Func(DynFunc::new(func)),
+            listeners: Default::default(),
+        };
+        rt.set_running_signal(previous);
+        scope.insert_signal(signal);
+        id
     });
     Signal {
         id,
@@ -95,15 +101,19 @@ where
     F: Fn() -> T + 'static,
     T: PartialEq + 'static,
 {
-    // When creating a signal it also runs once to get the initial value
-    // We need to keep this out of the rt so there's no mut ref.
-    let signal = SignalInner {
-        value: crate::signal_inner::SignalValue::Func(DynFunc::new_eq(func)),
-        listeners: Default::default(),
-    };
-    let id = sx.rt.with_mut(|rt| {
+    let id = sx.rt.with_ref(|rt| {
         let scope = &rt.scope_tree[sx.sx];
-        scope.insert_signal(sx, signal)
+        let id = scope.next_signal_id(sx);
+
+        let previous = rt.set_running_signal(Some(id));
+        let signal = SignalInner {
+            value: crate::signal_inner::SignalValue::Func(DynFunc::new_eq(func)),
+            listeners: Default::default(),
+        };
+        rt.set_running_signal(previous);
+
+        scope.insert_signal(signal);
+        id
     });
     Signal {
         id,

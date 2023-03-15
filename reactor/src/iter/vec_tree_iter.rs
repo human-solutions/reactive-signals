@@ -51,7 +51,7 @@ where
     }
 
     pub(crate) fn skip_children(&mut self) {
-        self.queued_children = None;
+        self.queued_children = None
     }
 }
 

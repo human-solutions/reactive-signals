@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use crate::{
     primitives::{AnyData, DynFunc, SortedVec},
+    runtime_inner::RuntimeInner,
     signal_id::SignalId,
 };
 
@@ -36,6 +37,19 @@ impl SignalInner {
                 *value = AnyData::new(new_value)
             }
             SignalValue::Reuse => panic!("BUG: using a reused signal"),
+        }
+    }
+
+    pub(crate) fn run(&self, rt: &RuntimeInner, id: SignalId) -> bool {
+        if let SignalValue::Func(func) = &self.value {
+            let previous = rt.set_running_signal(Some(id));
+            let changed = func.run();
+            // println!("run: {id:?}");
+            rt.set_running_signal(previous);
+            changed
+        } else {
+            // println!("NOT: {id:?}");
+            false
         }
     }
 

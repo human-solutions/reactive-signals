@@ -13,10 +13,9 @@ fn test_signal_dep() {
     let output = Rc::new(StringStore::new());
     let out = output.clone();
 
-    let str_sig = create_func_signal(cx, move || out.push(format!("val: {}", num_sig.get())));
+    let _str_sig = create_func_signal(cx, move || out.push(format!("val: {}", num_sig.get())));
 
-    str_sig.subscribe(num_sig);
-
+    assert_eq!(output.values(), "val: 5");
     num_sig.set(4);
 
     assert_eq!(output.values(), "val: 5, val: 4");
@@ -33,16 +32,10 @@ fn test_signal_func_val() {
     let a_sig = create_func_signal(cx, move || format!("a{}", num_sig.get()));
     let b_sig = create_func_signal(cx, move || format!("b{}", num_sig.get()));
 
-    a_sig.subscribe(num_sig);
-    b_sig.subscribe(num_sig);
-
     let out = output.clone();
-    let str_sig = create_func_signal(cx, move || {
+    let _str_sig = create_func_signal(cx, move || {
         out.push(format!("{}-{}", a_sig.get(), b_sig.get()))
     });
-
-    str_sig.subscribe(a_sig);
-    str_sig.subscribe(b_sig);
 
     num_sig.set(4);
 
@@ -81,9 +74,6 @@ fn test_signal_func_skip_equal() {
             b_sig.get() + 1
         })
     };
-    a_sig.subscribe(num_sig);
-    b_sig.subscribe(a_sig);
-    c_sig.subscribe(b_sig);
 
     assert_eq!(a_sig.get(), 11);
     assert_eq!(b_sig.get(), 100);
@@ -100,7 +90,7 @@ fn test_signal_func_skip_equal() {
     assert_eq!(c_sig.get(), 101);
 
     assert_eq!(a_call.get(), 2);
-    assert_eq!(b_call.get(), 2);
+    assert_eq!(b_call.get(), 1);
     assert_eq!(c_call.get(), 1);
 }
 

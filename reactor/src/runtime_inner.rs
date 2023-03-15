@@ -1,5 +1,5 @@
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     ops::{Index, IndexMut},
 };
 
@@ -50,6 +50,7 @@ impl RuntimePool {
 pub(crate) struct RuntimeInner {
     pub(crate) id: Runtime,
     pub(crate) scope_tree: Tree<ScopeInner>,
+    running_signal: Cell<Option<SignalId>>,
 }
 
 impl RuntimeInner {
@@ -57,6 +58,7 @@ impl RuntimeInner {
         Self {
             id,
             scope_tree: Tree::create(),
+            running_signal: Cell::new(None),
         }
     }
 
@@ -69,6 +71,16 @@ impl RuntimeInner {
             // also sets the tree to not initialized
             self.scope_tree.discard_all();
         }
+    }
+
+    pub(crate) fn get_running_signal(&self) -> Option<SignalId> {
+        self.running_signal.get()
+    }
+
+    pub(crate) fn set_running_signal(&self, signal: Option<SignalId>) -> Option<SignalId> {
+        let previous = self.running_signal.take();
+        self.running_signal.set(signal);
+        previous
     }
 }
 

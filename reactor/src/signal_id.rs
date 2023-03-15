@@ -29,14 +29,6 @@ impl SignalId {
     {
         self.rt.with_ref(f)
     }
-
-    #[inline]
-    pub(crate) fn rt_mut<F, T>(&self, f: F) -> T
-    where
-        F: FnOnce(&mut RuntimeInner) -> T,
-    {
-        self.rt.with_mut(f)
-    }
 }
 
 impl std::fmt::Debug for SignalId {

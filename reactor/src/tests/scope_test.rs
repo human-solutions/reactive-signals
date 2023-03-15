@@ -13,9 +13,7 @@ fn test_scopes_deep() {
 
     let output = Rc::new(StringStore::new());
     let out = output.clone();
-    let str_sig = create_func_signal(cx, move || out.push(format!("val: {}", num_sig.get())));
-
-    str_sig.subscribe(num_sig);
+    let _str_sig = create_func_signal(cx, move || out.push(format!("val: {}", num_sig.get())));
 
     num_sig.set(4);
 
@@ -35,9 +33,7 @@ fn test_scopes_discard() {
 
     let output = Rc::new(StringStore::new());
     let out = output.clone();
-    let str_sig = create_func_signal(cx3, move || out.push(format!("val: {}", num_sig.get())));
-
-    str_sig.subscribe(num_sig);
+    let _str_sig = create_func_signal(cx3, move || out.push(format!("val: {}", num_sig.get())));
 
     num_sig.set(4);
 
