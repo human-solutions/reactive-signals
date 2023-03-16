@@ -28,6 +28,6 @@ impl<'a> NodeResolver<'a> for Tree<ScopeInner> {
     type Id = SignalId;
     type Elem = RefVecElem<'a, SignalInner>;
     fn node(&'a self, id: SignalId) -> Self::Elem {
-        RefVecElem::new(self[id.sx].signals.borrow(), id.id.usize())
+        RefVecElem::new(self[id.sx].signals.borrow(), id.id.as_usize())
     }
 }

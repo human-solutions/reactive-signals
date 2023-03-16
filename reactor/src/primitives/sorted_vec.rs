@@ -18,10 +18,7 @@ impl<T: Ord + Copy> SortedVec<T> {
     }
 
     pub(crate) fn retain<F: FnMut(&T) -> bool>(&self, f: F) {
-        let mut vec = self.0.borrow_mut();
-        vec.retain(f);
-        // TODO might leave the vec in un-ordered state
-        // check that it is still ordered
+        self.0.borrow_mut().retain(f);
     }
 
     pub(crate) fn len(&self) -> usize {
@@ -41,4 +38,50 @@ impl<T: Ord> Default for SortedVec<T> {
     fn default() -> Self {
         Self(RefCell::new(Vec::new()))
     }
+}
+
+#[test]
+fn test_retain() {
+    use crate::{primitives::u15Bool, signal_id::SignalId, Runtime};
+    use arena_link_tree::NodeId;
+
+    let sig1_scope1 = SignalId {
+        id: u15Bool::new(1, false),
+        sx: NodeId::from(1),
+        rt: Runtime::from(4),
+    };
+
+    let sig2_scope1 = SignalId {
+        id: u15Bool::new(2, false),
+        sx: NodeId::from(1),
+        rt: Runtime::from(4),
+    };
+
+    let sig1_scope2 = SignalId {
+        id: u15Bool::new(1, false),
+        sx: NodeId::from(2),
+        rt: Runtime::from(4),
+    };
+
+    let sig2_scope2 = SignalId {
+        id: u15Bool::new(2, false),
+        sx: NodeId::from(2),
+        rt: Runtime::from(4),
+    };
+
+    let vec = SortedVec::default();
+    vec.insert(sig2_scope1);
+    vec.insert(sig1_scope2);
+    vec.insert(sig1_scope1);
+    vec.insert(sig2_scope2);
+
+    assert_eq!(vec.get(0), sig1_scope1);
+    assert_eq!(vec.get(1), sig2_scope1);
+    assert_eq!(vec.get(2), sig1_scope2);
+    assert_eq!(vec.get(3), sig2_scope2);
+
+    vec.retain(|id| id.sx != NodeId::from(1));
+
+    assert_eq!(vec.get(0), sig1_scope2);
+    assert_eq!(vec.get(1), sig2_scope2);
 }
