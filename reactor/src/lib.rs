@@ -1,6 +1,9 @@
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "profile")]
+pub mod profile;
+
 mod iter;
 mod primitives;
 mod runtime;

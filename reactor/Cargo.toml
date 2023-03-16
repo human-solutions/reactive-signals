@@ -7,35 +7,42 @@ edition = "2021"
 [features]
 default = ["extra-traits"]
 extra-traits = []
-flamegraph = ["inferno"]
+profile = ["dep:pprof", "dep:criterion"]
 
 [dependencies]
 arena-link-tree = { path = "../arena-link-tree" }
 bitvec = "1.0"
 
-# Optional: used only when running example through Criterion & pprof
-criterion = { version = "0.4", optional = true }
-inferno = { version = "0.11", default-features = false, features = [
-  "nameattr",
+# Optional: used only when benchmarking and running profiling examples
+criterion = { version = "0.4", features = ["html_reports"], optional = true }
+pprof = { version = "0.11", features = [
+  "flamegraph",
+  "frame-pointer",
+  "criterion",
 ], optional = true }
 
 [dev-dependencies]
-criterion = { version = "0.4", features = ["html_reports"] }
-pprof = { version = "0.11", features = ["flamegraph", "criterion"] }
 insta = "1.28"
 
 [[bench]]
 name = "create_scopes"
 harness = false
+required-features = ["profile"]
 
 [[bench]]
 name = "signal_propagation"
 harness = false
+required-features = ["profile"]
 
 [[bench]]
 name = "discard_scopes"
 harness = false
+required-features = ["profile"]
 
 [[example]]
-name = "propagation_perf"
-required-features = ["flamegraph", "criterion"]
+name = "propagation_flamegraph"
+required-features = ["profile"]
+
+[[example]]
+name = "creation_flamegraph"
+required-features = ["profile"]

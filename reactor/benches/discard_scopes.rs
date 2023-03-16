@@ -1,20 +1,10 @@
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
-use reactor::{create_data_signal, create_func_signal, Scope};
 
 pub fn discard_scopes_with_signals(c: &mut Criterion) {
     c.bench_function("Discard 1,000 nested scopes with 1 func signal each", |b| {
         b.iter_batched(
-            || {
-                let base = Scope::bench_root().new_child();
-                let mut scope = base;
-                let sig = create_data_signal(scope, 0u32);
-                (0..1000).for_each(|_| {
-                    scope = scope.new_child();
-                    create_func_signal(scope, move || sig.get() + 1);
-                });
-                base
-            },
-            |base| base.discard(),
+            reactor::profile::create_1000_nested,
+            |(scope, _start, _end)| scope.discard(),
             BatchSize::SmallInput,
         );
     });
@@ -23,17 +13,8 @@ pub fn discard_scopes_with_signals(c: &mut Criterion) {
         "Discard 1,000 sibling scopes with 1 func signal each",
         |b| {
             b.iter_batched(
-                || {
-                    let root = Scope::bench_root();
-                    let scope = root.new_child();
-                    let sig = create_data_signal(root, 0u32);
-                    (0..1000).for_each(|_| {
-                        let sx = scope.new_child();
-                        create_func_signal(sx, move || sig.get() + 1);
-                    });
-                    scope
-                },
-                |scope| scope.discard(),
+                reactor::profile::create_1000_nested,
+                |(scope, _, _)| scope.discard(),
                 BatchSize::SmallInput,
             );
         },

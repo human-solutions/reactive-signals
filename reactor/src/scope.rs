@@ -11,6 +11,7 @@ pub struct Scope {
 
 impl Scope {
     #[allow(unused)]
+    #[cfg(feature = "profile")]
     pub fn bench_root() -> Self {
         RUNTIMES.with(|pool| pool.bench_clean_all());
         Self::new_root()

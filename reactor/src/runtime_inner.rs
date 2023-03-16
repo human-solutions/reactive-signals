@@ -39,10 +39,9 @@ impl RuntimePool {
         rt.discard();
     }
 
+    #[cfg(feature = "profile")]
     pub(crate) fn bench_clean_all(&self) {
-        let mut vec = self.0.borrow_mut();
-        vec.iter_mut().for_each(|rt| rt.discard());
-        vec.clear();
+        self.0.borrow_mut().clear();
     }
 }
 
