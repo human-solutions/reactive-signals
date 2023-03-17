@@ -1,16 +1,16 @@
-use crate::{create_data_signal, create_func_signal, Scope, Signal};
+use crate::{Scope, Signal};
 
 pub fn create_1000_nested() -> (Scope, Signal<usize>, Signal<usize>) {
     let mut scope = Scope::bench_root();
 
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
-    let start_sig = create_data_signal(scope, 0usize);
-    let mut next_sig = create_func_signal(scope, move || start_sig.get() + 1);
+    let start_sig = Signal::new_data(scope, 0usize);
+    let mut next_sig = Signal::new_func(scope, move || start_sig.get() + 1);
 
     (0..1000).for_each(|_| {
         scope = scope.new_child();
-        let sig = create_func_signal(scope, move || next_sig.get() + 1);
+        let sig = Signal::new_func(scope, move || next_sig.get() + 1);
         next_sig = sig;
     });
 
@@ -22,12 +22,12 @@ pub fn create_1000_siblings() -> (Scope, Signal<usize>, Signal<usize>) {
     let scope = Scope::bench_root();
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
-    let start_sig = create_data_signal(scope, 0usize);
-    let mut next_sig = create_func_signal(scope, move || start_sig.get() + 1);
+    let start_sig = Signal::new_data(scope, 0usize);
+    let mut next_sig = Signal::new_func(scope, move || start_sig.get() + 1);
 
     (0..1000).for_each(|_| {
         let sx = scope.new_child();
-        let sig = create_func_signal(sx, move || next_sig.get() + 1);
+        let sig = Signal::new_func(sx, move || next_sig.get() + 1);
         next_sig = sig;
     });
 

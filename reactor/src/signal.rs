@@ -1,8 +1,7 @@
-use std::{fmt::Debug, marker::PhantomData};
+use std::marker::PhantomData;
 
 use crate::{
     primitives::{AnyData, DynFunc},
-    runtime_inner::RuntimeInner,
     scope::Scope,
     signal_id::SignalId,
     signal_inner::{SignalInner, SignalValue},
@@ -12,9 +11,6 @@ use crate::{
 pub struct Signal<T> {
     id: SignalId,
     ty: PhantomData<T>,
-    #[cfg(test)]
-    /// to determine if the signal is an implementation of PartialEq
-    pub eq: bool,
 }
 
 impl<T> Clone for Signal<T> {
@@ -22,19 +18,69 @@ impl<T> Clone for Signal<T> {
         Self {
             id: self.id,
             ty: self.ty,
-            #[cfg(test)]
-            eq: self.eq,
         }
     }
 }
 impl<T> Copy for Signal<T> {}
 
-impl<T> Signal<T>
-where
-    T: Clone + Debug + 'static,
-{
+impl<T: 'static> Signal<T> {
+    fn data(sx: Scope, data: AnyData) -> Signal<T> {
+        let id = sx.rt.with_ref(|rt| {
+            let scope = &rt.scope_tree[sx.sx];
+            let id = scope.next_signal_id(sx);
+            let signal = SignalInner {
+                value: SignalValue::Data(data),
+                listeners: Default::default(),
+            };
+            scope.insert_signal(signal);
+            id
+        });
+        Signal {
+            id,
+            ty: PhantomData,
+        }
+    }
+
+    #[inline]
+    pub(crate) fn new_data(sx: Scope, data: T) -> Signal<T> {
+        Self::data(sx, AnyData::new(data))
+    }
+
+    fn func(sx: Scope, func: impl FnOnce() -> DynFunc) -> Signal<T> {
+        let id = sx.rt.with_ref(|rt| {
+            let scope = &rt.scope_tree[sx.sx];
+            let id = scope.next_signal_id(sx);
+
+            let previous = rt.set_running_signal(Some(id));
+            let signal = SignalInner {
+                value: crate::signal_inner::SignalValue::Func(func()),
+                listeners: Default::default(),
+            };
+            rt.set_running_signal(previous);
+
+            scope.insert_signal(signal);
+            id
+        });
+        Signal {
+            id,
+            ty: PhantomData,
+        }
+    }
+
+    #[inline]
+    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope, func: F) -> Signal<T> {
+        Self::func(sx, || DynFunc::new(func))
+    }
+
+    // #[cfg(test)]
+    // fn with_inner<I, F: Fn(&SignalInner) -> I>(&self, f: F) -> I {
+    //     self.id.rt_ref(|rt| rt[self.id].with_signal(self.id, f))
+    // }
+}
+
+impl<T: Clone + 'static> Signal<T> {
     pub fn get(&self) -> T {
-        let val = self.id.rt_ref(|rt| {
+        self.id.rt_ref(|rt| {
             if let Some(listener) = rt.get_running_signal() {
                 rt[self.id].with_signal(self.id, |signal| {
                     signal.listeners.insert(listener);
@@ -43,91 +89,25 @@ where
             } else {
                 rt[self.id].with_signal(self.id, |signal| signal.get())
             }
-        });
-        // println!("got: {:?} - {val:?}", self.id);
-
-        val
+        })
     }
 
     pub fn set(&self, val: T) {
-        // println!("set: {:?} - {val:?}", self.id);
-        self.id.rt_ref(|rt| self.set_rt(val, rt));
-    }
+        self.id.rt_ref(|rt| {
+            rt[self.id].with_signal_mut(self.id, |sig| sig.set(val));
 
-    pub(crate) fn set_rt(&self, val: T, rt: &RuntimeInner) {
-        rt[self.id].with_signal_mut(self.id, |sig| sig.set(val));
-        propagate_change(rt, self.id);
+            propagate_change(rt, self.id);
+        });
     }
 }
-
-pub fn create_data_signal<T: 'static>(sx: Scope, value: T) -> Signal<T> {
-    let id = sx.rt.with_ref(|rt| {
-        let scope = &rt.scope_tree[sx.sx];
-        let id = scope.next_signal_id(sx);
-        let signal = SignalInner {
-            value: SignalValue::Data(AnyData::new(value)),
-            listeners: Default::default(),
-        };
-        scope.insert_signal(signal);
-        id
-    });
-    Signal {
-        id,
-        ty: PhantomData,
-        #[cfg(test)]
-        eq: false,
+impl<T: PartialEq + 'static> Signal<T> {
+    #[inline]
+    pub(crate) fn new_func_eq<F: Fn() -> T + 'static>(sx: Scope, func: F) -> Signal<T> {
+        Self::func(sx, || DynFunc::new_eq(func))
     }
-}
 
-pub fn create_func_signal<F, T>(sx: Scope, func: F) -> Signal<T>
-where
-    F: Fn() -> T + 'static,
-    T: 'static,
-{
-    let id = sx.rt.with_ref(|rt| {
-        let scope = &rt.scope_tree[sx.sx];
-        let id = scope.next_signal_id(sx);
-
-        let previous = rt.set_running_signal(Some(id));
-        let signal = SignalInner {
-            value: SignalValue::Func(DynFunc::new(func)),
-            listeners: Default::default(),
-        };
-        rt.set_running_signal(previous);
-        scope.insert_signal(signal);
-        id
-    });
-    Signal {
-        id,
-        ty: PhantomData,
-        #[cfg(test)]
-        eq: false,
-    }
-}
-
-pub fn create_func_signal_eq<F, T>(sx: Scope, func: F) -> Signal<T>
-where
-    F: Fn() -> T + 'static,
-    T: PartialEq + 'static,
-{
-    let id = sx.rt.with_ref(|rt| {
-        let scope = &rt.scope_tree[sx.sx];
-        let id = scope.next_signal_id(sx);
-
-        let previous = rt.set_running_signal(Some(id));
-        let signal = SignalInner {
-            value: crate::signal_inner::SignalValue::Func(DynFunc::new_eq(func)),
-            listeners: Default::default(),
-        };
-        rt.set_running_signal(previous);
-
-        scope.insert_signal(signal);
-        id
-    });
-    Signal {
-        id,
-        ty: PhantomData,
-        #[cfg(test)]
-        eq: true,
+    #[inline]
+    pub(crate) fn new_data_eq(sx: Scope, data: T) -> Signal<T> {
+        Self::data(sx, AnyData::new(data))
     }
 }

@@ -44,7 +44,7 @@ impl SignalInner {
         if let SignalValue::Func(func) = &self.value {
             let previous = rt.set_running_signal(Some(id));
             let changed = func.run();
-            // println!("run: {id:?}");
+            // println!("run: {id:?} - {changed}");
             rt.set_running_signal(previous);
             changed
         } else {

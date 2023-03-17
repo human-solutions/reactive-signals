@@ -19,4 +19,4 @@ mod updater;
 
 pub use runtime::Runtime;
 pub use scope::Scope;
-pub use signal::{create_data_signal, create_func_signal, create_func_signal_eq, Signal};
+pub use signal::Signal;

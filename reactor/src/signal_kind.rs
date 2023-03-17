@@ -44,7 +44,7 @@ impl EqFunc {
         T: PartialEq + 'static,
     {
         let (sx, func) = tuple;
-        crate::create_func_signal_eq(sx, func)
+        Signal::new_func_eq(sx, func)
     }
 }
 pub(crate) struct TrueFunc;
@@ -57,7 +57,7 @@ impl TrueFunc {
         T: 'static,
     {
         let (sx, func) = tuple;
-        crate::create_func_signal(sx, func)
+        crate::Signal::new_func(sx, func)
     }
 }
 
@@ -75,7 +75,7 @@ impl<T> EqDataKind for (Scope, T) where T: PartialEq + 'static {}
 
 pub(crate) trait TrueDataKind {
     #[inline]
-    fn data_kind(&self) -> TrueData {
+    fn func_kind(&self) -> TrueData {
         TrueData
     }
 }
@@ -92,7 +92,7 @@ impl EqData {
         T: PartialEq + 'static,
     {
         let (sx, value) = tuple;
-        crate::create_data_signal(sx, value)
+        Signal::new_data_eq(sx, value)
     }
 }
 pub(crate) struct TrueData;
@@ -104,6 +104,6 @@ impl TrueData {
         T: 'static,
     {
         let (sx, value) = tuple;
-        crate::create_data_signal(sx, value)
+        Signal::new_data(sx, value)
     }
 }
