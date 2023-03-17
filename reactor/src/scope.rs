@@ -3,7 +3,7 @@ use arena_link_tree::NodeId;
 use crate::{runtime_inner::RUNTIMES, Runtime};
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone)]
 pub struct Scope {
     pub(crate) sx: NodeId,
     pub(crate) rt: Runtime,
@@ -41,3 +41,12 @@ impl Scope {
         }
     }
 }
+
+impl PartialEq for Scope {
+    #[inline]
+    fn eq(&self, other: &Scope) -> bool {
+        self.sx == other.sx
+    }
+}
+
+impl Eq for Scope {}
