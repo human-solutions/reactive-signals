@@ -1,0 +1,60 @@
+#[macro_export]
+macro_rules! signal {
+    ($sx:ident, $data:literal) => {{
+        #[allow(unused_imports)]
+        use $crate::signal_kind::{EqDataKind, TrueDataKind};
+        match ($sx, $data) {
+            tuple => (&tuple).data_kind().new(tuple),
+        }
+    }};
+    ($sx:ident, $data:ident) => {{
+        #[allow(unused_imports)]
+        use $crate::signal_kind::{EqDataKind, TrueDataKind};
+        match ($sx, $data) {
+            tuple => (&tuple).data_kind().new(tuple),
+        }
+    }};
+    ($sx:ident, $data:expr) => {{
+        #[allow(unused_imports)]
+        use $crate::signal_kind::{EqFuncKind, TrueFuncKind};
+        match ($sx, $data) {
+            tuple => (&tuple).func_kind().new(tuple),
+        }
+    }};
+    ($sx:ident, clone: $($clone:ident) +, $data:expr) => {{
+        $(let $clone = $clone.clone();)*
+        #[allow(unused_imports)]
+        use $crate::signal_kind::{EqFuncKind, TrueFuncKind};
+        match ($sx, $data) {
+            tuple => (&tuple).func_kind().new(tuple),
+        }
+    }};
+}
+
+#[test]
+fn test() {
+    use crate::Scope;
+    let sx = Scope::new_root();
+    let sig = signal!(sx, 32);
+    assert!(!sig.eq);
+
+    let x = 5;
+    let sig = signal!(sx, x);
+    assert!(!sig.eq);
+
+    let sig = signal!(sx, || 32);
+    assert!(sig.eq);
+
+    #[derive(Clone)]
+    struct NonEq;
+    let sig = signal!(sx, || NonEq);
+    assert!(!sig.eq);
+
+    let ne = NonEq;
+    let sig = signal!(sx, move || ne.clone());
+    assert!(!sig.eq);
+
+    let ne = NonEq;
+    let sig = signal!(sx, clone: ne, move || ne.clone());
+    assert!(!sig.eq);
+}

@@ -5,6 +5,7 @@ mod tests;
 pub mod profile;
 
 mod iter;
+mod macros;
 mod primitives;
 mod runtime;
 mod runtime_inner;
@@ -13,6 +14,7 @@ mod scope_inner;
 mod signal;
 mod signal_id;
 mod signal_inner;
+mod signal_kind;
 mod updater;
 
 pub use runtime::Runtime;

@@ -12,6 +12,9 @@ use crate::{
 pub struct Signal<T> {
     id: SignalId,
     ty: PhantomData<T>,
+    #[cfg(test)]
+    /// to determine if the signal is an implementation of PartialEq
+    pub eq: bool,
 }
 
 impl<T> Clone for Signal<T> {
@@ -19,6 +22,8 @@ impl<T> Clone for Signal<T> {
         Self {
             id: self.id,
             ty: self.ty,
+            #[cfg(test)]
+            eq: self.eq,
         }
     }
 }
@@ -69,6 +74,8 @@ pub fn create_data_signal<T: 'static>(sx: Scope, value: T) -> Signal<T> {
     Signal {
         id,
         ty: PhantomData,
+        #[cfg(test)]
+        eq: false,
     }
 }
 
@@ -93,6 +100,8 @@ where
     Signal {
         id,
         ty: PhantomData,
+        #[cfg(test)]
+        eq: false,
     }
 }
 
@@ -118,5 +127,7 @@ where
     Signal {
         id,
         ty: PhantomData,
+        #[cfg(test)]
+        eq: true,
     }
 }

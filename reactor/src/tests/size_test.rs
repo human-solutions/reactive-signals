@@ -4,8 +4,11 @@ use crate::Signal;
 
 #[test]
 fn test_sizes() {
-    assert_eq!(8, mem::size_of::<Signal<String>>());
-    assert_eq!(8, mem::size_of::<Signal<usize>>());
+    // size is 12 when testing and 8 when in non-test mode
+    // because Signal has a eq field that is only present
+    // in test config
+    assert_eq!(12, mem::size_of::<Signal<String>>());
+    assert_eq!(12, mem::size_of::<Signal<usize>>());
 }
 
 #[test]

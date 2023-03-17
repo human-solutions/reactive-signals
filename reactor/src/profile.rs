@@ -2,6 +2,9 @@ use crate::{create_data_signal, create_func_signal, Scope, Signal};
 
 pub fn create_1000_nested() -> (Scope, Signal<usize>, Signal<usize>) {
     let mut scope = Scope::bench_root();
+
+    // don't use the signal! macro, because we want to force the signals to
+    // be non equals. Otherwise a propagation wouldn't happen
     let start_sig = create_data_signal(scope, 0usize);
     let mut next_sig = create_func_signal(scope, move || start_sig.get() + 1);
 
@@ -17,6 +20,8 @@ pub fn create_1000_nested() -> (Scope, Signal<usize>, Signal<usize>) {
 
 pub fn create_1000_siblings() -> (Scope, Signal<usize>, Signal<usize>) {
     let scope = Scope::bench_root();
+    // don't use the signal! macro, because we want to force the signals to
+    // be non equals. Otherwise a propagation wouldn't happen
     let start_sig = create_data_signal(scope, 0usize);
     let mut next_sig = create_func_signal(scope, move || start_sig.get() + 1);
 
