@@ -1,10 +1,10 @@
 use crate::{
     iter::{NodeResolver, VecTreeIter},
-    runtime_inner::RuntimeInner,
+    runtimes::{Runtime, RuntimeInner},
     signal_id::SignalId,
 };
 
-pub(crate) fn propagate_change(rt: &RuntimeInner, sig: SignalId) {
+pub(crate) fn propagate_change<RT: Runtime>(rt: &RuntimeInner<RT>, sig: SignalId<RT>) {
     let tree = &rt.scope_tree;
     let mut iter = VecTreeIter::new(tree, sig);
 

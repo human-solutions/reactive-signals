@@ -42,31 +42,32 @@ impl<T: Ord> Default for SortedVec<T> {
 
 #[test]
 fn test_retain() {
+    use crate::runtimes::PoolRuntimeId;
     use crate::{primitives::u15Bool, signal_id::SignalId, Runtime};
     use arena_link_tree::NodeId;
 
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(1),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     let sig2_scope1 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(1),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     let sig1_scope2 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(2),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     let sig2_scope2 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(2),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     let vec = SortedVec::default();

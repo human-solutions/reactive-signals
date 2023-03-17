@@ -1,7 +1,11 @@
-use crate::{Scope, Signal};
+use crate::{Scope, Signal, SingleRuntime, SingleRuntimeId};
 
-pub fn create_1000_nested() -> (Scope, Signal<usize>, Signal<usize>) {
-    let mut scope = Scope::bench_root();
+pub fn create_1000_nested() -> (
+    Scope<SingleRuntimeId>,
+    Signal<usize, SingleRuntimeId>,
+    Signal<usize, SingleRuntimeId>,
+) {
+    let mut scope = SingleRuntime::bench_root_scope();
 
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
@@ -18,8 +22,12 @@ pub fn create_1000_nested() -> (Scope, Signal<usize>, Signal<usize>) {
     (scope, start_sig, end_sig)
 }
 
-pub fn create_1000_siblings() -> (Scope, Signal<usize>, Signal<usize>) {
-    let scope = Scope::bench_root();
+pub fn create_1000_siblings() -> (
+    Scope<SingleRuntimeId>,
+    Signal<usize, SingleRuntimeId>,
+    Signal<usize, SingleRuntimeId>,
+) {
+    let scope = SingleRuntime::bench_root_scope();
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
     let start_sig = Signal::new_data(scope, 0usize);

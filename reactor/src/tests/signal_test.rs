@@ -1,10 +1,10 @@
 use std::{cell::Cell, rc::Rc};
 
-use crate::{scope::Scope, signal, tests::StringStore};
+use crate::{signal, tests::StringStore, RuntimePool};
 
 #[test]
 fn test_signal_dep() {
-    let cx = Scope::new_root();
+    let cx = RuntimePool::new_root_scope();
 
     let num_sig = signal!(cx, 5);
 
@@ -21,7 +21,7 @@ fn test_signal_dep() {
 
 #[test]
 fn test_signal_func_val() {
-    let cx = Scope::new_root();
+    let cx = RuntimePool::new_root_scope();
 
     let num_sig = signal!(cx, 5);
 
@@ -41,7 +41,7 @@ fn test_signal_func_val() {
 
 #[test]
 fn test_signal_func_skip_equal() {
-    let cx = Scope::new_root();
+    let cx = RuntimePool::new_root_scope();
 
     let num_sig = signal!(cx, 10);
 

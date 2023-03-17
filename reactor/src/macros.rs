@@ -33,8 +33,8 @@ macro_rules! signal {
 
 #[test]
 fn test() {
-    use crate::Scope;
-    let sx = Scope::new_root();
+    use crate::RuntimePool;
+    let sx = RuntimePool::new_root_scope();
     let _sig = signal!(sx, 32);
     // assert!(!sig.eq);
 

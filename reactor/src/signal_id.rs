@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use arena_link_tree::NodeId;
 
-use crate::{primitives::u15Bool, runtime_inner::RuntimeInner, scope::Scope, Runtime};
+use crate::{primitives::u15Bool, runtimes::RuntimeInner, scope::Scope, Runtime};
 
 /// The SignalId has three components:
 ///
@@ -19,14 +19,14 @@ use crate::{primitives::u15Bool, runtime_inner::RuntimeInner, scope::Scope, Runt
 ///
 /// They are ordered by Scope and then by `id`.
 #[derive(Clone, Copy)]
-pub struct SignalId {
+pub(crate) struct SignalId<RT: Runtime> {
     pub(crate) id: u15Bool,
     pub(crate) sx: NodeId,
-    pub(crate) rt: Runtime,
+    pub(crate) rt: RT,
 }
 
-impl SignalId {
-    pub(crate) fn new(id: usize, sx: Scope) -> Self {
+impl<RT: Runtime> SignalId<RT> {
+    pub(crate) fn new(id: usize, sx: Scope<RT>) -> Self {
         Self {
             sx: sx.sx,
             id: u15Bool::new(id, false),
@@ -41,27 +41,27 @@ impl SignalId {
     #[inline]
     pub(crate) fn rt_ref<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&RuntimeInner) -> T,
+        F: FnOnce(&RuntimeInner<RT>) -> T,
     {
         self.rt.with_ref(f)
     }
 }
 
-impl PartialEq for SignalId {
+impl<RT: Runtime> PartialEq for SignalId<RT> {
     #[inline]
-    fn eq(&self, other: &SignalId) -> bool {
+    fn eq(&self, other: &SignalId<RT>) -> bool {
         self.id == other.id && self.sx == other.sx
     }
 }
 
-impl Eq for SignalId {}
+impl<RT: Runtime> Eq for SignalId<RT> {}
 
 // ordering by NodeId (Scope) and then id. The runtime is not considered
 // as it is assumed to be the same for all SignalId's running on the same
 // thread
-impl PartialOrd for SignalId {
+impl<RT: Runtime> PartialOrd for SignalId<RT> {
     #[inline]
-    fn partial_cmp(&self, other: &SignalId) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &SignalId<RT>) -> Option<Ordering> {
         match self.sx.partial_cmp(&other.sx) {
             Some(Ordering::Equal) => self.id.partial_cmp(&other.id),
             cmp => cmp,
@@ -69,9 +69,9 @@ impl PartialOrd for SignalId {
     }
 }
 
-impl Ord for SignalId {
+impl<RT: Runtime> Ord for SignalId<RT> {
     #[inline]
-    fn cmp(&self, other: &SignalId) -> Ordering {
+    fn cmp(&self, other: &SignalId<RT>) -> Ordering {
         match self.sx.cmp(&other.sx) {
             Ordering::Equal => self.id.cmp(&other.id),
             cmp => cmp,
@@ -79,7 +79,7 @@ impl Ord for SignalId {
     }
 }
 
-impl std::fmt::Debug for SignalId {
+impl<RT: Runtime> std::fmt::Debug for SignalId<RT> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}ˢⁱᵍ", self.sx, self.id.as_u15())
     }
@@ -87,33 +87,38 @@ impl std::fmt::Debug for SignalId {
 
 #[test]
 fn signal_id_size() {
-    assert_eq!(std::mem::size_of::<SignalId>(), 8);
+    use crate::runtimes::{PoolRuntimeId, SingleRuntimeId};
+
+    assert_eq!(std::mem::size_of::<SignalId<PoolRuntimeId>>(), 8);
+    assert_eq!(std::mem::size_of::<SignalId<SingleRuntimeId>>(), 4);
 }
 
 #[test]
 fn signal_id_ordering() {
+    use crate::runtimes::PoolRuntimeId;
+
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(1),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     let sig2_scope1 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(1),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     let sig1_scope2 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(2),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     let sig2_scope2 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(2),
-        rt: Runtime::from(4),
+        rt: PoolRuntimeId::from(4),
     };
 
     assert!(sig1_scope1 < sig2_scope1);

@@ -1,11 +1,11 @@
 use std::{mem, num::NonZeroU16};
 
-use crate::Signal;
+use crate::{runtimes::SingleRuntimeId, Signal};
 
 #[test]
-fn test_sizes() {
-    assert_eq!(8, mem::size_of::<Signal<String>>());
-    assert_eq!(8, mem::size_of::<Signal<usize>>());
+fn test_signal_sizes() {
+    assert_eq!(4, mem::size_of::<Signal<String, SingleRuntimeId>>());
+    assert_eq!(4, mem::size_of::<Signal<usize, SingleRuntimeId>>());
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn test_subscriber_size() {
     use std::mem::size_of;
 
     // vec: a pointer, size and capacity
-    assert_eq!(size_of::<Vec<SignalId>>(), 24);
+    assert_eq!(size_of::<Vec<SignalId<SingleRuntimeId>>>(), 24);
     assert_eq!(size_of::<[(u16, u16); 1]>(), 4);
 
     enum Store_u15_NoRT_big {

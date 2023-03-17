@@ -2,18 +2,19 @@ use std::marker::PhantomData;
 
 use crate::{
     primitives::{AnyData, DynFunc},
+    runtimes::Runtime,
     scope::Scope,
     signal_id::SignalId,
     signal_inner::{SignalInner, SignalValue},
     updater::propagate_change,
 };
 
-pub struct Signal<T> {
-    id: SignalId,
+pub struct Signal<T, RT: Runtime> {
+    id: SignalId<RT>,
     ty: PhantomData<T>,
 }
 
-impl<T> Clone for Signal<T> {
+impl<T, RT: Runtime> Clone for Signal<T, RT> {
     fn clone(&self) -> Self {
         Self {
             id: self.id,
@@ -21,10 +22,10 @@ impl<T> Clone for Signal<T> {
         }
     }
 }
-impl<T> Copy for Signal<T> {}
+impl<T, RT: Runtime> Copy for Signal<T, RT> {}
 
-impl<T: 'static> Signal<T> {
-    fn data(sx: Scope, data: AnyData) -> Signal<T> {
+impl<T: 'static, RT: Runtime> Signal<T, RT> {
+    fn data(sx: Scope<RT>, data: AnyData) -> Signal<T, RT> {
         let id = sx.rt.with_ref(|rt| {
             let scope = &rt.scope_tree[sx.sx];
             let id = scope.next_signal_id(sx);
@@ -42,11 +43,11 @@ impl<T: 'static> Signal<T> {
     }
 
     #[inline]
-    pub(crate) fn new_data(sx: Scope, data: T) -> Signal<T> {
+    pub(crate) fn new_data(sx: Scope<RT>, data: T) -> Signal<T, RT> {
         Self::data(sx, AnyData::new(data))
     }
 
-    fn func(sx: Scope, func: impl FnOnce() -> DynFunc) -> Signal<T> {
+    fn func(sx: Scope<RT>, func: impl FnOnce() -> DynFunc) -> Signal<T, RT> {
         let id = sx.rt.with_ref(|rt| {
             let scope = &rt.scope_tree[sx.sx];
             let id = scope.next_signal_id(sx);
@@ -68,7 +69,7 @@ impl<T: 'static> Signal<T> {
     }
 
     #[inline]
-    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope, func: F) -> Signal<T> {
+    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<T, RT> {
         Self::func(sx, || DynFunc::new(func))
     }
 
@@ -78,7 +79,7 @@ impl<T: 'static> Signal<T> {
     // }
 }
 
-impl<T: Clone + 'static> Signal<T> {
+impl<T: Clone + 'static, RT: Runtime> Signal<T, RT> {
     pub fn get(&self) -> T {
         self.id.rt_ref(|rt| {
             if let Some(listener) = rt.get_running_signal() {
@@ -100,14 +101,14 @@ impl<T: Clone + 'static> Signal<T> {
         });
     }
 }
-impl<T: PartialEq + 'static> Signal<T> {
+impl<T: PartialEq + 'static, RT: Runtime> Signal<T, RT> {
     #[inline]
-    pub(crate) fn new_func_eq<F: Fn() -> T + 'static>(sx: Scope, func: F) -> Signal<T> {
+    pub(crate) fn new_func_eq<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<T, RT> {
         Self::func(sx, || DynFunc::new_eq(func))
     }
 
     #[inline]
-    pub(crate) fn new_data_eq(sx: Scope, data: T) -> Signal<T> {
+    pub(crate) fn new_data_eq(sx: Scope<RT>, data: T) -> Signal<T, RT> {
         Self::data(sx, AnyData::new(data))
     }
 }

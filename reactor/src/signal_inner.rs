@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use crate::{
     primitives::{AnyData, DynFunc, SortedVec},
-    runtime_inner::RuntimeInner,
+    runtimes::{Runtime, RuntimeInner},
     signal_id::SignalId,
 };
 
@@ -14,12 +14,12 @@ pub enum SignalValue {
 }
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
-pub struct SignalInner {
+pub(crate) struct SignalInner<RT: Runtime> {
     pub(crate) value: SignalValue,
-    pub(crate) listeners: SortedVec<SignalId>,
+    pub(crate) listeners: SortedVec<SignalId<RT>>,
 }
 
-impl SignalInner {
+impl<RT: Runtime> SignalInner<RT> {
     fn value(&self) -> &AnyData {
         match self.value {
             SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => value,
@@ -40,7 +40,7 @@ impl SignalInner {
         }
     }
 
-    pub(crate) fn run(&self, rt: &RuntimeInner, id: SignalId) -> bool {
+    pub(crate) fn run(&self, rt: &RuntimeInner<RT>, id: SignalId<RT>) -> bool {
         if let SignalValue::Func(func) = &self.value {
             let previous = rt.set_running_signal(Some(id));
             let changed = func.run();
