@@ -10,6 +10,7 @@ use crate::{
 pub enum SignalValue {
     Data(AnyData),
     Func(DynFunc),
+    #[cfg(debug_assertions)]
     Reuse,
 }
 
@@ -23,6 +24,7 @@ impl<RT: Runtime> SignalInner<RT> {
     fn value(&self) -> &AnyData {
         match self.value {
             SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => value,
+            #[cfg(debug_assertions)]
             SignalValue::Reuse => panic!("BUG: using a reused signal"),
         }
     }
@@ -36,6 +38,7 @@ impl<RT: Runtime> SignalInner<RT> {
             SignalValue::Data(ref mut value) | SignalValue::Func(DynFunc { ref mut value, .. }) => {
                 *value = AnyData::new(new_value)
             }
+            #[cfg(debug_assertions)]
             SignalValue::Reuse => panic!("BUG: using a reused signal"),
         }
     }
@@ -55,7 +58,8 @@ impl<RT: Runtime> SignalInner<RT> {
 
     pub(crate) fn reuse(&mut self) {
         self.listeners.clear();
-        if cfg!(debug_assertions) {
+        #[cfg(debug_assertions)]
+        {
             self.value = SignalValue::Reuse;
         }
     }
