@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, hash::Hash};
 
 use arena_link_tree::NodeId;
 
@@ -83,6 +83,45 @@ impl<RT: Runtime> std::fmt::Debug for SignalId<RT> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}ˢⁱᵍ", self.sx, self.id.as_u15())
     }
+}
+
+impl<RT: Runtime> Hash for SignalId<RT> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        // only writes once to the Hasher in order to be compatible
+        // with nohash-hasher
+        state.write_u32(hash(&self))
+    }
+}
+
+#[inline]
+fn hash<RT: Runtime>(me: &SignalId<RT>) -> u32 {
+    ((me.sx.as_raw() as u32) << 16) | (me.id.as_u15() as u32)
+}
+
+#[test]
+fn test_hash() {
+    use crate::runtimes::SingleRuntimeId;
+    let sig1 = SignalId {
+        id: u15Bool::new(u15Bool::MAX as usize, false),
+        sx: NodeId::from(0),
+        rt: SingleRuntimeId,
+    };
+
+    assert_eq!(sig1.sx.as_raw() as u32, 0x1);
+    assert_eq!(sig1.id.as_u15(), 0x7FFE);
+    assert_eq!(((sig1.sx.as_raw() as u32) << 16), 0x10000);
+    assert_eq!(hash(&sig1), 0x17FFE);
+
+    let sig2 = SignalId {
+        id: u15Bool::new(1, false),
+        sx: NodeId::from(u16::MAX as usize - 2),
+        rt: SingleRuntimeId,
+    };
+
+    assert_eq!(sig2.sx.as_raw() as u32, 0xFFFE);
+    assert_eq!(sig2.id.as_u15(), 0x1);
+    assert_eq!(((sig2.sx.as_raw() as u32) << 16), 0xFFFE0000);
+    assert_eq!(hash(&sig2), 0xFFFE0001);
 }
 
 #[test]

@@ -21,6 +21,10 @@ impl NodeId {
     pub(crate) fn root() -> Self {
         Self(unsafe { NonZeroU16::new_unchecked(1) })
     }
+
+    pub fn as_raw(&self) -> u16 {
+        self.0.get()
+    }
 }
 
 impl fmt::Debug for NodeId {

@@ -1,10 +1,10 @@
-use std::{cell::RefCell, ops::Index};
+use std::{cell::RefCell, hash::Hash, ops::Index};
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 
-pub(crate) struct SortedVec<T: Ord>(RefCell<Vec<T>>);
+pub(crate) struct SignalSet<T: Ord + Eq + Hash>(RefCell<Vec<T>>);
 
-impl<T: Ord + Copy> SortedVec<T> {
+impl<T: Ord + Eq + Copy + Hash> SignalSet<T> {
     pub(crate) fn insert(&self, elem: T) {
         let mut vec = self.0.borrow_mut();
         match vec.binary_search(&elem) {
@@ -34,7 +34,7 @@ impl<T: Ord + Copy> SortedVec<T> {
     }
 }
 
-impl<T: Ord> Default for SortedVec<T> {
+impl<T: Ord + Eq + Hash> Default for SignalSet<T> {
     fn default() -> Self {
         Self(RefCell::new(Vec::new()))
     }
@@ -70,7 +70,7 @@ fn test_retain() {
         rt: PoolRuntimeId::from(4),
     };
 
-    let vec = SortedVec::default();
+    let vec = SignalSet::default();
     vec.insert(sig2_scope1);
     vec.insert(sig1_scope2);
     vec.insert(sig1_scope1);
