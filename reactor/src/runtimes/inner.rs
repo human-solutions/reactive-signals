@@ -11,15 +11,13 @@ use super::Runtime;
 
 #[derive(Default)]
 pub struct RuntimeInner<RT: Runtime> {
-    pub(crate) id: RT,
     pub(crate) scope_tree: Tree<ScopeInner<RT>>,
     running_signal: Cell<Option<SignalId<RT>>>,
 }
 
 impl<RT: Runtime> RuntimeInner<RT> {
-    pub(crate) fn new(id: RT) -> Self {
+    pub(crate) fn new() -> Self {
         Self {
-            id,
             scope_tree: Tree::create(),
             running_signal: Cell::new(None),
         }

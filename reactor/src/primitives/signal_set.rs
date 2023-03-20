@@ -2,6 +2,7 @@ use std::{cell::RefCell, ops::Index};
 
 use super::ArrVec;
 
+#[derive(Debug)]
 pub(crate) struct SignalSet<const N: usize, T: Ord + Eq + Copy>(RefCell<ArrVec<N, T>>);
 
 impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {

@@ -50,15 +50,18 @@ impl RuntimePool {
         RUNTIME_POOL.with(|rt| {
             let mut vec = rt.0.borrow_mut();
 
-            for rt in &mut vec.iter_mut() {
+            for (i, rt) in &mut vec.iter_mut().enumerate() {
                 if !rt.in_use() {
                     let id = rt.scope_tree.init(Default::default());
-                    return Scope { rt: rt.id, sx: id };
+                    return Scope {
+                        rt: PoolRuntimeId(i as u32),
+                        sx: id,
+                    };
                 }
             }
 
             let id = PoolRuntimeId::from(vec.len());
-            let mut rti = RuntimeInner::new(id);
+            let mut rti = RuntimeInner::new();
             rti.scope_tree.init(Default::default());
             let sx = rti.scope_tree.root();
             vec.push(rti);

@@ -36,7 +36,7 @@ impl  SingleRuntime {
             if data.in_use() {
                 panic!("Runtime is already used. Make sure to not call new_root_scope() more than once on a thread");
             }
-            let mut rti = RuntimeInner::new(SingleRuntimeId);
+            let mut rti = RuntimeInner::new();
             let sx = rti.scope_tree.init(Default::default());
             *data = rti;
 

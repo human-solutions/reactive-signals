@@ -12,7 +12,7 @@ impl<RT: Runtime> Scope<RT> {
     pub fn new_child(&self) -> Self {
         self.rt.with_mut(|rt| {
             let sx = rt.scope_tree.add_child(self.sx, Default::default());
-            Self { sx, rt: rt.id }
+            Self { sx, rt: self.rt }
         })
     }
 
@@ -20,7 +20,7 @@ impl<RT: Runtime> Scope<RT> {
         self.rt.with_mut(|rt| {
             let is_root = rt.scope_tree.root() == self.sx;
             if is_root {
-                rt.id.discard();
+                self.rt.discard();
             } else {
                 let discarded = rt.scope_tree.discard(self.sx, |s| s.reuse());
                 rt.scope_tree
