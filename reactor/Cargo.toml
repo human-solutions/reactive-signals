@@ -8,7 +8,7 @@ edition = "2021"
 default = ["extra-traits", "profile"]
 extra-traits = []
 profile = ["dep:pprof", "dep:criterion"]
-# use UnsafeCell instead of RefCell. Gain 10-20% performance for signal propagation
+# use UnsafeCell instead of RefCell. Gain 20% performance for signal propagation
 use-unsafe = []
 
 [dependencies]

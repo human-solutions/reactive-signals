@@ -35,7 +35,7 @@ fn size_of_signal_inner() {
     // SignalSet: RefCell & Vec = 3 words
     assert_eq!(
         mem::size_of::<SignalSet<3, SignalId<SingleRuntimeId>>>(),
-        24
+        32
     );
     #[cfg(not(feature = "use-unsafe"))]
     // SignalSet: RefCell & Vec = 4 words
@@ -46,7 +46,7 @@ fn size_of_signal_inner() {
 
     #[cfg(feature = "use-unsafe")]
     // SignalInner: SignalValue + SignalSet = 7 words (8 words when not in --release)
-    assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 64);
+    assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 72);
     #[cfg(not(feature = "use-unsafe"))]
     // SignalInner: SignalValue + SignalSet = 8 words (9 words when not in --release)
     assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 80);

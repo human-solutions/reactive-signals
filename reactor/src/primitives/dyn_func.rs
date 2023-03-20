@@ -2,8 +2,13 @@ use std::{any::Any, cell::RefCell};
 
 use super::AnyData;
 
+#[cfg(not(feature = "use-unsafe"))]
+type BoxAnyData = Box<RefCell<dyn Any>>;
+#[cfg(feature = "use-unsafe")]
+type BoxAnyData = Box<std::cell::UnsafeCell<dyn Any>>;
+
 pub struct DynFunc {
-    pub(crate) func: Box<dyn Fn(&Box<RefCell<dyn Any>>) -> bool>,
+    pub(crate) func: Box<dyn Fn(&BoxAnyData) -> bool>,
     pub(crate) value: AnyData,
 }
 
@@ -21,11 +26,20 @@ impl DynFunc {
         T: 'static,
     {
         let val = AnyData::new(func());
-        let func = Box::new(move |val: &Box<RefCell<dyn Any>>| {
+        let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
-            let mut old_any = val.borrow_mut();
-            let old: &mut T = old_any.downcast_mut::<T>().unwrap();
-            *old = new;
+            #[cfg(not(feature = "use-unsafe"))]
+            {
+                let mut old_any = val.borrow_mut();
+                let old: &mut T = old_any.downcast_mut::<T>().unwrap();
+                *old = new;
+            }
+            #[cfg(feature = "use-unsafe")]
+            unsafe {
+                let old_any: &mut dyn Any = &mut *val.get();
+                let old: &mut T = old_any.downcast_mut::<T>().unwrap();
+                *old = new;
+            }
             true
         });
         Self { func, value: val }
@@ -37,13 +51,24 @@ impl DynFunc {
         T: PartialEq + 'static,
     {
         let val = AnyData::new(func());
-        let func = Box::new(move |val: &Box<RefCell<dyn Any>>| {
+        let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
-            let mut old_any = val.borrow_mut();
-            let old: &mut T = old_any.downcast_mut::<T>().unwrap();
-            let changed = new != *old;
-            *old = new;
-            changed
+            #[cfg(not(feature = "use-unsafe"))]
+            {
+                let mut old_any = val.borrow_mut();
+                let old: &mut T = old_any.downcast_mut::<T>().unwrap();
+                let changed = new != *old;
+                *old = new;
+                changed
+            }
+            #[cfg(feature = "use-unsafe")]
+            unsafe {
+                let old_any: &mut dyn Any = &mut *val.get();
+                let old: &mut T = old_any.downcast_mut::<T>().unwrap();
+                let changed = new != *old;
+                *old = new;
+                changed
+            }
         });
         Self { func, value: val }
     }
