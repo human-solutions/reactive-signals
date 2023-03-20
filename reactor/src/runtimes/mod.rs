@@ -12,6 +12,24 @@ use crate::Scope;
 
 pub use pool::RuntimePool;
 
+////// StaticRuntime ////////
+
+#[cfg(not(feature = "use-unsafe"))]
+mod staticrt;
+#[cfg(not(feature = "use-unsafe"))]
+pub use staticrt::StaticRuntime;
+#[cfg(all(not(feature = "use-unsafe"), any(test, feature = "profile")))]
+pub use staticrt::StaticRuntimeId;
+
+#[cfg(feature = "use-unsafe")]
+mod staticrt_unsafe;
+#[cfg(feature = "use-unsafe")]
+pub use staticrt_unsafe::StaticRuntime;
+#[cfg(all(feature = "use-unsafe", any(test, feature = "profile")))]
+pub use staticrt_unsafe::StaticRuntimeId;
+
+////// SingleRuntime ////////
+
 #[cfg(not(feature = "use-unsafe"))]
 mod single;
 #[cfg(not(feature = "use-unsafe"))]

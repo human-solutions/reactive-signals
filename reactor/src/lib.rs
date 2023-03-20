@@ -22,7 +22,4 @@ use runtimes::Runtime;
 use scope::Scope;
 pub use signal::Signal;
 
-pub use runtimes::{RuntimePool, SingleRuntime};
-
-#[cfg(any(test, feature = "profile"))]
-pub use runtimes::{PoolRuntimeId, SingleRuntimeId};
+pub use runtimes::*;
