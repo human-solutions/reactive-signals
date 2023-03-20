@@ -8,30 +8,29 @@ pub(crate) trait IdVec {
 pub(crate) struct IdVecIter<V: IdVec> {
     vec: V,
     pos: usize,
+    len: usize,
 }
 
 impl<V: IdVec> IdVecIter<V> {
     pub(crate) fn new(vec: V) -> Self {
+        let len = vec.len();
         Self {
             vec,
             pos: usize::MAX,
+            len,
         }
     }
 
     pub(crate) fn remaining(&self) -> usize {
         if self.pos == usize::MAX {
-            self.vec.len()
+            self.len
         } else {
-            self.vec.len() - self.pos - 1
+            self.len - self.pos - 1
         }
     }
 
     pub(crate) fn has_more(&self) -> bool {
-        if self.pos == usize::MAX {
-            !self.vec.is_empty()
-        } else {
-            self.pos < (self.vec.len() - 1)
-        }
+        self.len - 1 > self.pos
     }
 }
 
