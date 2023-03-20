@@ -1,11 +1,11 @@
-use std::{cell::RefCell, collections::HashSet, mem, num::NonZeroU16};
+use std::{cell::RefCell, mem, num::NonZeroU16};
 
 use crate::{
     primitives::{AnyData, DynFunc, SignalSet},
     runtimes::SingleRuntimeId,
     signal_id::SignalId,
     signal_inner::{SignalInner, SignalValue},
-    PoolRuntimeId, Signal,
+    Signal,
 };
 
 #[test]
@@ -31,30 +31,42 @@ fn size_of_signal_inner() {
     // in the enum which makes it 40
     assert_eq!(mem::size_of::<SignalValue>(), 40);
 
+    #[cfg(feature = "use-unsafe")]
+    // SignalSet: RefCell & Vec = 3 words
+    assert_eq!(mem::size_of::<SignalSet<SignalId<SingleRuntimeId>>>(), 24);
+    #[cfg(not(feature = "use-unsafe"))]
     // SignalSet: RefCell & Vec = 4 words
     assert_eq!(mem::size_of::<SignalSet<SignalId<SingleRuntimeId>>>(), 32);
 
+    #[cfg(feature = "use-unsafe")]
+    // SignalInner: SignalValue + SignalSet = 7 words (8 words when not in --release)
+    assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 64);
+    #[cfg(not(feature = "use-unsafe"))]
     // SignalInner: SignalValue + SignalSet = 8 words (9 words when not in --release)
     assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 72);
-    assert_eq!(mem::size_of::<SignalInner<PoolRuntimeId>>(), 72);
 
+    // unsafe:
+    // 64-bit arch: 7 words = 56 bytes
+    // 32-bit arch: 7 words = 28 bytes
+
+    // safe:
     // 64-bit arch: 8 words = 64 bytes
     // 32-bit arch: 8 words = 32 bytes
 
     // --- Alternative use SigSetEnum instead of SignalSet ---
 
     #[allow(dead_code)]
-    enum SigSetEnum {
-        Set(HashSet<u64>),
+    enum SigEnum {
+        Set(Vec<u64>),
         Arr([u64; 4]),
     }
 
-    // HashSet 6 words
-    assert_eq!(mem::size_of::<HashSet<u32>>(), 48);
-    // SigSetEnum 7 words
-    assert_eq!(mem::size_of::<SigSetEnum>(), 56);
-    // RefCell & SigSetEnum = 8 words
-    assert_eq!(mem::size_of::<RefCell<SigSetEnum>>(), 64);
+    // Vec 3 words
+    assert_eq!(mem::size_of::<Vec<u32>>(), 24);
+    // SigEnum 5 words
+    assert_eq!(mem::size_of::<SigEnum>(), 40);
+    // RefCell & SigEnum = 6 words
+    assert_eq!(mem::size_of::<RefCell<SigEnum>>(), 48);
 
     // 64-bit arch: 12 words = 96 bytes
     // 32-bit arch: 12 words = 52 bytes
