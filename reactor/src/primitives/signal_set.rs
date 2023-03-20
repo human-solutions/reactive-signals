@@ -2,8 +2,6 @@ use std::{cell::RefCell, ops::Index};
 
 use super::ArrVec;
 
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
-
 pub(crate) struct SignalSet<const N: usize, T: Ord + Eq + Copy>(RefCell<ArrVec<N, T>>);
 
 impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {

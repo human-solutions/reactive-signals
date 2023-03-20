@@ -1,7 +1,6 @@
 use crate::runtime_inner::{RuntimeInner, RUNTIMES};
 
 #[derive(Default, Clone, Copy)]
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct Runtime(pub(crate) u32);
 
 impl Runtime {

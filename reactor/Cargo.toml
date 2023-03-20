@@ -5,8 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
-default = ["extra-traits", "use-unsafe"]
-extra-traits = []
+default = ["use-unsafe"]
 profile = ["dep:pprof", "dep:criterion"]
 # use UnsafeCell instead of RefCell. Gain 25% performance for signal propagation
 use-unsafe = []

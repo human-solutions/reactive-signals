@@ -6,7 +6,7 @@ use crate::{
     signal_id::SignalId,
 };
 
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
+#[derive(Debug)]
 pub enum SignalValue {
     Data(AnyData),
     Func(DynFunc),
@@ -14,7 +14,7 @@ pub enum SignalValue {
     Reuse,
 }
 
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
+#[derive(Debug)]
 pub(crate) struct SignalInner<RT: Runtime> {
     pub(crate) value: SignalValue,
     pub(crate) listeners: SignalSet<3, SignalId<RT>>,

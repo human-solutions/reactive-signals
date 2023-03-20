@@ -12,7 +12,6 @@ pub struct DynFunc {
     pub(crate) value: AnyData,
 }
 
-#[cfg(feature = "extra-traits")]
 impl std::fmt::Debug for DynFunc {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "RefFunc")

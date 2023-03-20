@@ -45,7 +45,6 @@ impl RuntimePool {
     }
 }
 
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub(crate) struct RuntimeInner {
     pub(crate) id: Runtime,
     pub(crate) scope_tree: Tree<ScopeInner>,

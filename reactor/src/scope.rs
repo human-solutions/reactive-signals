@@ -2,7 +2,6 @@ use arena_link_tree::NodeId;
 
 use crate::Runtime;
 
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[derive(Copy, Clone)]
 pub struct Scope<RT: Runtime> {
     pub(crate) sx: NodeId,

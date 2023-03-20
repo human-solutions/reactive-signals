@@ -5,8 +5,7 @@ use std::{
 
 use super::ArrVec;
 
-#[cfg_attr(feature = "extra-traits", derive(Debug))]
-
+#[derive(Debug)]
 pub(crate) struct SignalSet<const N: usize, T: Ord + Eq + Copy>(UnsafeCell<ArrVec<N, T>>);
 
 impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
