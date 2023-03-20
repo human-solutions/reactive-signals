@@ -1,16 +1,15 @@
-use std::{cell::RefCell, hash::Hash, ops::Index};
+use std::{cell::RefCell, ops::Index};
+
+use super::ArrVec;
 
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 
-pub(crate) struct SignalSet<T: Ord + Eq + Hash>(RefCell<Vec<T>>);
+pub(crate) struct SignalSet<const N: usize, T: Ord + Eq + Copy>(RefCell<ArrVec<N, T>>);
 
-impl<T: Ord + Eq + Copy + Hash> SignalSet<T> {
+impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
     pub(crate) fn insert(&self, elem: T) {
         let mut vec = self.0.borrow_mut();
-        match vec.binary_search(&elem) {
-            Ok(_) => {} // already present
-            Err(index) => vec.insert(index, elem),
-        }
+        vec.insert(elem);
     }
 
     pub(crate) fn clear(&self) {
@@ -30,13 +29,13 @@ impl<T: Ord + Eq + Copy + Hash> SignalSet<T> {
     }
 
     pub(crate) fn get(&self, index: usize) -> T {
-        self.0.borrow()[index]
+        self.0.borrow().get(index)
     }
 }
 
-impl<T: Ord + Eq + Hash> Default for SignalSet<T> {
+impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
     fn default() -> Self {
-        Self(RefCell::new(Vec::new()))
+        Self(RefCell::new(Default::default()))
     }
 }
 
@@ -70,7 +69,7 @@ fn test_retain() {
         rt: PoolRuntimeId::from(4),
     };
 
-    let vec = SignalSet::default();
+    let vec = SignalSet::<3, SignalId<PoolRuntimeId>>::default();
     vec.insert(sig2_scope1);
     vec.insert(sig1_scope2);
     vec.insert(sig1_scope1);

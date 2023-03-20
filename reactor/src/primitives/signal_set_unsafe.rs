@@ -1,63 +1,61 @@
 use std::{
     cell::{RefCell, UnsafeCell},
-    hash::Hash,
     ops::Index,
 };
 
+use super::ArrVec;
+
 #[cfg_attr(feature = "extra-traits", derive(Debug))]
 
-pub(crate) struct SignalSet<T: Ord + Eq + Hash>(UnsafeCell<Vec<T>>);
+pub(crate) struct SignalSet<const N: usize, T: Ord + Eq + Copy>(UnsafeCell<ArrVec<N, T>>);
 
-impl<T: Ord + Eq + Copy + Hash> SignalSet<T> {
+impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
     pub(crate) fn insert(&self, elem: T) {
         unsafe {
-            let vec: &mut Vec<T> = &mut *self.0.get();
-            match (vec).binary_search(&elem) {
-                Ok(_) => {} // already present
-                Err(index) => vec.insert(index, elem),
-            }
+            let vec: &mut ArrVec<N, T> = &mut *self.0.get();
+            vec.insert(elem)
         }
     }
 
     pub(crate) fn clear(&self) {
         unsafe {
-            let vec: &mut Vec<T> = &mut *self.0.get();
+            let vec: &mut ArrVec<N, T> = &mut *self.0.get();
             vec.clear();
         }
     }
 
     pub(crate) fn retain<F: FnMut(&T) -> bool>(&self, f: F) {
         unsafe {
-            let vec: &mut Vec<T> = &mut *self.0.get();
+            let vec: &mut ArrVec<N, T> = &mut *self.0.get();
             vec.retain(f);
         }
     }
 
     pub(crate) fn len(&self) -> usize {
         unsafe {
-            let vec: &Vec<T> = &*self.0.get();
+            let vec: &ArrVec<N, T> = &*self.0.get();
             vec.len()
         }
     }
 
     pub(crate) fn is_empty(&self) -> bool {
         unsafe {
-            let vec: &Vec<T> = &*self.0.get();
+            let vec: &ArrVec<N, T> = &*self.0.get();
             vec.is_empty()
         }
     }
 
     pub(crate) fn get(&self, index: usize) -> T {
         unsafe {
-            let vec: &Vec<T> = &*self.0.get();
-            vec[index]
+            let vec: &ArrVec<N, T> = &*self.0.get();
+            vec.get(index)
         }
     }
 }
 
-impl<T: Ord + Eq + Hash> Default for SignalSet<T> {
+impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
     fn default() -> Self {
-        Self(UnsafeCell::new(Vec::new()))
+        Self(UnsafeCell::new(Default::default()))
     }
 }
 
@@ -91,7 +89,7 @@ fn test_retain() {
         rt: PoolRuntimeId::from(4),
     };
 
-    let vec = SignalSet::default();
+    let vec = SignalSet::<3, SignalId<PoolRuntimeId>>::default();
     vec.insert(sig2_scope1);
     vec.insert(sig1_scope2);
     vec.insert(sig1_scope1);

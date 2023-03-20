@@ -33,17 +33,23 @@ fn size_of_signal_inner() {
 
     #[cfg(feature = "use-unsafe")]
     // SignalSet: RefCell & Vec = 3 words
-    assert_eq!(mem::size_of::<SignalSet<SignalId<SingleRuntimeId>>>(), 24);
+    assert_eq!(
+        mem::size_of::<SignalSet<3, SignalId<SingleRuntimeId>>>(),
+        24
+    );
     #[cfg(not(feature = "use-unsafe"))]
     // SignalSet: RefCell & Vec = 4 words
-    assert_eq!(mem::size_of::<SignalSet<SignalId<SingleRuntimeId>>>(), 32);
+    assert_eq!(
+        mem::size_of::<SignalSet<3, SignalId<SingleRuntimeId>>>(),
+        40
+    );
 
     #[cfg(feature = "use-unsafe")]
     // SignalInner: SignalValue + SignalSet = 7 words (8 words when not in --release)
     assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 64);
     #[cfg(not(feature = "use-unsafe"))]
     // SignalInner: SignalValue + SignalSet = 8 words (9 words when not in --release)
-    assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 72);
+    assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 80);
 
     // unsafe:
     // 64-bit arch: 7 words = 56 bytes
@@ -52,24 +58,6 @@ fn size_of_signal_inner() {
     // safe:
     // 64-bit arch: 8 words = 64 bytes
     // 32-bit arch: 8 words = 32 bytes
-
-    // --- Alternative use SigSetEnum instead of SignalSet ---
-
-    #[allow(dead_code)]
-    enum SigEnum {
-        Set(Vec<u64>),
-        Arr([u64; 4]),
-    }
-
-    // Vec 3 words
-    assert_eq!(mem::size_of::<Vec<u32>>(), 24);
-    // SigEnum 5 words
-    assert_eq!(mem::size_of::<SigEnum>(), 40);
-    // RefCell & SigEnum = 6 words
-    assert_eq!(mem::size_of::<RefCell<SigEnum>>(), 48);
-
-    // 64-bit arch: 12 words = 96 bytes
-    // 32-bit arch: 12 words = 52 bytes
 }
 
 #[allow(dead_code, non_camel_case_types)]
