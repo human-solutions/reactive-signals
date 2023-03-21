@@ -3,8 +3,8 @@ use std::{cell::RefCell, mem, num::NonZeroU16};
 use crate::{
     primitives::{AnyData, DynFunc, SignalSet},
     runtimes::SingleRuntimeId,
-    signal_id::SignalId,
-    signal_inner::{SignalInner, SignalValue},
+    signal::SignalId,
+    signal::{SignalInner, SignalValue},
     Signal,
 };
 

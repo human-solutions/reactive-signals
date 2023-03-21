@@ -2,21 +2,21 @@
 macro_rules! signal {
     ($sx:ident, $data:literal) => {{
         #[allow(unused_imports)]
-        use $crate::signal_kind::{EqDataKind, TrueDataKind};
+        use $crate::signal::{EqDataKind, TrueDataKind};
         match ($sx, $data) {
             tuple => (&tuple).data_kind().new(tuple),
         }
     }};
     ($sx:ident, $data:ident) => {{
         #[allow(unused_imports)]
-        use $crate::signal_kind::{EqDataKind, TrueDataKind};
+        use $crate::signal::{EqDataKind, TrueDataKind};
         match ($sx, $data) {
             tuple => (&tuple).data_kind().new(tuple),
         }
     }};
     ($sx:ident, $data:expr) => {{
         #[allow(unused_imports)]
-        use $crate::signal_kind::{EqFuncKind, TrueFuncKind};
+        use $crate::signal::{EqFuncKind, TrueFuncKind};
         match ($sx, $data) {
             tuple => (&tuple).func_kind().new(tuple),
         }
@@ -24,7 +24,7 @@ macro_rules! signal {
     ($sx:ident, clone: $($clone:ident) +, $data:expr) => {{
         $(let $clone = $clone.clone();)*
         #[allow(unused_imports)]
-        use $crate::signal_kind::{EqFuncKind, TrueFuncKind};
+        use $crate::signal::{EqFuncKind, TrueFuncKind};
         match ($sx, $data) {
             tuple => (&tuple).func_kind().new(tuple),
         }

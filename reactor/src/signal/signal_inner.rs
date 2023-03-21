@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 
+use super::SignalId;
 use crate::{
     primitives::{AnyData, DynFunc, SignalSet},
     runtimes::{Runtime, RuntimeInner},
-    signal_id::SignalId,
 };
 
 #[derive(Debug)]

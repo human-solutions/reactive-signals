@@ -11,9 +11,6 @@ pub mod runtimes;
 mod scope;
 mod scope_inner;
 mod signal;
-mod signal_id;
-mod signal_inner;
-mod signal_kind;
 mod updater;
 
 use runtimes::Runtime;

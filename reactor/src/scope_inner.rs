@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use arena_link_tree::NodeBitVec;
 
-use crate::{runtimes::Runtime, scope::Scope, signal_id::SignalId, signal_inner::SignalInner};
+use crate::{runtimes::Runtime, scope::Scope, signal::SignalId, signal::SignalInner};
 
 #[derive(Debug, Default)]
 pub(crate) struct ScopeInner<RT: Runtime> {

@@ -2,8 +2,7 @@ use crate::{
     iter::{IdVec, RefVecElem},
     runtimes::Runtime,
     scope_inner::ScopeInner,
-    signal_id::SignalId,
-    signal_inner::SignalInner,
+    signal::{SignalId, SignalInner},
 };
 use arena_link_tree::Tree;
 
