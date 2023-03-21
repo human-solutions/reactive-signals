@@ -12,34 +12,34 @@ pub use pool::RuntimePool;
 
 ////// StaticRuntime ////////
 
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 mod staticrt;
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 pub use staticrt::StaticRuntime;
-#[cfg(all(not(feature = "use-unsafe"), any(test, feature = "profile")))]
+#[cfg(all(not(feature = "unsafe-cell"), any(test, feature = "profile")))]
 pub use staticrt::StaticRuntimeId;
 
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 mod staticrt_unsafe;
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 pub use staticrt_unsafe::StaticRuntime;
-#[cfg(all(feature = "use-unsafe", any(test, feature = "profile")))]
+#[cfg(all(feature = "unsafe-cell", any(test, feature = "profile")))]
 pub use staticrt_unsafe::StaticRuntimeId;
 
 ////// SingleRuntime ////////
 
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 mod single;
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 pub use single::SingleRuntime;
-#[cfg(all(not(feature = "use-unsafe"), any(test, feature = "profile")))]
+#[cfg(all(not(feature = "unsafe-cell"), any(test, feature = "profile")))]
 pub use single::SingleRuntimeId;
 
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 mod single_unsafe;
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 pub use single_unsafe::SingleRuntime;
-#[cfg(all(feature = "use-unsafe", any(test, feature = "profile")))]
+#[cfg(all(feature = "unsafe-cell", any(test, feature = "profile")))]
 pub use single_unsafe::SingleRuntimeId;
 
 pub trait Runtime: Default + Copy + 'static {

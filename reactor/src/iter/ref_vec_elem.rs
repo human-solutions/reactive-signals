@@ -1,20 +1,20 @@
-use std::{cell::Ref, ops::Deref};
+use std::ops::Deref;
 
 pub(crate) struct RefVecElem<'a, T> {
     pub(crate) idx: usize,
-    #[cfg(not(feature = "use-unsafe"))]
-    pub(crate) vec: Ref<'a, Vec<T>>,
-    #[cfg(feature = "use-unsafe")]
+    #[cfg(not(feature = "unsafe-cell"))]
+    pub(crate) vec: std::cell::Ref<'a, Vec<T>>,
+    #[cfg(feature = "unsafe-cell")]
     pub(crate) vec: &'a [T],
 }
 
 impl<'a, T> RefVecElem<'a, T> {
-    #[cfg(not(feature = "use-unsafe"))]
-    pub(crate) fn new(vec: Ref<'a, Vec<T>>, idx: usize) -> Self {
+    #[cfg(not(feature = "unsafe-cell"))]
+    pub(crate) fn new(vec: std::cell::Ref<'a, Vec<T>>, idx: usize) -> Self {
         Self { idx, vec }
     }
 
-    #[cfg(feature = "use-unsafe")]
+    #[cfg(feature = "unsafe-cell")]
     pub(crate) fn new(vec: &'a [T], idx: usize) -> Self {
         Self { idx, vec }
     }

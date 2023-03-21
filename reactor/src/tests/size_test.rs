@@ -31,23 +31,23 @@ fn size_of_signal_inner() {
     // in the enum which makes it 40
     assert_eq!(mem::size_of::<SignalValue>(), 40);
 
-    #[cfg(feature = "use-unsafe")]
+    #[cfg(feature = "unsafe-cell")]
     // SignalSet: RefCell & Vec = 3 words
     assert_eq!(
         mem::size_of::<SignalSet<3, SignalId<SingleRuntimeId>>>(),
         32
     );
-    #[cfg(not(feature = "use-unsafe"))]
+    #[cfg(not(feature = "unsafe-cell"))]
     // SignalSet: RefCell & Vec = 4 words
     assert_eq!(
         mem::size_of::<SignalSet<3, SignalId<SingleRuntimeId>>>(),
         40
     );
 
-    #[cfg(feature = "use-unsafe")]
+    #[cfg(feature = "unsafe-cell")]
     // SignalInner: SignalValue + SignalSet = 7 words (8 words when not in --release)
     assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 72);
-    #[cfg(not(feature = "use-unsafe"))]
+    #[cfg(not(feature = "unsafe-cell"))]
     // SignalInner: SignalValue + SignalSet = 8 words (9 words when not in --release)
     assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 80);
 

@@ -8,7 +8,7 @@ edition = "2021"
 default = []
 profile = ["dep:pprof", "dep:criterion"]
 # use UnsafeCell instead of RefCell. Gain 40% performance for signal propagation
-use-unsafe = []
+unsafe-cell = []
 
 [dependencies]
 arena-link-tree = { path = "../arena-link-tree" }

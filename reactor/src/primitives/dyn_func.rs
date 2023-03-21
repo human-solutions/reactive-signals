@@ -2,9 +2,9 @@ use std::any::Any;
 
 use super::AnyData;
 
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 type BoxAnyData = Box<std::cell::RefCell<dyn Any>>;
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 type BoxAnyData = Box<std::cell::UnsafeCell<dyn Any>>;
 
 pub struct DynFunc {
@@ -27,13 +27,13 @@ impl DynFunc {
         let val = AnyData::new(func());
         let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
-            #[cfg(not(feature = "use-unsafe"))]
+            #[cfg(not(feature = "unsafe-cell"))]
             {
                 let mut old_any = val.borrow_mut();
                 let old: &mut T = old_any.downcast_mut::<T>().unwrap();
                 *old = new;
             }
-            #[cfg(feature = "use-unsafe")]
+            #[cfg(feature = "unsafe-cell")]
             unsafe {
                 let old_any: &mut dyn Any = &mut *val.get();
                 let old: &mut T = old_any.downcast_mut::<T>().unwrap();
@@ -52,7 +52,7 @@ impl DynFunc {
         let val = AnyData::new(func());
         let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
-            #[cfg(not(feature = "use-unsafe"))]
+            #[cfg(not(feature = "unsafe-cell"))]
             {
                 let mut old_any = val.borrow_mut();
                 let old: &mut T = old_any.downcast_mut::<T>().unwrap();
@@ -60,7 +60,7 @@ impl DynFunc {
                 *old = new;
                 changed
             }
-            #[cfg(feature = "use-unsafe")]
+            #[cfg(feature = "unsafe-cell")]
             unsafe {
                 let old_any: &mut dyn Any = &mut *val.get();
                 let old: &mut T = old_any.downcast_mut::<T>().unwrap();

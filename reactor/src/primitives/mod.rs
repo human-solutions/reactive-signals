@@ -12,24 +12,24 @@ pub(crate) use u15_bool::u15Bool;
 
 ///// any_data ////
 
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 mod any_data;
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 pub(crate) use any_data::AnyData;
 
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 mod any_data_unsafe;
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 pub(crate) use any_data_unsafe::AnyData;
 
 ///// signal_set ////
 
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 mod signal_set;
-#[cfg(not(feature = "use-unsafe"))]
+#[cfg(not(feature = "unsafe-cell"))]
 pub(crate) use signal_set::SignalSet;
 
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 mod signal_set_unsafe;
-#[cfg(feature = "use-unsafe")]
+#[cfg(feature = "unsafe-cell")]
 pub(crate) use signal_set_unsafe::SignalSet;
