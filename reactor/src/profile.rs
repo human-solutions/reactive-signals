@@ -1,4 +1,7 @@
-use crate::{Scope, Signal, SingleRuntime, SingleRuntimeId};
+use crate::{
+    runtimes::{SingleRuntime, SingleRuntimeId},
+    Scope, Signal,
+};
 
 pub fn create_1000_nested() -> (
     Scope<SingleRuntimeId>,

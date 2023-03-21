@@ -7,9 +7,7 @@ pub mod profile;
 mod iter;
 mod macros;
 mod primitives;
-// mod runtime;
-// mod runtime_inner;
-mod runtimes;
+pub mod runtimes;
 mod scope;
 mod scope_inner;
 mod signal;
@@ -19,7 +17,5 @@ mod signal_kind;
 mod updater;
 
 use runtimes::Runtime;
-use scope::Scope;
+pub use scope::Scope;
 pub use signal::Signal;
-
-pub use runtimes::*;

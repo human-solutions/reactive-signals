@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{signal, tests::StringStore, RuntimePool};
+use crate::{runtimes::RuntimePool, signal, tests::StringStore};
 
 #[test]
 fn test_scopes_deep() {

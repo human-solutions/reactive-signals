@@ -33,7 +33,7 @@ macro_rules! signal {
 
 #[test]
 fn test() {
-    use crate::RuntimePool;
+    use crate::runtimes::RuntimePool;
     let sx = RuntimePool::new_root_scope();
     let _sig = signal!(sx, 32);
     // assert!(!sig.eq);
