@@ -32,15 +32,6 @@ impl<RT: Runtime> ScopeInner<RT> {
         f(&signal)
     }
 
-    pub fn with_signal_mut<F, T>(&self, id: SignalId<RT>, f: F) -> T
-    where
-        F: FnOnce(&mut SignalInner<RT>) -> T,
-    {
-        let mut signals = self.signals.borrow_mut();
-        let mut signal = signals.get_mut(id.index()).unwrap();
-        f(&mut signal)
-    }
-
     pub(crate) fn remove_scopes(&mut self, discarded_scopes: &NodeBitVec) {
         let mut signals = self.signals.borrow_mut();
         signals

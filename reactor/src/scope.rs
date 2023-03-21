@@ -30,12 +30,3 @@ impl<RT: Runtime> Scope<RT> {
         })
     }
 }
-
-impl<RT: Runtime> PartialEq for Scope<RT> {
-    #[inline]
-    fn eq(&self, other: &Scope<RT>) -> bool {
-        self.sx == other.sx
-    }
-}
-
-impl<RT: Runtime> Eq for Scope<RT> {}

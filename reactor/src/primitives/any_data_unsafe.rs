@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::{any::Any, cell::UnsafeCell};
 
 pub struct AnyData(pub(crate) Box<UnsafeCell<dyn Any>>);
@@ -17,7 +15,7 @@ impl std::fmt::Debug for AnyData {
 }
 
 impl AnyData {
-    pub fn with<T: 'static>(&self, f: impl Fn(&T)) {
+    pub fn with<T: 'static, R>(&self, f: impl Fn(&T) -> R) -> R {
         unsafe {
             let val_any: &dyn Any = &*self.0.get();
             let val = (*val_any).downcast_ref::<T>().unwrap();
@@ -25,7 +23,7 @@ impl AnyData {
         }
     }
 
-    pub fn with_mut<T: 'static>(&self, f: impl Fn(&mut T)) {
+    pub fn update<T: 'static, R>(&self, f: impl Fn(&mut T) -> R) -> R {
         unsafe {
             let val_any: &mut dyn Any = &mut *self.0.get();
             let val = (*val_any).downcast_mut::<T>().unwrap();
@@ -49,19 +47,11 @@ impl AnyData {
         }
     }
 
-    pub fn set<T: Copy + 'static>(&self, val: T) {
+    pub fn set<T: 'static>(&self, val: T) {
         unsafe {
             let val_any: &mut dyn Any = &mut *self.0.get();
             let val_t = (*val_any).downcast_mut::<T>().unwrap();
             *val_t = val
-        }
-    }
-
-    pub fn update<T: Copy + 'static>(&self, f: impl Fn(T) -> T) {
-        unsafe {
-            let val_any: &mut dyn Any = &mut *self.0.get();
-            let val_t = (*val_any).downcast_mut::<T>().unwrap();
-            *val_t = f(*val_t)
         }
     }
 }

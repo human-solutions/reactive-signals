@@ -4,7 +4,7 @@ use crate::{runtimes::Runtime, Scope, Signal};
 
 // https://github.com/dtolnay/case-studies/tree/master/autoref-specialization
 
-pub(crate) trait EqFuncKind {
+pub trait EqFuncKind {
     #[inline]
     fn func_kind(&self) -> EqFunc {
         EqFunc
@@ -19,7 +19,7 @@ where
 {
 }
 
-pub(crate) trait TrueFuncKind {
+pub trait TrueFuncKind {
     #[inline]
     fn func_kind(&self) -> TrueFunc {
         TrueFunc
@@ -34,11 +34,11 @@ where
 {
 }
 
-pub(crate) struct EqFunc;
+pub struct EqFunc;
 
 impl EqFunc {
     #[inline]
-    pub(crate) fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<T, RT>
+    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<T, RT>
     where
         F: Fn() -> T + 'static,
         T: PartialEq + 'static,
@@ -47,11 +47,11 @@ impl EqFunc {
         Signal::new_func_eq(sx, func)
     }
 }
-pub(crate) struct TrueFunc;
+pub struct TrueFunc;
 
 impl TrueFunc {
     #[inline]
-    pub(crate) fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<T, RT>
+    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<T, RT>
     where
         F: Fn() -> T + 'static,
         T: 'static,
@@ -63,7 +63,7 @@ impl TrueFunc {
 
 // ====== DATA =======
 
-pub(crate) trait EqDataKind {
+pub trait EqDataKind {
     #[inline]
     fn data_kind(&self) -> EqData {
         EqData
@@ -73,7 +73,7 @@ pub(crate) trait EqDataKind {
 // Does not require any autoref if called as (&error).datakind().
 impl<T, RT: Runtime> EqDataKind for (Scope<RT>, T) where T: PartialEq + 'static {}
 
-pub(crate) trait TrueDataKind {
+pub trait TrueDataKind {
     #[inline]
     fn func_kind(&self) -> TrueData {
         TrueData
@@ -83,11 +83,11 @@ pub(crate) trait TrueDataKind {
 // Requires one extra autoref to call! Lower priority than EqKind.
 impl<T, RT: Runtime> TrueDataKind for &(Scope<RT>, T) where T: 'static {}
 
-pub(crate) struct EqData;
+pub struct EqData;
 
 impl EqData {
     #[inline]
-    pub(crate) fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<T, RT>
+    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<T, RT>
     where
         T: PartialEq + 'static,
     {
@@ -95,11 +95,11 @@ impl EqData {
         Signal::new_data_eq(sx, value)
     }
 }
-pub(crate) struct TrueData;
+pub struct TrueData;
 
 impl TrueData {
     #[inline]
-    pub(crate) fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<T, RT>
+    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<T, RT>
     where
         T: 'static,
     {

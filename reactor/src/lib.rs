@@ -15,4 +15,4 @@ mod updater;
 
 use runtimes::Runtime;
 pub use scope::Scope;
-pub use signal::Signal;
+pub use signal::*;

@@ -3,7 +3,7 @@ use std::any::Any;
 use super::AnyData;
 
 #[cfg(not(feature = "use-unsafe"))]
-type BoxAnyData = Box<RefCell<dyn Any>>;
+type BoxAnyData = Box<std::cell::RefCell<dyn Any>>;
 #[cfg(feature = "use-unsafe")]
 type BoxAnyData = Box<std::cell::UnsafeCell<dyn Any>>;
 

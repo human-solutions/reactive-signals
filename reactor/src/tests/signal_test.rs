@@ -31,7 +31,7 @@ fn test_signal_func_val() {
     let b_sig = signal!(cx, move || format!("b{}", num_sig.get()));
 
     let _str_sig = signal!(cx, clone: output, move || {
-        output.push(format!("{}-{}", a_sig.get(), b_sig.get()))
+        output.push(format!("{}-{}", a_sig.cloned(), b_sig.cloned()))
     });
 
     num_sig.set(4);

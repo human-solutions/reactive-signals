@@ -16,12 +16,12 @@ pub enum SignalValue {
 
 #[derive(Debug)]
 pub(crate) struct SignalInner<RT: Runtime> {
-    pub(crate) value: SignalValue,
+    pub(super) value: SignalValue,
     pub(crate) listeners: SignalSet<3, SignalId<RT>>,
 }
 
 impl<RT: Runtime> SignalInner<RT> {
-    fn value(&self) -> &AnyData {
+    pub(crate) fn value(&self) -> &AnyData {
         match self.value {
             SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => value,
             #[cfg(debug_assertions)]
@@ -29,14 +29,10 @@ impl<RT: Runtime> SignalInner<RT> {
         }
     }
 
-    pub fn get<T: 'static + Clone>(&self) -> T {
-        self.value().cloned()
-    }
-
-    pub(crate) fn set<T: 'static>(&mut self, new_value: T) {
+    pub(crate) fn set<T: 'static>(&self, new_value: T) {
         match self.value {
-            SignalValue::Data(ref mut value) | SignalValue::Func(DynFunc { ref mut value, .. }) => {
-                *value = AnyData::new(new_value)
+            SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => {
+                value.set(new_value)
             }
             #[cfg(debug_assertions)]
             SignalValue::Reuse => panic!("BUG: using a reused signal"),
