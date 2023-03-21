@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 mod inner;
 mod pool;
 

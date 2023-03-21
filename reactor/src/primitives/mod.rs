@@ -1,14 +1,14 @@
-#![allow(unused_imports)]
-
 mod arr_vec;
 mod dyn_func;
 mod u15_bool;
-mod u31_bool;
 
 pub(crate) use arr_vec::ArrVec;
 pub(crate) use dyn_func::DynFunc;
 pub(crate) use u15_bool::u15Bool;
-pub(crate) use u31_bool::u31Bool;
+
+// kept for future use if a feature "large-indexes" is added
+// mod u31_bool;
+// pub(crate) use u31_bool::u31Bool;
 
 ///// any_data ////
 

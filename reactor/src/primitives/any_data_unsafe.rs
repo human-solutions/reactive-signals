@@ -1,9 +1,6 @@
 #![allow(dead_code)]
 
-use std::{
-    any::Any,
-    cell::{RefCell, UnsafeCell},
-};
+use std::{any::Any, cell::UnsafeCell};
 
 pub struct AnyData(pub(crate) Box<UnsafeCell<dyn Any>>);
 

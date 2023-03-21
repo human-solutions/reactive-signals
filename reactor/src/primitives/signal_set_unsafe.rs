@@ -1,7 +1,4 @@
-use std::{
-    cell::{RefCell, UnsafeCell},
-    ops::Index,
-};
+use std::cell::UnsafeCell;
 
 use super::ArrVec;
 
@@ -61,7 +58,7 @@ impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
 #[test]
 fn test_retain() {
     use crate::runtimes::PoolRuntimeId;
-    use crate::{primitives::u15Bool, signal_id::SignalId, Runtime};
+    use crate::{primitives::u15Bool, signal_id::SignalId};
     use arena_link_tree::NodeId;
 
     let sig1_scope1 = SignalId {

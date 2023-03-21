@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::{any::Any, cell::RefCell};
 
 pub struct AnyData(pub(crate) Box<RefCell<dyn Any>>);
