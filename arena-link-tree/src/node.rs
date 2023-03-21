@@ -10,18 +10,19 @@ impl From<usize> for NodeId {
 }
 
 impl NodeId {
+    pub(crate) const MAX: usize = u16::MAX as usize - 1;
+
+    #[inline]
     pub(crate) fn index(self) -> usize {
         self.0.get() as usize - 1
     }
 
-    pub(crate) fn max() -> usize {
-        u16::MAX as usize - 1
-    }
-
+    #[inline]
     pub(crate) fn root() -> Self {
         Self(unsafe { NonZeroU16::new_unchecked(1) })
     }
 
+    #[inline]
     pub fn as_raw(&self) -> u16 {
         self.0.get()
     }

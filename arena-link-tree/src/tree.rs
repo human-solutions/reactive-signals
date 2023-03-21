@@ -65,11 +65,9 @@ impl<T: Default> Tree<T> {
             );
             return id;
         } else {
-            let idx = self.len();
-            if idx > NodeId::max() {
-                panic!("too many nodes");
-            }
-            self.push(Default::default());
+            let idx = self.nodes.len();
+            debug_assert!(idx <= NodeId::MAX, "too many nodes");
+            self.nodes.push(Default::default());
             idx.into()
         }
     }
@@ -99,7 +97,7 @@ impl<T: Default> Tree<T> {
         );
         let root_id = self.availability.init();
 
-        self.push(Node::new(data));
+        self.nodes.push(Node::new(data));
         self.initialized = true;
         root_id
     }

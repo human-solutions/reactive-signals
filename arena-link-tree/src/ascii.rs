@@ -4,7 +4,7 @@ use crate::{NodeId, Tree};
 
 impl<T: Default> Tree<T> {
     pub fn ascii(&self, data_fmt: &impl Fn(&T) -> String) -> String {
-        if self.is_empty() {
+        if self.nodes.is_empty() {
             "".to_string()
         } else {
             self.ascii_node(self.root(), data_fmt)
