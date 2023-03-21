@@ -1,8 +1,8 @@
 use crate::{
     iter::{IdVec, RefVecElem},
     runtimes::Runtime,
-    scope_inner::ScopeInner,
     signal::{SignalId, SignalInner},
+    ScopeInner,
 };
 use arena_link_tree::Tree;
 
@@ -28,6 +28,6 @@ impl<'a, RT: Runtime> NodeResolver<'a> for Tree<ScopeInner<RT>> {
     type Id = SignalId<RT>;
     type Elem = RefVecElem<'a, SignalInner<RT>>;
     fn node(&'a self, id: SignalId<RT>) -> Self::Elem {
-        RefVecElem::new(self[id.sx].signals.borrow(), id.id.as_usize())
+        RefVecElem::new(self[id.sx].vec_ref(), id.id.as_usize())
     }
 }

@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 
 use arena_link_tree::NodeBitVec;
 
@@ -6,13 +6,13 @@ use crate::{runtimes::Runtime, scope::Scope, signal::SignalId, signal::SignalInn
 
 #[derive(Debug, Default)]
 pub(crate) struct ScopeInner<RT: Runtime> {
-    pub(crate) signals: RefCell<Vec<SignalInner<RT>>>,
+    signals: RefCell<Vec<SignalInner<RT>>>,
 }
 
 impl<RT: Runtime> ScopeInner<RT> {
     /// **Warning!**
     ///
-    /// This signal is not yet valid. There has to be a subsequent
+    /// This signal id is not yet valid. There has to be a subsequent
     /// call to `insert_signal` before it is valid
     pub fn next_signal_id(&self, sx: Scope<RT>) -> SignalId<RT> {
         let idx = self.signals.borrow().len();
@@ -43,5 +43,9 @@ impl<RT: Runtime> ScopeInner<RT> {
         let mut signals = self.signals.borrow_mut();
         signals.iter_mut().for_each(|signal| signal.reuse());
         signals.clear();
+    }
+
+    pub(crate) fn vec_ref(&self) -> Ref<Vec<SignalInner<RT>>> {
+        self.signals.borrow()
     }
 }
