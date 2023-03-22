@@ -29,16 +29,6 @@ impl<RT: Runtime> SignalInner<RT> {
         }
     }
 
-    pub(crate) fn set<T: 'static>(&self, new_value: T) {
-        match self.value {
-            SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => {
-                value.set(new_value)
-            }
-            #[cfg(debug_assertions)]
-            SignalValue::Reuse => panic!("BUG: using a reused signal"),
-        }
-    }
-
     pub(crate) fn run(&self, rt: &RuntimeInner<RT>, id: SignalId<RT>) -> bool {
         if let SignalValue::Func(func) = &self.value {
             let previous = rt.set_running_signal(Some(id));

@@ -8,7 +8,7 @@ impl<T: 'static, RT: Runtime> Signal<T, RT> {
     /// otherwise it always notifies.
     pub fn set(&self, val: T) {
         self.id.rt_ref(|rt| {
-            rt[self.id].with_signal(self.id, |sig| sig.set(val));
+            rt[self.id].with_signal(self.id, |sig| sig.value().set(val));
             propagate_change(rt, self.id);
         });
     }
