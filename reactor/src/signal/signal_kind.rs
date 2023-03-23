@@ -3,7 +3,7 @@
 use std::hash::Hash;
 
 use crate::{
-    primitives::{Data, EqData},
+    primitives::{Data, EqData, EqFunc, Func},
     runtimes::Runtime,
     Scope, Signal,
 };
@@ -12,8 +12,8 @@ use crate::{
 
 pub trait EqFuncKind {
     #[inline]
-    fn signal_kind(&self) -> EqFunc {
-        EqFunc
+    fn signal_kind(&self) -> EqFuncSignal {
+        EqFuncSignal
     }
 }
 
@@ -40,11 +40,11 @@ where
 {
 }
 
-pub struct EqFunc;
+pub struct EqFuncSignal;
 
-impl EqFunc {
+impl EqFuncSignal {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<EqData<T>, RT>
+    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<EqFunc<T>, RT>
     where
         F: Fn() -> T + 'static,
         T: PartialEq + 'static,
@@ -57,7 +57,7 @@ pub struct TrueFunc;
 
 impl TrueFunc {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<Data<T>, RT>
+    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<Func<T>, RT>
     where
         F: Fn() -> T + 'static,
         T: 'static,

@@ -1,7 +1,7 @@
 use std::{hash::Hash, marker::PhantomData};
 
 use crate::{
-    primitives::{AnyData, Compare, Data, DynFunc, EqData, HashEqData},
+    primitives::{AnyData, Data, DynFunc, EqData, EqFunc, Func, HashEqData, SignalType},
     runtimes::Runtime,
     scope::Scope,
     Signal,
@@ -9,7 +9,7 @@ use crate::{
 
 use super::{SignalInner, SignalValue};
 
-impl<T: 'static + Compare, RT: Runtime> Signal<T, RT> {
+impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
     pub(super) fn data(sx: Scope<RT>, data: AnyData) -> Signal<T, RT> {
         let id = sx.rt.with_ref(|rt| {
             let scope = &rt.scope_tree[sx.sx];
@@ -49,27 +49,31 @@ impl<T: 'static + Compare, RT: Runtime> Signal<T, RT> {
     }
 }
 
-impl<T: 'static, RT: Runtime> Signal<Data<T>, RT> {
+impl<T: 'static, RT: Runtime> Signal<Func<T>, RT> {
     #[inline]
-    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<Data<T>, RT> {
+    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<Func<T>, RT> {
         Self::func(sx, || DynFunc::new(func))
     }
+}
 
+impl<T: 'static, RT: Runtime> Signal<Data<T>, RT> {
     #[inline]
     pub(crate) fn new_data(sx: Scope<RT>, data: T) -> Signal<Data<T>, RT> {
         Self::data(sx, AnyData::new(Data(data)))
     }
 }
 
-impl<T: PartialEq + 'static, RT: Runtime> Signal<EqData<T>, RT> {
+impl<T: PartialEq + 'static, RT: Runtime> Signal<EqFunc<T>, RT> {
     #[inline]
     pub(crate) fn new_func_eq<F: Fn() -> T + 'static>(
         sx: Scope<RT>,
         func: F,
-    ) -> Signal<EqData<T>, RT> {
+    ) -> Signal<EqFunc<T>, RT> {
         Self::func(sx, || DynFunc::new_eq(func))
     }
+}
 
+impl<T: PartialEq + 'static, RT: Runtime> Signal<EqData<T>, RT> {
     #[inline]
     pub(crate) fn new_data_eq(sx: Scope<RT>, data: T) -> Signal<EqData<T>, RT> {
         Self::data(sx, AnyData::new(EqData(data)))

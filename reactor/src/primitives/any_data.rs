@@ -2,7 +2,7 @@ use std::any::Any;
 
 use crate::CellType;
 
-use super::Compare;
+use super::SignalType;
 
 pub struct AnyData(pub(crate) Box<CellType<dyn Any>>);
 
@@ -19,7 +19,7 @@ impl AnyData {
 
     pub fn with<T, R>(&self, f: impl Fn(&T::Inner) -> R) -> R
     where
-        T: Compare + 'static,
+        T: SignalType + 'static,
     {
         let val_any = self.val_ref();
         let val = (*val_any).downcast_ref::<T>().unwrap();
@@ -28,7 +28,7 @@ impl AnyData {
 
     pub fn update<T, R>(&self, f: impl Fn(&mut T::Inner) -> R) -> (bool, R)
     where
-        T: Compare + 'static,
+        T: SignalType + 'static,
     {
         let val_any = self.val_mut();
         let val = (*val_any).downcast_mut::<T>().unwrap();
@@ -44,7 +44,7 @@ impl AnyData {
 
     pub fn cloned<T>(&self) -> T::Inner
     where
-        T: Compare + 'static,
+        T: SignalType + 'static,
         T::Inner: Clone,
     {
         let val_any = self.val_ref();
@@ -54,7 +54,7 @@ impl AnyData {
 
     pub fn get<T>(&self) -> T::Inner
     where
-        T: Compare + 'static,
+        T: SignalType + 'static,
         T::Inner: Copy,
     {
         let val_any = self.val_ref();
@@ -62,7 +62,7 @@ impl AnyData {
         *val.inner()
     }
 
-    pub fn set<T: Compare + 'static>(&self, val: T::Inner) -> bool {
+    pub fn set<T: SignalType + 'static>(&self, val: T::Inner) -> bool {
         let val_any = self.val_mut();
         let val_t = (*val_any).downcast_mut::<T>().unwrap();
         let eq = val_t.is_eq(&val);

@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use super::{AnyData, Compare, Data, EqData};
+use super::{AnyData, EqFunc, Func, SignalType};
 
 #[cfg(not(feature = "unsafe-cell"))]
 type BoxAnyData = Box<std::cell::RefCell<dyn Any>>;
@@ -24,19 +24,19 @@ impl DynFunc {
         F: Fn() -> T + 'static,
         T: 'static,
     {
-        let val = AnyData::new(Data(func()));
+        let val = AnyData::new(Func(func()));
         let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
             #[cfg(not(feature = "unsafe-cell"))]
             {
                 let mut old_any = val.borrow_mut();
-                let old: &mut T = old_any.downcast_mut::<Data<T>>().unwrap();
+                let old: &mut T = old_any.downcast_mut::<Func<T>>().unwrap();
                 *old = new;
             }
             #[cfg(feature = "unsafe-cell")]
             unsafe {
                 let old_any: &mut dyn Any = &mut *val.get();
-                let old: &mut T = old_any.downcast_mut::<Data<T>>().unwrap().inner_mut();
+                let old: &mut T = old_any.downcast_mut::<Func<T>>().unwrap().inner_mut();
                 *old = new;
             }
             true
@@ -49,13 +49,13 @@ impl DynFunc {
         F: Fn() -> T + 'static,
         T: PartialEq + 'static,
     {
-        let val = AnyData::new(EqData(func()));
+        let val = AnyData::new(EqFunc(func()));
         let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
             #[cfg(not(feature = "unsafe-cell"))]
             {
                 let mut old_any = val.borrow_mut();
-                let old: &mut T = old_any.downcast_mut::<EqData<T>>().unwrap();
+                let old: &mut T = old_any.downcast_mut::<EqFunc<T>>().unwrap();
 
                 let changed = new != *old;
                 *old = new;
@@ -64,7 +64,7 @@ impl DynFunc {
             #[cfg(feature = "unsafe-cell")]
             unsafe {
                 let old_any: &mut dyn Any = &mut *val.get();
-                let old: &mut T = old_any.downcast_mut::<EqData<T>>().unwrap().inner_mut();
+                let old: &mut T = old_any.downcast_mut::<EqFunc<T>>().unwrap().inner_mut();
                 let changed = new != *old;
                 *old = new;
                 changed
@@ -81,19 +81,19 @@ impl DynFunc {
 fn test_usize() {
     let num_fn = DynFunc::new_eq(|| 42usize);
     assert_eq!(num_fn.run(), false);
-    assert_eq!(num_fn.value.get::<EqData<usize>>(), 42);
+    assert_eq!(num_fn.value.get::<EqFunc<usize>>(), 42);
 
     // no equality checking
     let num_fn = DynFunc::new(|| 42usize);
     assert_eq!(num_fn.run(), true);
-    assert_eq!(num_fn.value.get::<Data<usize>>(), 42);
+    assert_eq!(num_fn.value.get::<Func<usize>>(), 42);
 }
 
 #[test]
 fn test_string() {
     let string_fn = DynFunc::new_eq(|| "hello".to_string());
     assert_eq!(
-        string_fn.value.cloned::<EqData<String>>(),
+        string_fn.value.cloned::<EqFunc<String>>(),
         "hello".to_string()
     );
 
@@ -111,7 +111,7 @@ fn test_string() {
     assert_eq!(dyn_fn.run(), false);
 
     assert_eq!(
-        dyn_fn.value.cloned::<EqData<String>>(),
+        dyn_fn.value.cloned::<EqFunc<String>>(),
         "Val: 1".to_string()
     );
     {
@@ -122,7 +122,7 @@ fn test_string() {
     assert_eq!(dyn_fn.run(), false);
 
     assert_eq!(
-        dyn_fn.value.cloned::<EqData<String>>(),
+        dyn_fn.value.cloned::<EqFunc<String>>(),
         "Val: 2".to_string()
     );
 }

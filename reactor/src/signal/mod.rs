@@ -9,7 +9,7 @@ mod signal_new;
 
 use std::marker::PhantomData;
 
-use crate::{primitives::Compare, runtimes::Runtime};
+use crate::{primitives::SignalType, runtimes::Runtime};
 pub(crate) use signal_id::SignalId;
 pub(crate) use signal_inner::{SignalInner, SignalValue};
 #[allow(unused_imports)] // allowed because these are used by the signal! macro.
@@ -69,19 +69,20 @@ pub use signal_kind::{EqDataKind, EqFuncKind, HashEqDataKind, TrueDataKind, True
 /// name.update(|t| *t = "fig");
 /// assert_eq!(text.cloned(), "1 fig");
 ///
-/// // 1 kiwi is repated because when changing count is_plural changes as well
-/// // this will be detected in future versions and only notified once.
+/// // 1 kiwi is repated because when changing count, is_plural changes as well
+/// // triggering a second update of the text. This will be detected in
+/// // future versions and only notified once.
 /// assert_eq!(
 ///     history.with(|h| h.join(", ")),
 ///     "5 kiwis, 1 kiwi, 1 kiwi, 1 fig"
 /// );
 /// ```
-pub struct Signal<T: Compare, RT: Runtime> {
+pub struct Signal<T: SignalType, RT: Runtime> {
     id: SignalId<RT>,
     ty: PhantomData<T>,
 }
 
-impl<T: Compare, RT: Runtime> Clone for Signal<T, RT> {
+impl<T: SignalType, RT: Runtime> Clone for Signal<T, RT> {
     fn clone(&self) -> Self {
         Self {
             id: self.id,
@@ -89,7 +90,8 @@ impl<T: Compare, RT: Runtime> Clone for Signal<T, RT> {
         }
     }
 }
-impl<T: Compare, RT: Runtime> Copy for Signal<T, RT> {}
+
+impl<T: SignalType, RT: Runtime> Copy for Signal<T, RT> {}
 
 #[test]
 fn test_example() {
@@ -132,8 +134,9 @@ fn test_example() {
     name.update(|t| *t = "fig");
     assert_eq!(text.cloned(), "1 fig");
 
-    // 1 kiwi is repated because when changing count is_plural changes as well
-    // this will be detected in future versions and only notified once.
+    // 1 kiwi is repated because when changing count, is_plural changes as well
+    // triggering a second update of the text. This will be detected in
+    // future versions and only notified once.
     assert_eq!(
         history.with(|h| h.join(", ")),
         "5 kiwis, 1 kiwi, 1 kiwi, 1 fig"

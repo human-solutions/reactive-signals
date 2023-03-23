@@ -1,5 +1,5 @@
 use crate::{
-    primitives::{Compare, Modify},
+    primitives::{Modify, SignalType},
     runtimes::Runtime,
     updater::propagate_change,
     Signal,
@@ -9,7 +9,7 @@ use super::{SignalId, SignalInner};
 
 impl<T, RT> Signal<T, RT>
 where
-    T: 'static + Compare + Modify,
+    T: 'static + SignalType + Modify,
     RT: Runtime,
 {
     /// Set the signal's value and notifies subscribers
@@ -56,7 +56,7 @@ where
 
 impl<T, RT> Signal<T, RT>
 where
-    T: 'static + Compare,
+    T: 'static + SignalType,
     T::Inner: Copy,
     RT: Runtime,
 {
@@ -66,9 +66,9 @@ where
     }
 }
 
-impl<T: 'static + Compare, RT: Runtime> Signal<T, RT>
+impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT>
 where
-    T: 'static + Compare,
+    T: 'static + SignalType,
     T::Inner: Clone,
     RT: Runtime,
 {
@@ -80,7 +80,7 @@ where
     }
 }
 
-impl<T: 'static + Compare, RT: Runtime> Signal<T, RT> {
+impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
     /// Applies a function to the current value to mutate it in place and returns
     /// whatever that function returns.
     ///

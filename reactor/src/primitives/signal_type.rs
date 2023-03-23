@@ -4,28 +4,65 @@ use std::{
 };
 
 pub trait Modify {}
+pub trait DataSignal {}
 
-pub trait Compare {
+pub trait FuncSignal {}
+
+pub trait SignalType {
     type Inner;
-    fn is_eq(&self, other: &Self::Inner) -> bool;
-    fn opt_hash(&self) -> Option<u64>;
-
-    fn inner(&self) -> &Self::Inner;
-    fn inner_mut(&mut self) -> &mut Self::Inner;
-}
-
-pub struct Data<T>(pub(crate) T);
-
-impl<T> Modify for Data<T> {}
-
-impl<T> Compare for Data<T> {
-    type Inner = T;
-    fn is_eq(&self, _: &Self::Inner) -> bool {
+    fn is_eq(&self, _other: &Self::Inner) -> bool {
         false
     }
     fn opt_hash(&self) -> Option<u64> {
         None
     }
+
+    fn inner(&self) -> &Self::Inner;
+    fn inner_mut(&mut self) -> &mut Self::Inner;
+}
+
+pub struct Func<T>(pub(crate) T);
+
+impl<T> FuncSignal for Func<T> {}
+
+impl<T> SignalType for Func<T> {
+    type Inner = T;
+
+    fn inner(&self) -> &Self::Inner {
+        &self.0
+    }
+    fn inner_mut(&mut self) -> &mut Self::Inner {
+        &mut self.0
+    }
+}
+
+pub struct EqFunc<T>(pub(crate) T);
+
+impl<T> FuncSignal for EqFunc<T> {}
+
+impl<T: PartialEq> SignalType for EqFunc<T> {
+    type Inner = T;
+
+    fn is_eq(&self, other: &Self::Inner) -> bool {
+        self.0 == *other
+    }
+
+    fn inner(&self) -> &Self::Inner {
+        &self.0
+    }
+    fn inner_mut(&mut self) -> &mut Self::Inner {
+        &mut self.0
+    }
+}
+
+pub struct Data<T>(pub(crate) T);
+
+impl<T> Modify for Data<T> {}
+impl<T> DataSignal for Data<T> {}
+
+impl<T> SignalType for Data<T> {
+    type Inner = T;
+
     fn inner(&self) -> &Self::Inner {
         &self.0
     }
@@ -37,15 +74,14 @@ impl<T> Compare for Data<T> {
 pub struct EqData<T>(pub(crate) T);
 
 impl<T> Modify for EqData<T> {}
+impl<T> DataSignal for EqData<T> {}
 
-impl<T: PartialEq> Compare for EqData<T> {
+impl<T: PartialEq> SignalType for EqData<T> {
     type Inner = T;
     fn is_eq(&self, other: &Self::Inner) -> bool {
         self.0 == *other
     }
-    fn opt_hash(&self) -> Option<u64> {
-        None
-    }
+
     fn inner(&self) -> &Self::Inner {
         &self.0
     }
@@ -58,8 +94,9 @@ impl<T: PartialEq> Compare for EqData<T> {
 pub struct HashEqData<T>(pub(crate) T);
 
 impl<T> Modify for HashEqData<T> {}
+impl<T> DataSignal for HashEqData<T> {}
 
-impl<T: PartialEq + Hash> Compare for HashEqData<T> {
+impl<T: PartialEq + Hash> SignalType for HashEqData<T> {
     type Inner = T;
     fn is_eq(&self, other: &Self::Inner) -> bool {
         self.0 == *other
@@ -81,7 +118,7 @@ impl<T: PartialEq + Hash> Compare for HashEqData<T> {
 }
 
 #[cfg(test)]
-fn set<T: 'static + Compare>(val1: &T, val2: &T::Inner) -> bool {
+fn set<T: 'static + SignalType>(val1: &T, val2: &T::Inner) -> bool {
     val1.is_eq(&val2)
 }
 
