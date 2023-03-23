@@ -1,5 +1,5 @@
 use crate::{
-    primitives::{Modify, SignalType},
+    primitives::{DataSignal, SignalType},
     runtimes::Runtime,
     updater::propagate_change,
     Signal,
@@ -9,7 +9,7 @@ use super::{SignalId, SignalInner};
 
 impl<T, RT> Signal<T, RT>
 where
-    T: 'static + SignalType + Modify,
+    T: 'static + SignalType + DataSignal,
     RT: Runtime,
 {
     /// Set the signal's value and notifies subscribers

@@ -3,7 +3,6 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-pub trait Modify {}
 pub trait DataSignal {}
 
 pub trait FuncSignal {}
@@ -57,7 +56,6 @@ impl<T: PartialEq> SignalType for EqFunc<T> {
 
 pub struct Data<T>(pub(crate) T);
 
-impl<T> Modify for Data<T> {}
 impl<T> DataSignal for Data<T> {}
 
 impl<T> SignalType for Data<T> {
@@ -73,7 +71,6 @@ impl<T> SignalType for Data<T> {
 
 pub struct EqData<T>(pub(crate) T);
 
-impl<T> Modify for EqData<T> {}
 impl<T> DataSignal for EqData<T> {}
 
 impl<T: PartialEq> SignalType for EqData<T> {
@@ -93,7 +90,6 @@ impl<T: PartialEq> SignalType for EqData<T> {
 
 pub struct HashEqData<T>(pub(crate) T);
 
-impl<T> Modify for HashEqData<T> {}
 impl<T> DataSignal for HashEqData<T> {}
 
 impl<T: PartialEq + Hash> SignalType for HashEqData<T> {
