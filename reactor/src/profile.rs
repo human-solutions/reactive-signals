@@ -1,12 +1,13 @@
 use crate::{
+    primitives::Data,
     runtimes::{SingleRuntime, SingleRuntimeId},
     Scope, Signal,
 };
 
 pub fn create_1000_nested() -> (
     Scope<SingleRuntimeId>,
-    Signal<usize, SingleRuntimeId>,
-    Signal<usize, SingleRuntimeId>,
+    Signal<Data<usize>, SingleRuntimeId>,
+    Signal<Data<usize>, SingleRuntimeId>,
 ) {
     let mut scope = SingleRuntime::bench_root_scope();
 
@@ -27,8 +28,8 @@ pub fn create_1000_nested() -> (
 
 pub fn create_1000_siblings() -> (
     Scope<SingleRuntimeId>,
-    Signal<usize, SingleRuntimeId>,
-    Signal<usize, SingleRuntimeId>,
+    Signal<Data<usize>, SingleRuntimeId>,
+    Signal<Data<usize>, SingleRuntimeId>,
 ) {
     let scope = SingleRuntime::bench_root_scope();
     // don't use the signal! macro, because we want to force the signals to

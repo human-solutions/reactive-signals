@@ -7,6 +7,7 @@ fn test_signal_dep() {
     let cx = RuntimePool::new_root_scope();
 
     let num_sig = signal!(cx, 5);
+    assert_eq!(num_sig.get(), 5);
 
     let output = Rc::new(StringStore::new());
     let out = output.clone();

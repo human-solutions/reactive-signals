@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{
-    primitives::{AnyData, DynFunc},
+    primitives::{AnyData, Compare, Data, DynFunc, EqData},
     runtimes::Runtime,
     scope::Scope,
     Signal,
@@ -9,7 +9,7 @@ use crate::{
 
 use super::{SignalInner, SignalValue};
 
-impl<T: 'static, RT: Runtime> Signal<T, RT> {
+impl<T: 'static + Compare, RT: Runtime> Signal<T, RT> {
     pub(super) fn data(sx: Scope<RT>, data: AnyData) -> Signal<T, RT> {
         let id = sx.rt.with_ref(|rt| {
             let scope = &rt.scope_tree[sx.sx];
@@ -25,11 +25,6 @@ impl<T: 'static, RT: Runtime> Signal<T, RT> {
             id,
             ty: PhantomData,
         }
-    }
-
-    #[inline]
-    pub(crate) fn new_data(sx: Scope<RT>, data: T) -> Signal<T, RT> {
-        Self::data(sx, AnyData::new(data))
     }
 
     pub(super) fn func(sx: Scope<RT>, func: impl FnOnce() -> DynFunc) -> Signal<T, RT> {
@@ -52,21 +47,31 @@ impl<T: 'static, RT: Runtime> Signal<T, RT> {
             ty: PhantomData,
         }
     }
+}
+
+impl<T: 'static, RT: Runtime> Signal<Data<T>, RT> {
+    #[inline]
+    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<Data<T>, RT> {
+        Self::func(sx, || DynFunc::new(func))
+    }
 
     #[inline]
-    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<T, RT> {
-        Self::func(sx, || DynFunc::new(func))
+    pub(crate) fn new_data(sx: Scope<RT>, data: T) -> Signal<Data<T>, RT> {
+        Self::data(sx, AnyData::new(Data(data)))
     }
 }
 
-impl<T: PartialEq + 'static, RT: Runtime> Signal<T, RT> {
+impl<T: PartialEq + 'static, RT: Runtime> Signal<EqData<T>, RT> {
     #[inline]
-    pub(crate) fn new_func_eq<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<T, RT> {
+    pub(crate) fn new_func_eq<F: Fn() -> T + 'static>(
+        sx: Scope<RT>,
+        func: F,
+    ) -> Signal<EqData<T>, RT> {
         Self::func(sx, || DynFunc::new_eq(func))
     }
 
     #[inline]
-    pub(crate) fn new_data_eq(sx: Scope<RT>, data: T) -> Signal<T, RT> {
-        Self::data(sx, AnyData::new(data))
+    pub(crate) fn new_data_eq(sx: Scope<RT>, data: T) -> Signal<EqData<T>, RT> {
+        Self::data(sx, AnyData::new(EqData(data)))
     }
 }

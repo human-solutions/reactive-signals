@@ -5,7 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
-default = []
+default = ["unsafe-cell"]
 profile = ["dep:pprof", "dep:criterion"]
 # use UnsafeCell instead of RefCell. Gain 40% performance for signal propagation
 unsafe-cell = []

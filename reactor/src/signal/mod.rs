@@ -6,7 +6,7 @@ mod signal_new;
 
 use std::marker::PhantomData;
 
-use crate::runtimes::Runtime;
+use crate::{primitives::Compare, runtimes::Runtime};
 pub(crate) use signal_id::SignalId;
 pub(crate) use signal_inner::{SignalInner, SignalValue};
 #[allow(unused_imports)] // allowed because these are used by the signal! macro.
@@ -65,12 +65,12 @@ pub use signal_kind::{EqDataKind, EqFuncKind, TrueDataKind, TrueFuncKind};
 ///     "5 kiwis, 1 kiwi, 1 kiwi, 1 fig"
 /// );
 /// ```
-pub struct Signal<T, RT: Runtime> {
+pub struct Signal<T: Compare, RT: Runtime> {
     id: SignalId<RT>,
     ty: PhantomData<T>,
 }
 
-impl<T, RT: Runtime> Clone for Signal<T, RT> {
+impl<T: Compare, RT: Runtime> Clone for Signal<T, RT> {
     fn clone(&self) -> Self {
         Self {
             id: self.id,
@@ -78,7 +78,7 @@ impl<T, RT: Runtime> Clone for Signal<T, RT> {
         }
     }
 }
-impl<T, RT: Runtime> Copy for Signal<T, RT> {}
+impl<T: Compare, RT: Runtime> Copy for Signal<T, RT> {}
 
 #[test]
 fn test_example() {
@@ -105,6 +105,9 @@ fn test_example() {
     });
 
     assert_eq!(text.cloned(), "5 kiwis");
+
+    count.set(1);
+    assert_eq!(text.cloned(), "1 kiwi");
 
     count.set(1);
     assert_eq!(text.cloned(), "1 kiwi");

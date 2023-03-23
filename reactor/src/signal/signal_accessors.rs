@@ -1,15 +1,21 @@
-use crate::{runtimes::Runtime, updater::propagate_change, Signal};
+use crate::{primitives::Compare, runtimes::Runtime, updater::propagate_change, Signal};
 
 use super::{SignalId, SignalInner};
 
-impl<T: 'static, RT: Runtime> Signal<T, RT> {
+impl<T, RT> Signal<T, RT>
+where
+    T: 'static + Compare,
+    RT: Runtime,
+{
     /// Set the signal's value and notifies subscribers
     /// if the value changed when it implements `PartialEq`
     /// otherwise it always notifies.
-    pub fn set(&self, val: T) {
+    pub fn set(&self, val: T::Inner) {
         self.id.rt_ref(|rt| {
-            rt[self.id].with_signal(self.id, |sig| sig.value().set(val));
-            propagate_change(rt, self.id);
+            let is_equal = rt[self.id].with_signal(self.id, |sig| sig.value().set::<T>(val));
+            if !is_equal {
+                propagate_change(rt, self.id);
+            }
         });
     }
 
@@ -31,32 +37,42 @@ impl<T: 'static, RT: Runtime> Signal<T, RT> {
     /// });
     /// ```
     ///
-    pub fn update<R: 'static>(&self, f: impl Fn(&mut T) -> R) -> R {
+    pub fn update<R: 'static>(&self, f: impl Fn(&mut T::Inner) -> R) -> R {
         self.id.rt_ref(|rt| {
-            let r = rt[self.id].with_signal(self.id, |sig| sig.value().update(f));
+            let r = rt[self.id].with_signal(self.id, |sig| sig.value().update::<T, R>(f));
             propagate_change(rt, self.id);
             r
         })
     }
 }
 
-impl<T: Copy + 'static, RT: Runtime> Signal<T, RT> {
+impl<T, RT> Signal<T, RT>
+where
+    T: 'static + Compare,
+    T::Inner: Copy,
+    RT: Runtime,
+{
     /// Get a copy of the signal value (if the value implements [Copy])
-    pub fn get(&self) -> T {
-        register_and_run(self.id, |sig| sig.value().get())
+    pub fn get(&self) -> T::Inner {
+        register_and_run(self.id, |sig| sig.value().get::<T>())
     }
 }
 
-impl<T: Clone + 'static, RT: Runtime> Signal<T, RT> {
+impl<T: 'static + Compare, RT: Runtime> Signal<T, RT>
+where
+    T: 'static + Compare,
+    T::Inner: Clone,
+    RT: Runtime,
+{
     /// Get a clone of the signal value (if the value implements [Clone])
     ///
     /// Use the `.with()` function if you can in order to avoid the clone.
-    pub fn cloned(&self) -> T {
-        register_and_run(self.id, |sig| sig.value().cloned())
+    pub fn cloned(&self) -> T::Inner {
+        register_and_run(self.id, |sig| sig.value().cloned::<T>())
     }
 }
 
-impl<T: 'static, RT: Runtime> Signal<T, RT> {
+impl<T: 'static + Compare, RT: Runtime> Signal<T, RT> {
     /// Applies a function to the current value to mutate it in place and returns
     /// whatever that function returns.
     ///
@@ -72,8 +88,8 @@ impl<T: 'static, RT: Runtime> Signal<T, RT> {
     /// let is_even = count.with(|val| *val % 2 == 0);
     /// ```
     ///
-    pub fn with<R: 'static>(&self, f: impl Fn(&T) -> R) -> R {
-        register_and_run(self.id, |sig| sig.value().with(f))
+    pub fn with<R: 'static>(&self, f: impl Fn(&T::Inner) -> R) -> R {
+        register_and_run(self.id, |sig| sig.value().with::<T, R>(f))
     }
 }
 

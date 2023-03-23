@@ -1,6 +1,10 @@
 #![allow(dead_code)]
 
-use crate::{runtimes::Runtime, Scope, Signal};
+use crate::{
+    primitives::{Data, EqData},
+    runtimes::Runtime,
+    Scope, Signal,
+};
 
 // https://github.com/dtolnay/case-studies/tree/master/autoref-specialization
 
@@ -38,7 +42,7 @@ pub struct EqFunc;
 
 impl EqFunc {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<T, RT>
+    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<EqData<T>, RT>
     where
         F: Fn() -> T + 'static,
         T: PartialEq + 'static,
@@ -51,7 +55,7 @@ pub struct TrueFunc;
 
 impl TrueFunc {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<T, RT>
+    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<Data<T>, RT>
     where
         F: Fn() -> T + 'static,
         T: 'static,
@@ -65,8 +69,8 @@ impl TrueFunc {
 
 pub trait EqDataKind {
     #[inline]
-    fn data_kind(&self) -> EqData {
-        EqData
+    fn data_kind(&self) -> EqSignal {
+        EqSignal
     }
 }
 
@@ -75,19 +79,19 @@ impl<T, RT: Runtime> EqDataKind for (Scope<RT>, T) where T: PartialEq + 'static 
 
 pub trait TrueDataKind {
     #[inline]
-    fn func_kind(&self) -> TrueData {
-        TrueData
+    fn func_kind(&self) -> TrueSignal {
+        TrueSignal
     }
 }
 
 // Requires one extra autoref to call! Lower priority than EqKind.
 impl<T, RT: Runtime> TrueDataKind for &(Scope<RT>, T) where T: 'static {}
 
-pub struct EqData;
+pub struct EqSignal;
 
-impl EqData {
+impl EqSignal {
     #[inline]
-    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<T, RT>
+    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<EqData<T>, RT>
     where
         T: PartialEq + 'static,
     {
@@ -95,11 +99,11 @@ impl EqData {
         Signal::new_data_eq(sx, value)
     }
 }
-pub struct TrueData;
+pub struct TrueSignal;
 
-impl TrueData {
+impl TrueSignal {
     #[inline]
-    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<T, RT>
+    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<Data<T>, RT>
     where
         T: 'static,
     {

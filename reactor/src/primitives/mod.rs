@@ -1,8 +1,10 @@
 mod arr_vec;
+mod data_compare;
 mod dyn_func;
 mod u15_bool;
 
 pub(crate) use arr_vec::ArrVec;
+pub(crate) use data_compare::*;
 pub(crate) use dyn_func::DynFunc;
 pub(crate) use u15_bool::u15Bool;
 

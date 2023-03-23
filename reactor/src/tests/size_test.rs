@@ -1,7 +1,7 @@
 use std::{cell::RefCell, mem, num::NonZeroU16};
 
 use crate::{
-    primitives::{AnyData, DynFunc, SignalSet},
+    primitives::{AnyData, DynFunc, EqData, SignalSet},
     runtimes::SingleRuntimeId,
     signal::SignalId,
     signal::{SignalInner, SignalValue},
@@ -10,8 +10,8 @@ use crate::{
 
 #[test]
 fn test_signal_sizes() {
-    assert_eq!(4, mem::size_of::<Signal<String, SingleRuntimeId>>());
-    assert_eq!(4, mem::size_of::<Signal<usize, SingleRuntimeId>>());
+    assert_eq!(4, mem::size_of::<Signal<EqData<String>, SingleRuntimeId>>());
+    assert_eq!(4, mem::size_of::<Signal<EqData<usize>, SingleRuntimeId>>());
 }
 
 #[test]
