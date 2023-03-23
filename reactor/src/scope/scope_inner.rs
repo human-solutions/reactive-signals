@@ -1,4 +1,4 @@
-use arena_tree::NodeBitVec;
+use arena_tree::FlagVec;
 
 use crate::{runtimes::Runtime, scope::Scope, signals::SignalId, signals::SignalInner, CellType};
 
@@ -30,12 +30,14 @@ impl<RT: Runtime> ScopeInner<RT> {
         f(&signal)
     }
 
-    pub(crate) fn remove_scopes(&mut self, discarded_scopes: &NodeBitVec) {
+    pub(crate) fn remove_scopes(&mut self, discarded_scopes: &FlagVec) {
         #[allow(unused_mut)]
         let mut signals = self.vec_mut();
-        signals
-            .iter_mut()
-            .for_each(|signal| signal.listeners.retain(|s| !discarded_scopes[s.sx]));
+        signals.iter_mut().for_each(|signal| {
+            signal
+                .listeners
+                .retain(|s| !discarded_scopes.get(s.sx.as_raw() as usize))
+        });
     }
 
     pub(crate) fn reuse(&self) {

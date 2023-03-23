@@ -1,173 +1,160 @@
-use std::ops::Range;
+use crate::{flag_arr::FlagArr, Node, NodeId};
 
-use crate::{Node, NodeId};
+#[derive(Debug, Default)]
+pub(crate) struct NodeSlotAvailability(pub(crate) FlagArr);
 
-#[derive(Debug)]
-pub(crate) struct NodeSlotAvailability(pub(crate) Vec<u8>);
-
-const FULL: u8 = u8::MAX;
-const SLOT_SIZE: usize = 100;
+const SLOT_SIZE: usize = 16;
 
 impl NodeSlotAvailability {
+    #[inline]
     pub(crate) fn set_available(&mut self, id: NodeId) {
-        set_available(SLOT_SIZE, &mut self.0, id.index());
+        set_available(&mut self.0, id.index());
     }
 
+    #[inline]
     pub(crate) fn get_available<T>(&mut self, vec: &[Node<T>]) -> Option<NodeId> {
-        get_available(SLOT_SIZE, &mut self.0, |mut range| {
-            range.end = usize::min(range.end, vec.len());
-            for idx in range {
-                if !vec[idx].is_used() && idx != 0 {
-                    return Some(idx);
-                }
-            }
-            None
-        })
-        .map(NodeId::from)
+        get_available(&mut self.0, |i| !(i == 0 || vec[i].is_used())).map(NodeId::from)
     }
 
-    pub(crate) fn create() -> Self {
-        Self(Vec::new())
-    }
-
+    #[inline]
     pub(crate) fn init(&mut self) -> NodeId {
-        debug_assert!(
-            self.0.len() == 0,
-            "initializing NodeSlotAvailability but it already contains {} ids",
-            self.0.len()
-        );
-
+        self.0.init();
         NodeId::root()
     }
 
+    #[inline]
     pub(crate) fn discard(&mut self) {
-        self.0.clear();
-        // reduce size if very big.
-        // 1000 entries with SLOT_SIZE of 100 gives a capacity of 10,000 node ids.
-        // and will have a size of 1000 bytes + vec overhead (normally 16 bytes on a 64-bit arch)
-        self.0.truncate(1000);
+        self.0.reset();
     }
 }
 
-impl Default for NodeSlotAvailability {
-    fn default() -> Self {
-        Self::create()
-    }
-}
 #[inline]
-fn set_available(slot_size: usize, slots: &mut Vec<u8>, idx: usize) {
-    debug_assert!(slot_size < u8::MAX as usize);
-
-    let slot_index = idx / slot_size;
-    let sub_index = (idx % slot_size) as u8;
-
-    while slots.len() <= slot_index {
-        slots.push(FULL);
-    }
-
-    match slots[slot_index] {
-        FULL => {
-            slots[slot_index] = sub_index;
-        }
-        i if i > sub_index => {
-            slots[slot_index] = sub_index;
-        }
-        _ => {}
-    }
+fn set_available(flags: &mut FlagArr, idx: usize) {
+    let slot_idx = idx / SLOT_SIZE;
+    flags.set(slot_idx);
 }
 
-/// Find next available index and updates it to next one
 #[inline]
-fn get_available(
-    slot_size: usize,
-    slots: &mut Vec<u8>,
-    next_available_index: impl FnOnce(Range<usize>) -> Option<usize>,
-) -> Option<usize> {
-    debug_assert!(slot_size < u8::MAX as usize, "slot too big: {slot_size}");
-    let slot = slots.iter().position(|&i| i != FULL)?;
+fn get_available(flags: &mut FlagArr, is_available: impl Fn(usize) -> bool) -> Option<usize> {
+    let Some(slot_idx) = flags.take_last() else {
+        return None;
+    };
+    let mut i = slot_idx * SLOT_SIZE;
+    let slot_end = i + SLOT_SIZE;
 
-    let sub_idx = slots[slot] as usize;
+    let mut found_idx = usize::MAX;
 
-    let slot_start = slot * slot_size;
-
-    let node = slot_start + sub_idx;
-
-    if sub_idx + 1 >= slot_size {
-        slots[slot] = FULL;
-        return Some(node);
+    while i < slot_end {
+        if is_available(i) {
+            found_idx = i;
+            i += 1;
+            break;
+        }
+        i += 1;
     }
-    let range = (slot_start + sub_idx + 1)..(slot_start + slot_size);
 
-    #[cfg(debug_assertions)]
-    let range_dbg = range.clone();
-
-    // update to next available slot
-    if let Some(i) = next_available_index(range) {
-        #[cfg(debug_assertions)]
-        assert!(range_dbg.contains(&i));
-        slots[slot] = (i % slot_size) as u8;
-    } else {
-        slots[slot] = FULL;
+    while i < slot_end {
+        if is_available(i) {
+            flags.set(slot_idx);
+            return Some(found_idx);
+        }
+        i += 1;
     }
-    Some(node)
+    // for i in slot_start..slot_end {
+    //     let available = is_available(i);
+    //     match (found, available) {
+    //         (true, true) => {
+    //             flags.set(slot_idx);
+    //             return Some(found_idx);
+    //         }
+    //         (false, true) => {
+    //             found = true;
+    //             found_idx = i;
+    //         }
+    //         _ => {}
+    //     }
+    // }
+
+    (found_idx != usize::MAX).then(|| found_idx)
 }
 
 #[test]
-fn test_available() {
-    let mut slots = vec![FULL, FULL, FULL];
-    const SLOT_SIZE: usize = 10;
+fn test_set_available() {
+    let mut flags = FlagArr::default();
+    assert_eq!(format!("{flags:?}"), "[]");
 
-    let found = get_available(SLOT_SIZE, &mut slots, |_| None);
-    assert_eq!(found, None);
+    set_available(&mut flags, 0);
+    assert_eq!(flags.arr[0], 0b1000_0000_0000_0000_0000_0000_0000_0000);
 
-    set_available(10, &mut slots, 3);
-    assert_eq!(format!("{slots:?}"), "[3, 255, 255]");
+    flags.reset();
+    set_available(&mut flags, 6);
+    assert_eq!(flags.arr[0], 0b1000_0000_0000_0000_0000_0000_0000_0000);
 
-    let found = get_available(SLOT_SIZE, &mut slots, |_| Some(8));
-    assert_eq!(format!("{found:?} {slots:?}"), "Some(3) [8, 255, 255]");
+    flags.reset();
+    set_available(&mut flags, 15);
+    assert_eq!(flags.arr[0], 0b1000_0000_0000_0000_0000_0000_0000_0000);
 
-    let found = get_available(SLOT_SIZE, &mut slots, |_| Some(9));
-    assert_eq!(format!("{found:?} {slots:?}"), "Some(8) [9, 255, 255]");
+    flags.reset();
+    set_available(&mut flags, 16);
+    assert_eq!(flags.arr[0], 0b0100_0000_0000_0000_0000_0000_0000_0000);
 
-    let found = get_available(SLOT_SIZE, &mut slots, |r| {
-        assert_eq!(r, 9..10);
-        None
+    flags.reset();
+    set_available(&mut flags, 31);
+    assert_eq!(flags.arr[0], 0b0100_0000_0000_0000_0000_0000_0000_0000);
+
+    flags.reset();
+    let i = 32 * 16;
+    set_available(&mut flags, i);
+    assert_eq!(flags.arr[1], 0b1000_0000_0000_0000_0000_0000_0000_0000);
+}
+
+#[test]
+fn test_get_available() {
+    use std::cell::RefCell;
+
+    let mut flags = FlagArr::default();
+    let visited = RefCell::new(Vec::<String>::new());
+
+    flags.set(0);
+
+    let found = get_available(&mut flags, |i| {
+        let mut v = visited.borrow_mut();
+        v.push(format!("{i}"));
+        debug_assert!(i < 100);
+        2 == i || 4 == i
     });
-    assert_eq!(format!("{found:?} {slots:?}"), "Some(9) [255, 255, 255]");
 
-    set_available(SLOT_SIZE, &mut slots, 10);
-    assert_eq!(format!("{slots:?}"), "[255, 0, 255]");
+    assert_eq!(visited.borrow().join(" "), "0 1 2 3 4");
+    assert_eq!(found, Some(2));
+    assert_eq!(flags.arr[0], 0b1000_0000_0000_0000_0000_0000_0000_0000);
 
-    let found = get_available(SLOT_SIZE, &mut slots, |_| Some(11));
-    assert_eq!(format!("{found:?} {slots:?}"), "Some(10) [255, 1, 255]");
+    visited.borrow_mut().clear();
 
-    let found = get_available(SLOT_SIZE, &mut slots, |r| Some(r.end - 1));
-    assert_eq!(format!("{found:?} {slots:?}"), "Some(11) [255, 9, 255]");
+    let found = get_available(&mut flags, |i| {
+        let mut v = visited.borrow_mut();
+        v.push(format!("{i}"));
+        0 == i
+    });
+    assert_eq!(
+        visited.borrow().join(" "),
+        "0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
+    );
+    visited.borrow_mut().clear();
 
-    let found = get_available(SLOT_SIZE, &mut slots, |_| None);
-    assert_eq!(format!("{found:?} {slots:?}"), "Some(19) [255, 255, 255]");
+    assert_eq!(found, Some(0));
+    assert_eq!(flags.arr[0], 0b0000_0000_0000_0000_0000_0000_0000_0000);
 
-    set_available(SLOT_SIZE, &mut slots, 23);
+    flags.set(1);
 
-    let found = get_available(SLOT_SIZE, &mut slots, |_| Some(27));
-    assert_eq!(format!("{found:?} {slots:?}"), "Some(23) [255, 255, 7]");
-}
+    let found = get_available(&mut flags, |i| {
+        let mut v = visited.borrow_mut();
+        v.push(format!("{i}"));
+        23 == i || 22 == i
+    });
 
-#[test]
-fn test_availability() {
-    let mut availability = NodeSlotAvailability::default();
-    let mut vec = Vec::new();
+    assert_eq!(visited.borrow().join(" "), "16 17 18 19 20 21 22 23");
+    visited.borrow_mut().clear();
 
-    for i in 0..1000 {
-        let mut node = Node::new(i);
-        node.parent = Some(NodeId::from(0));
-        vec.push(node);
-    }
-
-    assert_eq!(availability.get_available(&vec), None);
-
-    availability.set_available(NodeId::from(1));
-
-    assert_eq!(availability.get_available(&vec), Some(NodeId::from(1)));
-    assert_eq!(availability.get_available(&vec), None);
+    assert_eq!(found, Some(22));
+    assert_eq!(flags.arr[0], 0b0100_0000_0000_0000_0000_0000_0000_0000);
 }

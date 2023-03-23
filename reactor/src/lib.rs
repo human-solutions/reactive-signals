@@ -14,19 +14,18 @@
 //! - Extremely slim API surface that is really powerful.
 //! - Developer experience: You create reactive signals and they update automatically in a predictable manner. There's not much more to know.
 //! - Memory and performance overhead so low that a developer doesn't need to worry about it.
-//! - No external dependencies (<sup>TBD</sup> remove [bitvec](https://crates.io/crates/bitvec) which is slow and pulls in a lot of polluting dependencies).
 //! - An easy-to-use [signal!] macro for creating all kinds of signals including data and functional signals, _server_ and _client_ only signals etc.
 //! - [Signal]s produce a reactive value, for data signals it's the contained data and for functional signals it's the value produce by the function.
 //!   When the value implements [PartialEq] then the subscribers will be notified only if the value changes.
 //! - Type-safe attached data to scopes. See the [Scope] doc.<sup>TBD</sup>
 //! - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive). See [Benchmarks](Self#Benchmarks) below.
-//! - Production-class test-coverage<sup>TBD</sup>
+//! - Production-class test-coverage<sup>TBC</sup>
 //! - Mirror the leptos_reactive api with deprecations that gives instructions on how to upgrade in order
 //!   to give a really smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
-//! - **Push-pull updates**: Guarantees that the nodes are only updated once and only if necessary.
+//! - Push-pull updates: Guarantees that the nodes are only updated once and only if necessary.
 //!   See end of the [reactively](https://github.com/modderme123/reactively) readme for more information.<sup>TBC</sup>
-//! - **Tokio [tracing](https://crates.io/crates/tracing)** compatibility.<sup>TBC</sup>
-//! - **async** signals with runtimes using a custom async runtime when running in a web browser and
+//! - Tokio [tracing](https://crates.io/crates/tracing) compatibility.<sup>TBC</sup>
+//! - async signals with runtimes using a custom async runtime when running in a web browser and
 //!   [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!] doc.<sup>TBC</sup>
 //! - See [Evolutions](Self#Evolutions) for more possible features.
 //!
@@ -133,13 +132,13 @@
 //!
 //! Please see the benches, examples and tests for full details.
 //!
-//! # A personal note & the future of reactor
+//! # A personal note & the future of Reactor
 //!
-//! I have spent a lot of time on reactor which has been entirely self-funded. Unfortunately,
+//! I have spent a lot of time on Reactor which has been entirely self-funded. Unfortunately,
 //! it is not possible for me to continue like that (I would love to!).
 //!
 //! The future of Reactor depends on your reactions and if you want to fund the really
-//! cool features. The ones I listed with a <sup>TBC</sup>. I believe there's a huge potiential for
+//! cool features, the ones I listed with a <sup>TBC</sup>. I believe there's a huge potiential for
 //! Leptos and Reactor together.
 //!
 //! Reactor could also be used outside of Leptos, but for now, since my heart lies
@@ -150,7 +149,7 @@
 //! to any type of freelance contract work that would allow me to continue
 //! developing and maintaining the open source projects I have and plan to do.
 //!
-//! Mentioning my other open source projects:, there's a couple that I have been working
+//! Mentioning my other open source projects, there's a couple that I have been working
 //! on for a while in stealth mode:
 //! 1. an easy way to package Rust libraries as iOS and Android packages, including resources.
 //! 1. packaging Leptos apps into iOS and Android packages that can be used as a simple WebView

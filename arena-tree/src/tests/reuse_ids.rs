@@ -25,6 +25,7 @@ fn reuse_ids() {
     "###);
     assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [2] 2, [3] 3, [4] 20, [5] 21, [6] 22");
 
+    // assert_eq!(tree.nodes[0].is_used(), true);
     tree.discard(c2, |_| {});
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"
     0
@@ -32,9 +33,17 @@ fn reuse_ids() {
      └─ 3
     "###);
     assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [3] 3");
-    assert_snapshot!(format!("{:?}", tree.availability.0), @"[2]");
+    assert_eq!(
+        tree.availability.0.arr[0],
+        0b1000_0000_0000_0000_0000_0000_0000_0000
+    );
     let _ = tree.add_child(c1, 11);
-    assert_snapshot!(format!("{:?}", tree.availability.0), @"[4]");
+    assert_snapshot!(tree.dump_used(), @"[0] 0, [1] 1, [2] 11, [3] 3");
+
+    assert_eq!(
+        tree.availability.0.arr[0],
+        0b1000_0000_0000_0000_0000_0000_0000_0000
+    );
     let _ = tree.add_child(c3, 31);
 
     assert_snapshot!(tree.ascii(&|d| d.to_string()), @r###"

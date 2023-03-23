@@ -1,9 +1,9 @@
 use crate::{
     availability::NodeSlotAvailability,
+    flag_vec::FlagVec,
     iter::{DepthFirstIter, MutDepthFirstIter},
     Node, NodeId,
 };
-use bitvec::prelude::*;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 #[derive(Debug)]
@@ -172,34 +172,19 @@ impl<T: Default> Tree<T> {
         self.initialized = false;
     }
 
-    pub fn discard(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) -> NodeBitVec {
+    pub fn discard(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) -> FlagVec {
         self.detach(node);
 
-        let ids = NodeBitVec(bitvec![u32, Msb0; 0; self.nodes.len()]);
+        let ids = FlagVec::with_size(self.nodes.len());
         let ids = self.iter_mut_from(node).fold(ids, |tree, mut ids, id| {
             tree.nodes[id.index()].reuse();
             tree.availability.set_available(id);
             reuse_data(&mut tree.nodes[id.index()].data);
-            ids.set(id);
+            ids.set(id.index());
             ids
         });
         self.nodes[node.index()].reuse();
         self.availability.set_available(node);
         ids
-    }
-}
-
-pub struct NodeBitVec(BitVec<u32, Msb0>);
-
-impl NodeBitVec {
-    pub(crate) fn set(&mut self, id: NodeId) {
-        self.0.set(id.index(), true);
-    }
-}
-
-impl Index<NodeId> for NodeBitVec {
-    type Output = bool;
-    fn index(&self, id: NodeId) -> &Self::Output {
-        &self.0[id.index()]
     }
 }
