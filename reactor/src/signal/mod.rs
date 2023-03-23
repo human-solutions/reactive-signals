@@ -37,23 +37,31 @@ pub use signal_kind::{EqDataKind, EqFuncKind, HashEqDataKind, TrueDataKind, True
 /// #
 /// // a simple data value
 /// let count = signal!(sx, 5);
+///
 /// // a simple string value
 /// let name = signal!(sx, "kiwi");
+///
 /// // is_plural will update when count changes
 /// let is_plural = signal!(sx, move || count.get() != 1);
+///
 /// // we'll keep a history of all changes
 /// let history = signal!(sx, Vec::<String>::new());
 ///
 /// let text = signal!(sx, move || {
 ///     let ending = if is_plural.get() { "s" } else { "" };
 ///     let txt = format!("{} {}{ending}", count.get(), name.get());
-///     // using .update we can add the text to the vec without cloning
+///     // using .update we can add the text to the vec without cloning the vec
 ///     history.update(|hist| hist.push(txt.clone()));
 ///     txt
 /// });
 ///
 /// assert_eq!(text.cloned(), "5 kiwis");
 ///
+/// // when setting to same value the subscribers are not notified.
+/// name.set("kiwi");
+/// assert_eq!(history.with(|h| h.join(", ")), "5 kiwis");
+///
+/// // when changing the count the name and is_plural are updated automatically.
 /// count.set(1);
 /// assert_eq!(text.cloned(), "1 kiwi");
 ///
@@ -92,27 +100,31 @@ fn test_example() {
 
     // a simple data value
     let count = signal!(sx, 5);
+
     // a simple string value
     let name = signal!(sx, "kiwi");
+
     // is_plural will update when count changes
     let is_plural = signal!(sx, move || count.get() != 1);
+
     // we'll keep a history of all changes
-    let v = Vec::<String>::new();
-    let history = signal!(sx, v);
+    let history = signal!(sx, Vec::<String>::new());
 
     let text = signal!(sx, move || {
         let ending = if is_plural.get() { "s" } else { "" };
         let txt = format!("{} {}{ending}", count.get(), name.get());
-        // using .update we can add the text to the vec without cloning
+        // using .update we can add the text to the vec without cloning the vec
         history.update(|hist| hist.push(txt.clone()));
         txt
     });
 
     assert_eq!(text.cloned(), "5 kiwis");
 
-    count.set(1);
-    assert_eq!(text.cloned(), "1 kiwi");
+    // when setting to same value the subscribers are not notified.
+    name.set("kiwi");
+    assert_eq!(history.with(|h| h.join(", ")), "5 kiwis");
 
+    // when changing the count the name and is_plural are updated automatically.
     count.set(1);
     assert_eq!(text.cloned(), "1 kiwi");
 
