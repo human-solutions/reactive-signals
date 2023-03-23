@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 mod signal_accessors;
 mod signal_id;
 mod signal_inner;

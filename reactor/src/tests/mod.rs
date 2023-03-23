@@ -1,21 +1,19 @@
 use std::cell::RefCell;
 
-mod scope_test;
-mod signal_test;
 mod size_test;
 
-struct StringStore(RefCell<Vec<String>>);
+pub struct StringStore(RefCell<Vec<String>>);
 
 impl StringStore {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self(RefCell::new(Vec::new()))
     }
 
-    fn push(&self, value: String) {
+    pub fn push(&self, value: String) {
         self.0.borrow_mut().push(value);
     }
 
-    fn values(&self) -> String {
+    pub fn values(&self) -> String {
         self.0
             .borrow()
             .iter()
