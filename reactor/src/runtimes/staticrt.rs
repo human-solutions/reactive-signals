@@ -43,12 +43,12 @@ impl StaticRuntime {
 #[cfg(not(feature = "unsafe-cell"))]
 impl StaticRuntimeId {
     #[inline]
-    fn rt_ref(&self) -> cell::Ref<RuntimeInner<StaticRuntimeId>> {
+    fn rt_ref(&self) -> std::cell::Ref<RuntimeInner<StaticRuntimeId>> {
         self.0.borrow()
     }
 
     #[inline]
-    fn rt_mut(&self) -> cell::RefMut<RuntimeInner<StaticRuntimeId>> {
+    fn rt_mut(&self) -> std::cell::RefMut<RuntimeInner<StaticRuntimeId>> {
         self.0.borrow_mut()
     }
 }

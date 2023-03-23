@@ -34,12 +34,12 @@ impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
 #[cfg(not(feature = "unsafe-cell"))]
 impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
     #[inline]
-    fn vec_mut(&self) -> cell::RefMut<ArrVec<N, T>> {
+    fn vec_mut(&self) -> std::cell::RefMut<ArrVec<N, T>> {
         self.0.borrow_mut()
     }
 
     #[inline]
-    fn vec_ref(&self) -> cell::Ref<ArrVec<N, T>> {
+    fn vec_ref(&self) -> std::cell::Ref<ArrVec<N, T>> {
         self.0.borrow()
     }
 }

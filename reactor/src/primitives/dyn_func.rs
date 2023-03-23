@@ -1,11 +1,10 @@
 use std::any::Any;
 
+use crate::CellType;
+
 use super::{AnyData, EqFunc, Func, SignalType};
 
-#[cfg(not(feature = "unsafe-cell"))]
-type BoxAnyData = Box<std::cell::RefCell<dyn Any>>;
-#[cfg(feature = "unsafe-cell")]
-type BoxAnyData = Box<std::cell::UnsafeCell<dyn Any>>;
+type BoxAnyData = Box<CellType<dyn Any>>;
 
 pub struct DynFunc {
     pub(crate) func: Box<dyn Fn(&BoxAnyData) -> bool>,
@@ -27,18 +26,14 @@ impl DynFunc {
         let val = AnyData::new(Func(func()));
         let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
+
             #[cfg(not(feature = "unsafe-cell"))]
-            {
-                let mut old_any = val.borrow_mut();
-                let old: &mut T = old_any.downcast_mut::<Func<T>>().unwrap();
-                *old = new;
-            }
+            let mut old_any = val.borrow_mut();
             #[cfg(feature = "unsafe-cell")]
-            unsafe {
-                let old_any: &mut dyn Any = &mut *val.get();
-                let old: &mut T = old_any.downcast_mut::<Func<T>>().unwrap().inner_mut();
-                *old = new;
-            }
+            let old_any: &mut dyn Any = unsafe { &mut *val.get() };
+
+            let old: &mut T = old_any.downcast_mut::<Func<T>>().unwrap().inner_mut();
+            *old = new;
             true
         });
         Self { func, value: val }
@@ -52,23 +47,16 @@ impl DynFunc {
         let val = AnyData::new(EqFunc(func()));
         let func = Box::new(move |val: &BoxAnyData| {
             let new = func();
-            #[cfg(not(feature = "unsafe-cell"))]
-            {
-                let mut old_any = val.borrow_mut();
-                let old: &mut T = old_any.downcast_mut::<EqFunc<T>>().unwrap();
 
-                let changed = new != *old;
-                *old = new;
-                changed
-            }
+            #[cfg(not(feature = "unsafe-cell"))]
+            let mut old_any = val.borrow_mut();
             #[cfg(feature = "unsafe-cell")]
-            unsafe {
-                let old_any: &mut dyn Any = &mut *val.get();
-                let old: &mut T = old_any.downcast_mut::<EqFunc<T>>().unwrap().inner_mut();
-                let changed = new != *old;
-                *old = new;
-                changed
-            }
+            let old_any: &mut dyn Any = unsafe { &mut *val.get() };
+
+            let old: &mut T = old_any.downcast_mut::<EqFunc<T>>().unwrap().inner_mut();
+            let changed = new != *old;
+            *old = new;
+            changed
         });
         Self { func, value: val }
     }

@@ -30,7 +30,8 @@ impl AnyData {
     where
         T: SignalType + 'static,
     {
-        let val_any = self.val_mut();
+        #[allow(unused_mut)]
+        let mut val_any = self.val_mut();
         let val = (*val_any).downcast_mut::<T>().unwrap();
         let hash_before = val.opt_hash();
         let r = f(val.inner_mut());
@@ -63,7 +64,8 @@ impl AnyData {
     }
 
     pub fn set<T: SignalType + 'static>(&self, val: T::Inner) -> bool {
-        let val_any = self.val_mut();
+        #[allow(unused_mut)]
+        let mut val_any = self.val_mut();
         let val_t = (*val_any).downcast_mut::<T>().unwrap();
         let eq = val_t.is_eq(&val);
         *val_t.inner_mut() = val;
@@ -74,11 +76,11 @@ impl AnyData {
 #[cfg(not(feature = "unsafe-cell"))]
 impl AnyData {
     #[inline]
-    fn val_ref(&self) -> cell::Ref<T> {
+    fn val_ref(&self) -> std::cell::Ref<dyn Any> {
         self.0.borrow()
     }
     #[inline]
-    fn val_mut(&self) -> cell::RefMut<T> {
+    fn val_mut(&self) -> std::cell::RefMut<dyn Any> {
         self.0.borrow_mut()
     }
 }

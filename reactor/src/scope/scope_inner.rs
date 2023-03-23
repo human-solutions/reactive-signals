@@ -31,14 +31,16 @@ impl<RT: Runtime> ScopeInner<RT> {
     }
 
     pub(crate) fn remove_scopes(&mut self, discarded_scopes: &NodeBitVec) {
-        let signals = self.vec_mut();
+        #[allow(unused_mut)]
+        let mut signals = self.vec_mut();
         signals
             .iter_mut()
             .for_each(|signal| signal.listeners.retain(|s| !discarded_scopes[s.sx]));
     }
 
     pub(crate) fn reuse(&self) {
-        let signals = self.vec_mut();
+        #[allow(unused_mut)]
+        let mut signals = self.vec_mut();
         signals.iter_mut().for_each(|signal| signal.reuse());
         signals.clear();
     }
@@ -47,12 +49,12 @@ impl<RT: Runtime> ScopeInner<RT> {
 #[cfg(not(feature = "unsafe-cell"))]
 impl<RT: Runtime> ScopeInner<RT> {
     #[inline]
-    fn rt_ref(&self) -> cell::Ref<Vec<SignalInner<RT>>> {
+    pub(crate) fn vec_ref(&self) -> std::cell::Ref<Vec<SignalInner<RT>>> {
         self.signals.borrow()
     }
 
     #[inline]
-    fn rt_mut(&self) -> cell::RefMut<Vec<SignalInner<RT>>> {
+    fn vec_mut(&self) -> std::cell::RefMut<Vec<SignalInner<RT>>> {
         self.signals.borrow_mut()
     }
 }

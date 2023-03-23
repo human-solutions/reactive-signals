@@ -32,7 +32,8 @@ impl Runtime for SingleRuntimeId {
 impl  SingleRuntime {
     pub fn new_root_scope() -> Scope<SingleRuntimeId> {
         RUNTIME.with(|rt| {
-            let data = rt.rt_mut();
+            #[allow(unused_mut)]
+            let mut data = rt.rt_mut();
             if data.in_use() {
                 panic!("Runtime is already used. Make sure to not call new_root_scope() more than once on a thread");
             }
@@ -60,12 +61,12 @@ impl  SingleRuntime {
 #[cfg(not(feature = "unsafe-cell"))]
 impl SingleRuntime {
     #[inline]
-    fn rt_ref(&self) -> cell::Ref<RuntimeInner<SingleRuntimeId>> {
+    fn rt_ref(&self) -> std::cell::Ref<RuntimeInner<SingleRuntimeId>> {
         self.0.borrow()
     }
 
     #[inline]
-    fn rt_mut(&self) -> cell::RefMut<RuntimeInner<SingleRuntimeId>> {
+    fn rt_mut(&self) -> std::cell::RefMut<RuntimeInner<SingleRuntimeId>> {
         self.0.borrow_mut()
     }
 
