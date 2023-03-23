@@ -3,13 +3,13 @@ use std::cell::RefCell;
 use super::{Runtime, RuntimeInner, Scope};
 
 thread_local! {
-  pub static RUNTIME_POOL: RuntimePool = Default::default();
+  pub static RUNTIME_POOL: ServerRuntimePool = Default::default();
 }
 
 #[derive(Default, Clone, Copy)]
-pub struct PoolRuntimeId(u32);
+pub struct ServerRuntime(u32);
 
-impl PoolRuntimeId {
+impl ServerRuntime {
     pub(crate) fn from(idx: usize) -> Self {
         if idx >= u32::MAX as usize {
             panic!("Too many runtimes. Check your code for leaks. A runtime needs to be discarded");
@@ -18,10 +18,12 @@ impl PoolRuntimeId {
     }
 }
 
-impl Runtime for PoolRuntimeId {
+impl Runtime for ServerRuntime {
+    const IS_SERVER: bool = true;
+
     fn with_mut<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&mut RuntimeInner<PoolRuntimeId>) -> T,
+        F: FnOnce(&mut RuntimeInner<ServerRuntime>) -> T,
     {
         RUNTIME_POOL.with(|pool| {
             let mut pool = pool.0.borrow_mut();
@@ -32,7 +34,7 @@ impl Runtime for PoolRuntimeId {
 
     fn with_ref<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&RuntimeInner<PoolRuntimeId>) -> T,
+        F: FnOnce(&RuntimeInner<ServerRuntime>) -> T,
     {
         RUNTIME_POOL.with(|pool| {
             let pool = pool.0.borrow();
@@ -43,10 +45,10 @@ impl Runtime for PoolRuntimeId {
 }
 
 #[derive(Default)]
-pub struct RuntimePool(RefCell<Vec<RuntimeInner<PoolRuntimeId>>>);
+pub struct ServerRuntimePool(RefCell<Vec<RuntimeInner<ServerRuntime>>>);
 
-impl RuntimePool {
-    pub fn new_root_scope() -> Scope<PoolRuntimeId> {
+impl ServerRuntimePool {
+    pub fn new_root_scope() -> Scope<ServerRuntime> {
         RUNTIME_POOL.with(|rt| {
             let mut vec = rt.0.borrow_mut();
 
@@ -54,13 +56,13 @@ impl RuntimePool {
                 if !rt.in_use() {
                     let id = rt.scope_tree.init(Default::default());
                     return Scope {
-                        rt: PoolRuntimeId(i as u32),
+                        rt: ServerRuntime(i as u32),
                         sx: id,
                     };
                 }
             }
 
-            let id = PoolRuntimeId::from(vec.len());
+            let id = ServerRuntime::from(vec.len());
             let mut rti = RuntimeInner::new();
             rti.scope_tree.init(Default::default());
             let sx = rti.scope_tree.root();
@@ -70,7 +72,7 @@ impl RuntimePool {
     }
 
     #[cfg(any(test, feature = "profile"))]
-    pub fn bench_root_scope() -> Scope<PoolRuntimeId> {
+    pub fn bench_root_scope() -> Scope<ServerRuntime> {
         RUNTIME_POOL.with(|rt| {
             drop(rt.0.borrow_mut().clear());
             Self::new_root_scope()

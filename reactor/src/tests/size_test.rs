@@ -2,7 +2,7 @@ use std::{cell::RefCell, mem, num::NonZeroU16};
 
 use crate::{
     primitives::{AnyData, DynFunc, EqData, SignalSet},
-    runtimes::SingleRuntimeId,
+    runtimes::ClientRuntime,
     signal::SignalId,
     signal::{SignalInner, SignalValue},
     Signal,
@@ -10,8 +10,8 @@ use crate::{
 
 #[test]
 fn test_signal_sizes() {
-    assert_eq!(4, mem::size_of::<Signal<EqData<String>, SingleRuntimeId>>());
-    assert_eq!(4, mem::size_of::<Signal<EqData<usize>, SingleRuntimeId>>());
+    assert_eq!(4, mem::size_of::<Signal<EqData<String>, ClientRuntime>>());
+    assert_eq!(4, mem::size_of::<Signal<EqData<usize>, ClientRuntime>>());
 }
 
 #[test]
@@ -33,23 +33,17 @@ fn size_of_signal_inner() {
 
     #[cfg(feature = "unsafe-cell")]
     // SignalSet: RefCell & Vec = 3 words
-    assert_eq!(
-        mem::size_of::<SignalSet<3, SignalId<SingleRuntimeId>>>(),
-        32
-    );
+    assert_eq!(mem::size_of::<SignalSet<3, SignalId<ClientRuntime>>>(), 32);
     #[cfg(not(feature = "unsafe-cell"))]
     // SignalSet: RefCell & Vec = 4 words
-    assert_eq!(
-        mem::size_of::<SignalSet<3, SignalId<SingleRuntimeId>>>(),
-        40
-    );
+    assert_eq!(mem::size_of::<SignalSet<3, SignalId<ClientRuntime>>>(), 40);
 
     #[cfg(feature = "unsafe-cell")]
     // SignalInner: SignalValue + SignalSet = 7 words (8 words when not in --release)
-    assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 72);
+    assert_eq!(mem::size_of::<SignalInner<ClientRuntime>>(), 72);
     #[cfg(not(feature = "unsafe-cell"))]
     // SignalInner: SignalValue + SignalSet = 8 words (9 words when not in --release)
-    assert_eq!(mem::size_of::<SignalInner<SingleRuntimeId>>(), 80);
+    assert_eq!(mem::size_of::<SignalInner<ClientRuntime>>(), 80);
 
     // unsafe:
     // 64-bit arch: 7 words = 56 bytes
@@ -64,7 +58,7 @@ fn size_of_signal_inner() {
 #[test]
 fn test_subscriber_size() {
     // vec: a pointer, size and capacity
-    assert_eq!(mem::size_of::<Vec<SignalId<SingleRuntimeId>>>(), 24);
+    assert_eq!(mem::size_of::<Vec<SignalId<ClientRuntime>>>(), 24);
     assert_eq!(mem::size_of::<[(u16, u16); 1]>(), 4);
 
     enum Store_u15_NoRT_big {

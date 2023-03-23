@@ -96,10 +96,10 @@ impl<T: SignalType, RT: Runtime> Copy for Signal<T, RT> {}
 
 #[test]
 fn test_example() {
-    use crate::{runtimes::SingleRuntime, signal};
+    use crate::{runtimes::SingleClientRuntime, signal};
 
     // signals are created in scopes
-    let sx = SingleRuntime::new_root_scope();
+    let sx = SingleClientRuntime::new_root_scope();
 
     // a simple data value
     let count = signal!(sx, 5);

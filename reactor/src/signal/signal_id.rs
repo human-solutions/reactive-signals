@@ -87,38 +87,38 @@ impl<RT: Runtime> std::fmt::Debug for SignalId<RT> {
 
 #[test]
 fn signal_id_size() {
-    use crate::runtimes::{PoolRuntimeId, SingleRuntimeId};
+    use crate::runtimes::{ClientRuntime, ServerRuntime};
 
-    assert_eq!(std::mem::size_of::<SignalId<PoolRuntimeId>>(), 8);
-    assert_eq!(std::mem::size_of::<SignalId<SingleRuntimeId>>(), 4);
+    assert_eq!(std::mem::size_of::<SignalId<ServerRuntime>>(), 8);
+    assert_eq!(std::mem::size_of::<SignalId<ClientRuntime>>(), 4);
 }
 
 #[test]
 fn signal_id_ordering() {
-    use crate::runtimes::PoolRuntimeId;
+    use crate::runtimes::ServerRuntime;
 
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(1),
-        rt: PoolRuntimeId::from(4),
+        rt: ServerRuntime::from(4),
     };
 
     let sig2_scope1 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(1),
-        rt: PoolRuntimeId::from(4),
+        rt: ServerRuntime::from(4),
     };
 
     let sig1_scope2 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(2),
-        rt: PoolRuntimeId::from(4),
+        rt: ServerRuntime::from(4),
     };
 
     let sig2_scope2 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(2),
-        rt: PoolRuntimeId::from(4),
+        rt: ServerRuntime::from(4),
     };
 
     assert!(sig1_scope1 < sig2_scope1);

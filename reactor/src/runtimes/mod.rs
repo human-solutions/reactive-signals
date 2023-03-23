@@ -1,18 +1,20 @@
+mod client;
 mod inner;
-mod pool;
-mod single;
+mod server;
 mod staticrt;
 
 #[cfg(any(test, feature = "profile"))]
-pub use self::pool::PoolRuntimeId;
+pub use self::server::ServerRuntime;
 
 use crate::Scope;
+pub use client::{ClientRuntime, SingleClientRuntime};
 pub(crate) use inner::RuntimeInner;
-pub use pool::RuntimePool;
-pub use single::{SingleRuntime, SingleRuntimeId};
+pub use server::ServerRuntimePool;
 pub use staticrt::{StaticRuntime, StaticRuntimeId};
 
 pub trait Runtime: Default + Copy + 'static {
+    const IS_SERVER: bool;
+
     fn with_ref<F, T>(&self, f: F) -> T
     where
         F: FnOnce(&RuntimeInner<Self>) -> T;

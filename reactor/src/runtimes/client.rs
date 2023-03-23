@@ -3,34 +3,36 @@ use crate::CellType;
 use super::{Runtime, RuntimeInner, Scope};
 
 thread_local! {
-  pub static RUNTIME: SingleRuntime = Default::default();
+  pub static RUNTIME: SingleClientRuntime = Default::default();
 }
 
 #[derive(Default)]
-pub struct SingleRuntime(CellType<RuntimeInner<SingleRuntimeId>>);
+pub struct SingleClientRuntime(CellType<RuntimeInner<ClientRuntime>>);
 
 #[derive(Default, Clone, Copy)]
-pub struct SingleRuntimeId;
+pub struct ClientRuntime;
 
-impl Runtime for SingleRuntimeId {
+impl Runtime for ClientRuntime {
+    const IS_SERVER: bool = false;
+    
     fn with_mut<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&mut RuntimeInner<SingleRuntimeId>) -> T,
+        F: FnOnce(&mut RuntimeInner<ClientRuntime>) -> T,
     {
         RUNTIME.with(|rt| f(&mut rt.rt_mut()))
     }
 
     fn with_ref<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&RuntimeInner<SingleRuntimeId>) -> T,
+        F: FnOnce(&RuntimeInner<ClientRuntime>) -> T,
     {
         RUNTIME.with(|rt| f(&rt.rt_ref()))
     }
 
 }
 
-impl  SingleRuntime {
-    pub fn new_root_scope() -> Scope<SingleRuntimeId> {
+impl  SingleClientRuntime {
+    pub fn new_root_scope() -> Scope<ClientRuntime> {
         RUNTIME.with(|rt| {
             #[allow(unused_mut)]
             let mut data = rt.rt_mut();
@@ -43,14 +45,14 @@ impl  SingleRuntime {
 
             Scope {
                 sx,
-                rt: SingleRuntimeId,
+                rt: ClientRuntime,
             }
     
         })
     }
 
     #[cfg(any(test, feature = "profile"))]
-    pub fn bench_root_scope() -> Scope<SingleRuntimeId> {
+    pub fn bench_root_scope() -> Scope<ClientRuntime> {
         RUNTIME.with(|rt| {
             drop(rt.rt_mut().discard());
             Self::new_root_scope()
@@ -59,27 +61,27 @@ impl  SingleRuntime {
 }
 
 #[cfg(not(feature = "unsafe-cell"))]
-impl SingleRuntime {
+impl SingleClientRuntime {
     #[inline]
-    fn rt_ref(&self) -> std::cell::Ref<RuntimeInner<SingleRuntimeId>> {
+    fn rt_ref(&self) -> std::cell::Ref<RuntimeInner<ClientRuntime>> {
         self.0.borrow()
     }
 
     #[inline]
-    fn rt_mut(&self) -> std::cell::RefMut<RuntimeInner<SingleRuntimeId>> {
+    fn rt_mut(&self) -> std::cell::RefMut<RuntimeInner<ClientRuntime>> {
         self.0.borrow_mut()
     }
 
 }
 #[cfg(feature = "unsafe-cell")]
-impl SingleRuntime {
+impl SingleClientRuntime {
     #[inline]
-    fn rt_ref(&self) -> &RuntimeInner<SingleRuntimeId> {
+    fn rt_ref(&self) -> &RuntimeInner<ClientRuntime> {
         unsafe { &*self.0.get() }
     }
 
     #[inline]
-    fn rt_mut(&self) -> &mut RuntimeInner<SingleRuntimeId> {
+    fn rt_mut(&self) -> &mut RuntimeInner<ClientRuntime> {
         unsafe { &mut *self.0.get() }
     }
 }

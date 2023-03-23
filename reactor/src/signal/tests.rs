@@ -1,10 +1,10 @@
 use std::{cell::Cell, rc::Rc};
 
-use crate::{runtimes::RuntimePool, signal, tests::StringStore};
+use crate::{runtimes::ServerRuntimePool, signal, tests::StringStore};
 
 #[test]
 fn test_signal_dep() {
-    let cx = RuntimePool::new_root_scope();
+    let cx = ServerRuntimePool::new_root_scope();
 
     let num_sig = signal!(cx, 5);
     assert_eq!(num_sig.get(), 5);
@@ -24,7 +24,7 @@ fn test_signal_dep() {
 fn test_signal_update() {
     use std::cell::RefCell;
 
-    let cx = RuntimePool::new_root_scope();
+    let cx = ServerRuntimePool::new_root_scope();
 
     let history = Rc::new(RefCell::new(Vec::<String>::new()));
 
@@ -48,7 +48,7 @@ fn test_signal_update() {
 
 #[test]
 fn test_signal_func_val() {
-    let cx = RuntimePool::new_root_scope();
+    let cx = ServerRuntimePool::new_root_scope();
 
     let num_sig = signal!(cx, 5);
 
@@ -68,7 +68,7 @@ fn test_signal_func_val() {
 
 #[test]
 fn test_signal_func_skip_equal() {
-    let cx = RuntimePool::new_root_scope();
+    let cx = ServerRuntimePool::new_root_scope();
 
     let num_sig = signal!(cx, 10);
 

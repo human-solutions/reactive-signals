@@ -14,6 +14,8 @@ impl Default for StaticRuntimeId {
 }
 
 impl Runtime for StaticRuntimeId {
+    const IS_SERVER: bool = false;
+
     #[inline]
     fn with_mut<F, T>(&self, f: F) -> T
     where
