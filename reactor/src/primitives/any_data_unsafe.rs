@@ -28,14 +28,21 @@ impl AnyData {
         }
     }
 
-    pub fn update<T, R>(&self, f: impl Fn(&mut T::Inner) -> R) -> R
+    pub fn update<T, R>(&self, f: impl Fn(&mut T::Inner) -> R) -> (bool, R)
     where
         T: Compare + 'static,
     {
         unsafe {
             let val_any: &mut dyn Any = &mut *self.0.get();
             let val = (*val_any).downcast_mut::<T>().unwrap();
-            f(val.inner_mut())
+            let hash_before = val.opt_hash();
+            let r = f(val.inner_mut());
+            let hash_after = val.opt_hash();
+            let eq = match (hash_before, hash_after) {
+                (Some(h1), Some(h2)) => h1 == h2,
+                _ => false,
+            };
+            (eq, r)
         }
     }
 

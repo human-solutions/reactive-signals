@@ -1,10 +1,15 @@
-use crate::{primitives::Compare, runtimes::Runtime, updater::propagate_change, Signal};
+use crate::{
+    primitives::{Compare, Modify},
+    runtimes::Runtime,
+    updater::propagate_change,
+    Signal,
+};
 
 use super::{SignalId, SignalInner};
 
 impl<T, RT> Signal<T, RT>
 where
-    T: 'static + Compare,
+    T: 'static + Compare + Modify,
     RT: Runtime,
 {
     /// Set the signal's value and notifies subscribers
@@ -39,8 +44,11 @@ where
     ///
     pub fn update<R: 'static>(&self, f: impl Fn(&mut T::Inner) -> R) -> R {
         self.id.rt_ref(|rt| {
-            let r = rt[self.id].with_signal(self.id, |sig| sig.value().update::<T, R>(f));
-            propagate_change(rt, self.id);
+            let (is_equal, r) =
+                rt[self.id].with_signal(self.id, |sig| sig.value().update::<T, R>(f));
+            if !is_equal {
+                propagate_change(rt, self.id);
+            }
             r
         })
     }

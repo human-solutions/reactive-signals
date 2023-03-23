@@ -11,7 +11,7 @@ pub(crate) use signal_id::SignalId;
 pub(crate) use signal_inner::{SignalInner, SignalValue};
 #[allow(unused_imports)] // allowed because these are used by the signal! macro.
 #[doc(hidden)]
-pub use signal_kind::{EqDataKind, EqFuncKind, TrueDataKind, TrueFuncKind};
+pub use signal_kind::{EqDataKind, EqFuncKind, HashEqDataKind, TrueDataKind, TrueFuncKind};
 
 /// A [Signal] is a reactive value or a function that produces a value,
 /// with subscribers that are automatically notified when the value changes.
@@ -94,7 +94,8 @@ fn test_example() {
     // is_plural will update when count changes
     let is_plural = signal!(sx, move || count.get() != 1);
     // we'll keep a history of all changes
-    let history = signal!(sx, Vec::<String>::new());
+    let v = Vec::<String>::new();
+    let history = signal!(sx, v);
 
     let text = signal!(sx, move || {
         let ending = if is_plural.get() { "s" } else { "" };

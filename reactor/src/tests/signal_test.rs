@@ -21,6 +21,32 @@ fn test_signal_dep() {
 }
 
 #[test]
+fn test_signal_update() {
+    use std::cell::RefCell;
+
+    let cx = RuntimePool::new_root_scope();
+
+    let history = Rc::new(RefCell::new(Vec::<String>::new()));
+
+    let string_sig = signal!(cx, "Hi 1".to_string());
+    assert_eq!(string_sig.cloned(), "Hi 1".to_string());
+
+    signal!(cx, clone: history, move || history
+        .borrow_mut()
+        .push(string_sig.cloned()));
+
+    assert_eq!(history.borrow().join(", "), "Hi 1");
+
+    // no change
+    string_sig.set("Hi 1".to_string());
+    assert_eq!(history.borrow().join(", "), "Hi 1");
+
+    // change
+    string_sig.set("Hi 2".to_string());
+    assert_eq!(history.borrow().join(", "), "Hi 1, Hi 2");
+}
+
+#[test]
 fn test_signal_func_val() {
     let cx = RuntimePool::new_root_scope();
 

@@ -1,7 +1,7 @@
-use std::marker::PhantomData;
+use std::{hash::Hash, marker::PhantomData};
 
 use crate::{
-    primitives::{AnyData, Compare, Data, DynFunc, EqData},
+    primitives::{AnyData, Compare, Data, DynFunc, EqData, HashEqData},
     runtimes::Runtime,
     scope::Scope,
     Signal,
@@ -73,5 +73,12 @@ impl<T: PartialEq + 'static, RT: Runtime> Signal<EqData<T>, RT> {
     #[inline]
     pub(crate) fn new_data_eq(sx: Scope<RT>, data: T) -> Signal<EqData<T>, RT> {
         Self::data(sx, AnyData::new(EqData(data)))
+    }
+}
+
+impl<T: PartialEq + Hash + 'static, RT: Runtime> Signal<EqData<T>, RT> {
+    #[inline]
+    pub(crate) fn new_data_hash_eq(sx: Scope<RT>, data: T) -> Signal<EqData<T>, RT> {
+        Self::data(sx, AnyData::new(HashEqData(data)))
     }
 }
