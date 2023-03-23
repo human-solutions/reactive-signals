@@ -13,7 +13,7 @@ use pprof::criterion::{Output, PProfProfiler};
 pub fn propagation_flamegraph(c: &mut Criterion) {
     c.bench_function("propagation_flamegraph", |b| {
         b.iter_batched(
-            reactor::profile::create_1000_nested,
+            reactor::tests::profile::create_1000_nested,
             |(_, start_sig, end_sig)| {
                 start_sig.set(2);
                 black_box(end_sig.get())

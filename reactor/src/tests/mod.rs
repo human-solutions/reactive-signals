@@ -1,6 +1,8 @@
-use std::cell::RefCell;
-
+pub mod profile;
+#[cfg(test)]
 mod size_test;
+
+use std::cell::RefCell;
 
 pub struct StringStore(RefCell<Vec<String>>);
 

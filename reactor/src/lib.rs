@@ -1,8 +1,5 @@
-#[cfg(test)]
+#[cfg(any(test, feature = "profile"))]
 pub mod tests;
-
-#[cfg(feature = "profile")]
-pub mod profile;
 
 mod iter;
 mod macros;
@@ -10,7 +7,6 @@ mod primitives;
 pub mod runtimes;
 mod scope;
 mod signal;
-mod updater;
 
 use runtimes::Runtime;
 pub use scope::Scope;

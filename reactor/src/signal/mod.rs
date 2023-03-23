@@ -6,6 +6,7 @@ mod signal_id;
 mod signal_inner;
 mod signal_kind;
 mod signal_new;
+mod updater;
 
 use std::marker::PhantomData;
 
