@@ -1,40 +1,65 @@
-use std::cell::RefCell;
+use crate::CellType;
 
 use super::ArrVec;
 
 #[derive(Debug)]
-pub(crate) struct SignalSet<const N: usize, T: Ord + Eq + Copy>(RefCell<ArrVec<N, T>>);
+pub(crate) struct SignalSet<const N: usize, T: Ord + Eq + Copy>(CellType<ArrVec<N, T>>);
 
 impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
     pub(crate) fn insert(&self, elem: T) {
-        let mut vec = self.0.borrow_mut();
-        vec.insert(elem);
+        self.vec_mut().insert(elem);
     }
 
     pub(crate) fn clear(&self) {
-        self.0.borrow_mut().clear()
+        self.vec_mut().clear()
     }
 
     pub(crate) fn retain<F: FnMut(&T) -> bool>(&self, f: F) {
-        self.0.borrow_mut().retain(f);
+        self.vec_mut().retain(f);
     }
 
     pub(crate) fn len(&self) -> usize {
-        self.0.borrow().len()
+        self.vec_ref().len()
     }
 
     pub(crate) fn is_empty(&self) -> bool {
-        self.0.borrow().is_empty()
+        self.vec_ref().is_empty()
     }
 
     pub(crate) fn get(&self, index: usize) -> T {
-        self.0.borrow().get(index)
+        self.vec_ref().get(index)
+    }
+}
+
+#[cfg(not(feature = "unsafe-cell"))]
+impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
+    #[inline]
+    fn vec_mut(&self) -> cell::RefMut<ArrVec<N, T>> {
+        self.0.borrow_mut()
+    }
+
+    #[inline]
+    fn vec_ref(&self) -> cell::Ref<ArrVec<N, T>> {
+        self.0.borrow()
+    }
+}
+
+#[cfg(feature = "unsafe-cell")]
+impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
+    #[inline]
+    fn vec_mut(&self) -> &mut ArrVec<N, T> {
+        unsafe { &mut *self.0.get() }
+    }
+
+    #[inline]
+    fn vec_ref(&self) -> &ArrVec<N, T> {
+        unsafe { &*self.0.get() }
     }
 }
 
 impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
     fn default() -> Self {
-        Self(RefCell::new(Default::default()))
+        return Self(CellType::new(Default::default()));
     }
 }
 

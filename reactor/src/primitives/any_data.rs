@@ -1,14 +1,10 @@
-use std::{any::Any, cell::RefCell};
+use std::any::Any;
+
+use crate::CellType;
 
 use super::Compare;
 
-pub struct AnyData(pub(crate) Box<RefCell<dyn Any>>);
-
-impl AnyData {
-    pub fn new<T: 'static>(val: T) -> Self {
-        Self(Box::new(RefCell::new(val)))
-    }
-}
+pub struct AnyData(pub(crate) Box<CellType<dyn Any>>);
 
 impl std::fmt::Debug for AnyData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -17,11 +13,15 @@ impl std::fmt::Debug for AnyData {
 }
 
 impl AnyData {
+    pub fn new<T: 'static>(val: T) -> Self {
+        Self(Box::new(CellType::new(val)))
+    }
+
     pub fn with<T, R>(&self, f: impl Fn(&T::Inner) -> R) -> R
     where
         T: Compare + 'static,
     {
-        let val_any = self.0.borrow();
+        let val_any = self.val_ref();
         let val = (*val_any).downcast_ref::<T>().unwrap();
         f(val.inner())
     }
@@ -30,7 +30,7 @@ impl AnyData {
     where
         T: Compare + 'static,
     {
-        let mut val_any = self.0.borrow_mut();
+        let val_any = self.val_mut();
         let val = (*val_any).downcast_mut::<T>().unwrap();
         let hash_before = val.opt_hash();
         let r = f(val.inner_mut());
@@ -47,7 +47,7 @@ impl AnyData {
         T: Compare + 'static,
         T::Inner: Clone,
     {
-        let val_any = self.0.borrow();
+        let val_any = self.val_ref();
         let val = (*val_any).downcast_ref::<T>().unwrap();
         val.inner().clone()
     }
@@ -57,16 +57,41 @@ impl AnyData {
         T: Compare + 'static,
         T::Inner: Copy,
     {
-        let val_any = self.0.borrow();
+        let val_any = self.val_ref();
         let val = (*val_any).downcast_ref::<T>().unwrap();
         *val.inner()
     }
 
     pub fn set<T: Compare + 'static>(&self, val: T::Inner) -> bool {
-        let mut val_any = self.0.borrow_mut();
+        let val_any = self.val_mut();
         let val_t = (*val_any).downcast_mut::<T>().unwrap();
         let eq = val_t.is_eq(&val);
         val_t.set(val);
         eq
+    }
+}
+
+#[cfg(not(feature = "unsafe-cell"))]
+impl AnyData {
+    #[inline]
+    fn val_ref(&self) -> cell::Ref<T> {
+        self.0.borrow()
+    }
+    #[inline]
+    fn val_mut(&self) -> cell::RefMut<T> {
+        self.0.borrow_mut()
+    }
+}
+
+#[cfg(feature = "unsafe-cell")]
+impl AnyData {
+    #[inline]
+    fn val_ref(&self) -> &dyn Any {
+        unsafe { &*self.0.get() }
+    }
+
+    #[inline]
+    fn val_mut(&self) -> &mut dyn Any {
+        unsafe { &mut *self.0.get() }
     }
 }
