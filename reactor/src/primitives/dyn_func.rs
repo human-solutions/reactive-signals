@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use super::{AnyData, Data, EqData};
+use super::{AnyData, Compare, Data, EqData};
 
 #[cfg(not(feature = "unsafe-cell"))]
 type BoxAnyData = Box<std::cell::RefCell<dyn Any>>;
@@ -36,7 +36,7 @@ impl DynFunc {
             #[cfg(feature = "unsafe-cell")]
             unsafe {
                 let old_any: &mut dyn Any = &mut *val.get();
-                let old: &mut T = old_any.downcast_mut::<Data<T>>().unwrap();
+                let old: &mut T = old_any.downcast_mut::<Data<T>>().unwrap().inner_mut();
                 *old = new;
             }
             true
@@ -64,7 +64,7 @@ impl DynFunc {
             #[cfg(feature = "unsafe-cell")]
             unsafe {
                 let old_any: &mut dyn Any = &mut *val.get();
-                let old: &mut T = old_any.downcast_mut::<EqData<T>>().unwrap();
+                let old: &mut T = old_any.downcast_mut::<EqData<T>>().unwrap().inner_mut();
                 let changed = new != *old;
                 *old = new;
                 changed

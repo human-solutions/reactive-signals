@@ -66,7 +66,7 @@ impl AnyData {
         let val_any = self.val_mut();
         let val_t = (*val_any).downcast_mut::<T>().unwrap();
         let eq = val_t.is_eq(&val);
-        val_t.set(val);
+        *val_t.inner_mut() = val;
         eq
     }
 }
