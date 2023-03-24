@@ -5,11 +5,15 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+profile = ["dep:dhat"]
+
 [dependencies]
 leptos = { version = "0.2", default-features = false, features = [
   "ssr",
   "stable",
 ] }
+dhat = { version = "0.3", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }
@@ -17,3 +21,7 @@ criterion = { version = "0.4", features = ["html_reports"] }
 [[bench]]
 name = "leptos_originals"
 harness = false
+
+[[example]]
+name = "leptos_heap"
+required-features = ["profile"]

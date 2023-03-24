@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
 default = []
-profile = ["dep:pprof", "dep:criterion"]
+profile = ["dep:pprof", "dep:criterion", "dep:dhat"]
 # use UnsafeCell instead of RefCell. Gain 40% performance for signal propagation
 unsafe-cell = []
 
@@ -20,6 +20,7 @@ pprof = { version = "0.11", features = [
   "frame-pointer",
   "criterion",
 ], optional = true }
+dhat = { version = "0.3", optional = true }
 
 [dev-dependencies]
 insta = "1.28"
@@ -45,4 +46,8 @@ required-features = ["profile"]
 
 [[example]]
 name = "creation_flamegraph"
+required-features = ["profile"]
+
+[[example]]
+name = "heap_profiling"
 required-features = ["profile"]

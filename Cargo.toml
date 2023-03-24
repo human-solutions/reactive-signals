@@ -1,2 +1,6 @@
 [workspace]
 members = ["reactor", "benchmarks", "arena-link-tree"]
+
+[profile.heap]
+inherits = "release"
+debug = 1
