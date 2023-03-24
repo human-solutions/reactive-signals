@@ -8,8 +8,8 @@ use wasm_bindgen_test::*;
 use crate::{
     primitives::{AnyData, DynFunc, SignalSet},
     runtimes::ClientRuntime,
-    signal::SignalId,
-    signal::{SignalInner, SignalValue},
+    signals::SignalId,
+    signals::{SignalInner, SignalValue},
 };
 
 /// Run with both:

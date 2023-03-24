@@ -4,7 +4,7 @@
 use crate::{
     primitives::{AnyData, DynFunc},
     runtimes::{ClientRuntime, Runtime},
-    signal::{Data, Func},
+    signals::{Data, Func},
     Scope, Signal,
 };
 

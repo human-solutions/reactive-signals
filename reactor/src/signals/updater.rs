@@ -1,7 +1,7 @@
 use crate::{
     iter::{NodeResolver, VecTreeIter},
     runtimes::{Runtime, RuntimeInner},
-    signal::SignalId,
+    signals::SignalId,
 };
 
 pub(crate) fn propagate_change<RT: Runtime>(rt: &RuntimeInner<RT>, sig: SignalId<RT>) {

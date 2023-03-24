@@ -1,7 +1,7 @@
 use crate::{
     primitives::DynFunc,
     runtimes::Runtime,
-    signal::{EqFunc, Func},
+    signals::{EqFunc, Func},
     Scope, Signal,
 };
 

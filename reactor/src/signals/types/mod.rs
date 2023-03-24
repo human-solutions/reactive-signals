@@ -39,7 +39,7 @@ fn set<T: 'static + SignalType>(val1: &T, val2: &T::Inner) -> bool {
 
 #[test]
 fn cmp_test() {
-    use crate::signal::{Data, EqData};
+    use crate::signals::{Data, EqData};
 
     let d1 = Data(3);
     let d2 = Data(2);

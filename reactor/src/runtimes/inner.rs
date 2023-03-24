@@ -5,7 +5,7 @@ use std::{
 
 use arena_link_tree::Tree;
 
-use crate::{signal::SignalId, ScopeInner};
+use crate::{signals::SignalId, ScopeInner};
 
 use super::Runtime;
 

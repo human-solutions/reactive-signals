@@ -1,7 +1,7 @@
 use crate::primitives::DynFunc;
 use crate::{runtimes::Runtime, Scope};
 
-use crate::signal::{ServerEqFunc, ServerFunc, Signal};
+use crate::signals::{ServerEqFunc, ServerFunc, Signal};
 
 pub trait ServerEqFuncKind {
     #[inline]

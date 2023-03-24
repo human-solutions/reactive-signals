@@ -3,7 +3,7 @@ use std::hash::Hash;
 use crate::{
     primitives::AnyData,
     runtimes::Runtime,
-    signal::{Data, EqData, HashEqData},
+    signals::{Data, EqData, HashEqData},
     Scope, Signal,
 };
 

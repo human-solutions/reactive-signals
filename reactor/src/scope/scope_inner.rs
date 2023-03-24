@@ -1,6 +1,6 @@
 use arena_link_tree::NodeBitVec;
 
-use crate::{runtimes::Runtime, scope::Scope, signal::SignalId, signal::SignalInner, CellType};
+use crate::{runtimes::Runtime, scope::Scope, signals::SignalId, signals::SignalInner, CellType};
 
 #[derive(Debug, Default)]
 pub(crate) struct ScopeInner<RT: Runtime> {
