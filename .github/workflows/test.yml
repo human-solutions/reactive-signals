@@ -21,6 +21,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+      
+      - name: "Run tests with all feature combinations"
+        uses: taiki-e/install-action@cargo-hack
+        with:
+          command: test
+          args: --each-feature
 
       - name: "Check that benches compile"
         uses: actions-rs/cargo@v1
