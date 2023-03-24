@@ -8,7 +8,7 @@ env:
 
 jobs:
   test:
-    name: Test and build benches
+    name: Full build & test suite
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout repo"
@@ -17,13 +17,34 @@ jobs:
       - name: "Use rust-cache"
         uses: Swatinem/rust-cache@v2
 
+      - name: "Use cargo hack"
+        uses: taiki-e/install-action@cargo-hack
+
       - name: "Run tests"
         uses: actions-rs/cargo@v1
         with:
           command: test
+      
+      - name: "Run tests with all feature combinations"
+        uses: actions-rs/cargo@v1
+        with:
+          command: hack
+          args: test --each-feature
+
+      - name: "Check that benches compile (unsafe-cell)"
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+          args: --features=profile,unsafe-cell --no-run
 
       - name: "Check that benches compile"
         uses: actions-rs/cargo@v1
         with:
           command: bench
-          args: dd
+          args: --features=profile --no-run
+
+      - name: "Check that examples compile"
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --examples --features=profile
