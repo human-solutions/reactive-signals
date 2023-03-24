@@ -1,8 +1,8 @@
-use reactor::{runtimes::SingleClientRuntime, signal};
+use reactor::{runtimes::ClientRuntime, signal};
 
 #[test]
 fn test_use() {
-    let sx = SingleClientRuntime::new_root_scope();
+    let sx = ClientRuntime::new_root_scope();
 
     let count = signal!(sx, 5);
     let even = signal!(sx, 2);

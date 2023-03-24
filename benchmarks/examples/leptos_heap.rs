@@ -13,6 +13,6 @@ fn main() {
     benchmarks::leptos_create_1000_signals(runtime);
 
     let stats = dhat::HeapStats::get();
-    assert_eq!(stats.max_bytes, 453_712);
+    assert_eq!(stats.max_bytes, 406_048);
     assert_eq!(stats.max_blocks, 3_016);
 }

@@ -47,7 +47,7 @@ impl Runtime for ServerRuntime {
 #[derive(Default)]
 pub struct ServerRuntimePool(RefCell<Vec<RuntimeInner<ServerRuntime>>>);
 
-impl ServerRuntimePool {
+impl ServerRuntime {
     pub fn new_root_scope() -> Scope<ServerRuntime> {
         RUNTIME_POOL.with(|rt| {
             let mut vec = rt.0.borrow_mut();

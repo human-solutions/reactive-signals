@@ -31,7 +31,7 @@ impl Runtime for ClientRuntime {
 
 }
 
-impl  SingleClientRuntime {
+impl  ClientRuntime {
     pub fn new_root_scope() -> Scope<ClientRuntime> {
         RUNTIME.with(|rt| {
             #[allow(unused_mut)]

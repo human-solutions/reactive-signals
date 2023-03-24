@@ -5,7 +5,7 @@ pub fn signal_propagation(c: &mut Criterion) {
         "Propagate a change through 1000 signals, each in a nested scope",
         |b| {
             b.iter_batched(
-                reactor::tests::profile::create_1000_nested,
+                reactor::tests::profile::create_1000_nested_scopes_each_with_a_signal,
                 |(_scope, start_sig, end_sig)| {
                     start_sig.set(2);
                     black_box(end_sig.get())

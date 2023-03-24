@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
-use crate::{runtimes::ServerRuntimePool, signal, tests::StringStore};
+use crate::{runtimes::ServerRuntime, signal, tests::StringStore};
 
 #[test]
 fn test_scopes_deep() {
-    let root = ServerRuntimePool::new_root_scope();
+    let root = ServerRuntime::new_root_scope();
 
     let mut cx = root.clone();
     let num_sig = signal!(cx, 5);
@@ -22,7 +22,7 @@ fn test_scopes_deep() {
 
 #[test]
 fn test_scopes_discard() {
-    let root = ServerRuntimePool::new_root_scope();
+    let root = ServerRuntime::new_root_scope();
 
     let cx0 = root.clone();
     let num_sig = signal!(cx0, 5);

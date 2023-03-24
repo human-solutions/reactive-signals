@@ -1,17 +1,15 @@
 mod client;
 mod inner;
 mod server;
-mod staticrt;
-
-#[cfg(any(test, feature = "profile"))]
-pub use self::server::ServerRuntime;
+// mod staticrt;
 
 use crate::Scope;
-pub use client::{ClientRuntime, SingleClientRuntime};
+pub use client::ClientRuntime;
 pub(crate) use inner::RuntimeInner;
-pub use server::ServerRuntimePool;
-pub use staticrt::{StaticRuntime, StaticRuntimeId};
+pub use server::ServerRuntime;
+// pub use staticrt::{StaticRuntime, StaticRuntimeId};
 
+#[doc(hidden)]
 pub trait Runtime: Default + Copy + 'static {
     const IS_SERVER: bool;
 

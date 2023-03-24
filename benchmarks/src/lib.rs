@@ -6,11 +6,10 @@ use std::{cell::Cell, rc::Rc};
 
 pub fn leptos_create_1000_signals(runtime: RuntimeId) {
     create_scope(runtime, |cx| {
-        let _acc = Rc::new(Cell::new(0));
-        let sigs = (0..1000).map(|n| create_signal(cx, n)).collect::<Vec<_>>();
-        let reads = sigs.iter().map(|(r, _)| *r).collect::<Vec<_>>();
-        let _writes = sigs.iter().map(|(_, w)| *w).collect::<Vec<_>>();
-        let memo = create_memo(cx, move |_| reads.iter().map(|r| r.get()).sum::<i32>());
+        let sigs = (0..1000)
+            .map(|n| create_signal(cx, n).0)
+            .collect::<Vec<_>>();
+        let memo = create_memo(cx, move |_| sigs.iter().map(|r| r.get()).sum::<i32>());
         assert_eq!(memo.get(), 499500);
     })
     .dispose()

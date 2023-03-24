@@ -31,10 +31,10 @@ pub use signal_kind::{EqDataKind, EqFuncKind, HashEqDataKind, TrueDataKind, True
 ///
 /// ### Example
 /// ```rust
-/// # use reactor::{runtimes::SingleRuntime, signal, TrueDataKind};
+/// # use reactor::{runtimes::ClientRuntime, signal, TrueDataKind};
 /// #
 /// # // signals are created in scopes
-/// # let sx = SingleRuntime::new_root_scope();
+/// # let sx = ClientRuntime::new_root_scope();
 /// #
 /// // a simple data value
 /// let count = signal!(sx, 5);
@@ -96,10 +96,10 @@ impl<T: SignalType, RT: Runtime> Copy for Signal<T, RT> {}
 
 #[test]
 fn test_example() {
-    use crate::{runtimes::SingleClientRuntime, signal};
+    use crate::{runtimes::ClientRuntime, signal};
 
     // signals are created in scopes
-    let sx = SingleClientRuntime::new_root_scope();
+    let sx = ClientRuntime::new_root_scope();
 
     // a simple data value
     let count = signal!(sx, 5);

@@ -12,7 +12,7 @@ use pprof::criterion::{Output, PProfProfiler};
 
 pub fn creation_flamegraph(c: &mut Criterion) {
     c.bench_function("creation_flamegraph", |b| {
-        b.iter(reactor::tests::profile::create_1000_nested);
+        b.iter(reactor::tests::profile::create_1000_nested_scopes_each_with_a_signal);
     });
 }
 

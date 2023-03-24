@@ -32,8 +32,8 @@ where
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactor::{signal, runtimes::SingleRuntime};
-    /// # let cx = SingleRuntime::new_root_scope();
+    /// # use reactor::{signal, runtimes::ClientRuntime};
+    /// # let cx = ClientRuntime::new_root_scope();
     /// let count = signal!(cx, 2);
     /// let is_even = count.update(|val| {
     ///     *val += 1;
@@ -89,8 +89,8 @@ impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactor::{signal, runtimes::SingleRuntime};
-    /// # let cx = SingleRuntime::new_root_scope();
+    /// # use reactor::{signal, runtimes::ClientRuntime};
+    /// # let cx = ClientRuntime::new_root_scope();
     /// let count = signal!(cx, 2);
     /// let is_even = count.with(|val| *val % 2 == 0);
     /// ```
