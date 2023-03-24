@@ -42,3 +42,9 @@ jobs:
         with:
           command: bench
           args: --features=profile --no-run
+
+      - name: "Check that examples compile"
+        uses: actions-rs/cargo@v1
+        with:
+          command: cargo build
+          args: --examples --features=profile
