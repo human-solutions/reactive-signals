@@ -17,19 +17,28 @@ jobs:
       - name: "Use rust-cache"
         uses: Swatinem/rust-cache@v2
 
+      - name: "Use cargo hack"
+        uses: taiki-e/install-action@cargo-hack
+
       - name: "Run tests"
         uses: actions-rs/cargo@v1
         with:
           command: test
       
       - name: "Run tests with all feature combinations"
-        uses: taiki-e/install-action@cargo-hack
+        uses: actions-rs/cargo@v1
         with:
-          command: test
-          args: --each-feature
+          command: hack
+          args: test --each-feature
+
+      - name: "Check that benches compile (unsafe-cell)"
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+          args: --features=profile,unsafe-cell --no-run
 
       - name: "Check that benches compile"
         uses: actions-rs/cargo@v1
         with:
           command: bench
-          args: dd
+          args: --features=profile --no-run
