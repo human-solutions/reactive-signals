@@ -1,4 +1,4 @@
-use std::{hash::Hash, marker::PhantomData};
+use std::marker::PhantomData;
 
 use crate::{
     primitives::{AnyData, DynFunc},
@@ -7,10 +7,10 @@ use crate::{
     Signal,
 };
 
-use super::{Data, EqData, EqFunc, Func, HashEqData, SignalInner, SignalType, SignalValue};
+use super::{SignalInner, SignalType, SignalValue};
 
 impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
-    pub(super) fn data(sx: Scope<RT>, data: AnyData) -> Signal<T, RT> {
+    pub(crate) fn data(sx: Scope<RT>, data: AnyData) -> Signal<T, RT> {
         let id = sx.rt.with_ref(|rt| {
             let scope = &rt.scope_tree[sx.sx];
             let id = scope.next_signal_id(sx);
@@ -27,7 +27,7 @@ impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
         }
     }
 
-    pub(super) fn func(sx: Scope<RT>, func: impl FnOnce() -> DynFunc) -> Signal<T, RT> {
+    pub(crate) fn func(sx: Scope<RT>, func: impl FnOnce() -> DynFunc) -> Signal<T, RT> {
         let id = sx.rt.with_ref(|rt| {
             let scope = &rt.scope_tree[sx.sx];
             let id = scope.next_signal_id(sx);
@@ -46,43 +46,5 @@ impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
             id,
             ty: PhantomData,
         }
-    }
-}
-
-impl<T: 'static, RT: Runtime> Signal<Func<T>, RT> {
-    #[inline]
-    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<Func<T>, RT> {
-        Self::func(sx, || DynFunc::new(func))
-    }
-}
-
-impl<T: 'static, RT: Runtime> Signal<Data<T>, RT> {
-    #[inline]
-    pub(crate) fn new_data(sx: Scope<RT>, data: T) -> Signal<Data<T>, RT> {
-        Self::data(sx, AnyData::new(Data(data)))
-    }
-}
-
-impl<T: PartialEq + 'static, RT: Runtime> Signal<EqFunc<T>, RT> {
-    #[inline]
-    pub(crate) fn new_func_eq<F: Fn() -> T + 'static>(
-        sx: Scope<RT>,
-        func: F,
-    ) -> Signal<EqFunc<T>, RT> {
-        Self::func(sx, || DynFunc::new_eq(func))
-    }
-}
-
-impl<T: PartialEq + 'static, RT: Runtime> Signal<EqData<T>, RT> {
-    #[inline]
-    pub(crate) fn new_data_eq(sx: Scope<RT>, data: T) -> Signal<EqData<T>, RT> {
-        Self::data(sx, AnyData::new(EqData(data)))
-    }
-}
-
-impl<T: PartialEq + Hash + 'static, RT: Runtime> Signal<EqData<T>, RT> {
-    #[inline]
-    pub(crate) fn new_data_hash_eq(sx: Scope<RT>, data: T) -> Signal<EqData<T>, RT> {
-        Self::data(sx, AnyData::new(HashEqData(data)))
     }
 }

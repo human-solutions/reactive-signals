@@ -1,10 +1,13 @@
 use crate::runtimes::Runtime;
 
-use super::{updater::propagate_change, DataSignal, Signal, SignalId, SignalInner, SignalType};
+use super::{
+    updater::propagate_change, Modifiable, OptReadable, Readable, Signal, SignalId, SignalInner,
+    SignalType,
+};
 
 impl<T, RT> Signal<T, RT>
 where
-    T: 'static + SignalType + DataSignal,
+    T: SignalType + Modifiable,
     RT: Runtime,
 {
     /// Set the signal's value and notifies subscribers
@@ -51,7 +54,7 @@ where
 
 impl<T, RT> Signal<T, RT>
 where
-    T: 'static + SignalType,
+    T: SignalType + Readable,
     T::Inner: Copy,
     RT: Runtime,
 {
@@ -61,9 +64,9 @@ where
     }
 }
 
-impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT>
+impl<T, RT> Signal<T, RT>
 where
-    T: 'static + SignalType,
+    T: SignalType + Readable,
     T::Inner: Clone,
     RT: Runtime,
 {
@@ -75,7 +78,11 @@ where
     }
 }
 
-impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
+impl<T, RT> Signal<T, RT>
+where
+    T: SignalType + Readable,
+    RT: Runtime,
+{
     /// Applies a function to the current value to mutate it in place and returns
     /// whatever that function returns.
     ///
@@ -93,6 +100,65 @@ impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
     ///
     pub fn with<R: 'static>(&self, f: impl Fn(&T::Inner) -> R) -> R {
         register_and_run(self.id, |sig| sig.value().with::<T, R>(f))
+    }
+}
+
+impl<T, RT> Signal<T, RT>
+where
+    T: SignalType + OptReadable,
+    RT: Runtime,
+{
+    const SHOULD_RUN: bool =
+        (RT::IS_SERVER && T::RUN_ON_SERVER) || (!RT::IS_SERVER && T::RUN_ON_CLIENT);
+}
+impl<T, RT> Signal<T, RT>
+where
+    T: SignalType + OptReadable,
+    T::Inner: Copy + Default,
+    RT: Runtime,
+{
+    /// Get a copy of the signal value (if the value implements [Copy])
+    pub fn opt_get(&self) -> Option<T::Inner> {
+        Self::SHOULD_RUN.then(|| register_and_run(self.id, |sig| sig.value().get::<T>()))
+    }
+}
+
+impl<T, RT> Signal<T, RT>
+where
+    T: SignalType + OptReadable,
+    T::Inner: Clone,
+    RT: Runtime,
+{
+    /// Get a clone of the signal value (if the value implements [Clone])
+    ///
+    /// Use the `.with()` function if you can in order to avoid the clone.
+    pub fn opt_cloned(&self) -> Option<T::Inner> {
+        Self::SHOULD_RUN.then(|| register_and_run(self.id, |sig| sig.value().cloned::<T>()))
+    }
+}
+
+impl<T, RT> Signal<T, RT>
+where
+    T: SignalType + OptReadable,
+    RT: Runtime,
+{
+    /// Applies a function to the current value to mutate it in place and returns
+    /// whatever that function returns.
+    ///
+    /// Subscribers are notified if the value changed when it implements `PartialEq`
+    /// otherwise it always notifies.
+    ///
+    /// **Example of using the return value**
+    ///
+    /// ```rust
+    /// # use reactor::{signal, runtimes::ClientRuntime};
+    /// # let cx = ClientRuntime::new_root_scope();
+    /// let count = signal!(cx, 2);
+    /// let is_even = count.with(|val| *val % 2 == 0);
+    /// ```
+    ///
+    pub fn opt_with<R: 'static>(&self, f: impl Fn(&T::Inner) -> R) -> Option<R> {
+        Self::SHOULD_RUN.then(|| register_and_run(self.id, |sig| sig.value().with::<T, R>(f)))
     }
 }
 

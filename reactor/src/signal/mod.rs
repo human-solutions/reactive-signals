@@ -1,28 +1,23 @@
 #[cfg(test)]
 mod tests;
 
-mod data_signal;
-mod func_signal;
+pub(crate) mod kinds;
 mod signal_accessors;
 mod signal_id;
 mod signal_inner;
-mod signal_kind;
 mod signal_new;
-mod signal_type;
+mod types;
 mod updater;
 
 use std::marker::PhantomData;
 
 use crate::runtimes::Runtime;
-pub(crate) use data_signal::*;
-pub(crate) use func_signal::*;
 pub(crate) use signal_id::SignalId;
 pub(crate) use signal_inner::{SignalInner, SignalValue};
-pub(crate) use signal_type::*;
+pub(crate) use types::*;
 
-#[allow(unused_imports)] // allowed because these are used by the signal! macro.
 #[doc(hidden)]
-pub use signal_kind::{EqDataKind, EqFuncKind, HashEqDataKind, TrueDataKind, TrueFuncKind};
+pub use kinds::*;
 
 /// A [Signal] is a reactive value or a function that produces a value,
 /// with subscribers that are automatically notified when the value changes.

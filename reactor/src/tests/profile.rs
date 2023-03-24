@@ -2,10 +2,25 @@
 //!
 
 use crate::{
-    runtimes::ClientRuntime,
+    primitives::{AnyData, DynFunc},
+    runtimes::{ClientRuntime, Runtime},
     signal::{Data, Func},
     Scope, Signal,
 };
+
+impl<T: 'static, RT: Runtime> Signal<Func<T>, RT> {
+    #[inline]
+    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<Func<T>, RT> {
+        Self::func(sx, || DynFunc::new::<F, T, Func<T>>(func))
+    }
+}
+
+impl<T: 'static, RT: Runtime> Signal<Data<T>, RT> {
+    #[inline]
+    pub(crate) fn new_data(sx: Scope<RT>, data: T) -> Signal<Data<T>, RT> {
+        Self::data(sx, AnyData::new(Data(data)))
+    }
+}
 
 pub fn create_1000_nested_scopes_each_with_a_signal() -> (
     Scope<ClientRuntime>,
@@ -16,7 +31,7 @@ pub fn create_1000_nested_scopes_each_with_a_signal() -> (
 
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
-    let start_sig = Signal::new_data(scope, 0usize);
+    let start_sig = Signal::data(scope, AnyData::new(Data(0usize)));
     let mut next_sig = Signal::new_func(scope, move || start_sig.get() + 1);
 
     (0..1000).for_each(|_| {
@@ -38,7 +53,7 @@ pub fn create_1000_nested_signals_in_a_scope() -> (
 
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
-    let start_sig = Signal::new_data(scope, 0usize);
+    let start_sig = Signal::data(scope, AnyData::new(Data(0usize)));
     let mut next_sig = Signal::new_func(scope, move || start_sig.get() + 1);
 
     (0..1000).for_each(|_| {

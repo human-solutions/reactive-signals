@@ -43,7 +43,10 @@ mod macros;
 mod primitives;
 pub mod runtimes;
 mod scope;
-pub mod signal;
+mod signal;
+
+#[doc(hidden)]
+pub use signal::kinds::*;
 
 pub use crate::signal::Signal;
 use runtimes::Runtime;

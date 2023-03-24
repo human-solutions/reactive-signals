@@ -1,5 +1,16 @@
-pub trait SignalType {
+mod client;
+mod data;
+mod func;
+mod server;
+
+pub(crate) use client::*;
+pub(crate) use data::*;
+pub(crate) use func::*;
+pub(crate) use server::*;
+
+pub trait SignalType: 'static {
     type Inner;
+
     fn is_eq(&self, _other: &Self::Inner) -> bool {
         false
     }
@@ -9,6 +20,16 @@ pub trait SignalType {
 
     fn inner(&self) -> &Self::Inner;
     fn inner_mut(&mut self) -> &mut Self::Inner;
+    fn new(value: Self::Inner) -> Self;
+}
+
+pub trait Modifiable {}
+
+pub trait Readable {}
+
+pub trait OptReadable {
+    const RUN_ON_SERVER: bool = true;
+    const RUN_ON_CLIENT: bool = true;
 }
 
 #[cfg(test)]

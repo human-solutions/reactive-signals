@@ -2,15 +2,29 @@
 macro_rules! signal {
     ($sx:ident, $data:expr) => {{
         #[allow(unused_imports)]
-        use $crate::signal::{EqFuncKind, TrueFuncKind, EqDataKind, TrueDataKind, HashEqDataKind};
+        use $crate::{EqFuncKind, TrueFuncKind, EqDataKind, TrueDataKind, HashEqDataKind};
         match ($sx, $data) {
             tuple => (&&tuple).signal_kind().new(tuple),
+        }
+    }};
+    ($sx:ident, server, $data:expr) => {{
+        #[allow(unused_imports)]
+        use $crate::{ServerEqFuncKind, ServerTrueFuncKind};
+        match ($sx, $data) {
+            tuple => (&&tuple).server_kind().new(tuple),
+        }
+    }};
+    ($sx:ident, client, $data:expr) => {{
+        #[allow(unused_imports)]
+        use $crate::{ClientEqFuncKind, ClientTrueFuncKind};
+        match ($sx, $data) {
+            tuple => (&&tuple).client_kind().new(tuple),
         }
     }};
     ($sx:ident, clone: $($clone:ident) +, $data:expr) => {{
         $(let $clone = $clone.clone();)*
         #[allow(unused_imports)]
-        use $crate::signal::{EqFuncKind, TrueFuncKind};
+        use $crate::{EqFuncKind, TrueFuncKind};
         match ($sx, $data) {
             tuple => (&&tuple).signal_kind().new(tuple),
         }
@@ -43,4 +57,13 @@ fn test() {
     let ne = NonEq;
     let _sig = signal!(sx, clone: ne, move || ne.clone());
     // assert!(!sig.eq);
+
+    let _sit = signal!(sx, server, move || ne.clone());
+
+    let srv = signal!(sx, server, move || 1);
+    assert_eq!(srv.opt_get(), Some(1));
+
+    let clnt = signal!(sx, client, move || 1);
+
+    assert_eq!(clnt.opt_get(), None);
 }
