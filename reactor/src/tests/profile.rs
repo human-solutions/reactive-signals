@@ -67,6 +67,16 @@ pub fn create_1000_data_signals() -> () {
     });
 }
 
+pub fn comparative_with_leptos_create_1000_signals() -> () {
+    let scope = ClientRuntime::bench_root_scope();
+
+    let sigs = (0..1000)
+        .map(|n| Signal::new_data(scope, n))
+        .collect::<Vec<_>>();
+    let func = Signal::new_func(scope, move || sigs.iter().map(|r| r.get()).sum::<i32>());
+    assert_eq!(func.get(), 499500);
+}
+
 pub fn create_1000_func_signals() -> () {
     let scope = ClientRuntime::bench_root_scope();
 

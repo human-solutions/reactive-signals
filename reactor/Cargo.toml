@@ -33,6 +33,11 @@ harness = false
 required-features = ["profile"]
 
 [[bench]]
+name = "create_signals"
+harness = false
+required-features = ["profile"]
+
+[[bench]]
 name = "signal_propagation"
 harness = false
 required-features = ["profile"]
