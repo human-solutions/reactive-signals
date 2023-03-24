@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests;
 
+mod data_signal;
+mod func_signal;
 mod signal_accessors;
 mod signal_id;
 mod signal_inner;
@@ -12,6 +14,8 @@ mod updater;
 use std::marker::PhantomData;
 
 use crate::runtimes::Runtime;
+pub(crate) use data_signal::*;
+pub(crate) use func_signal::*;
 pub(crate) use signal_id::SignalId;
 pub(crate) use signal_inner::{SignalInner, SignalValue};
 pub(crate) use signal_type::*;
