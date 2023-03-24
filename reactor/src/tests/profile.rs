@@ -2,8 +2,8 @@
 //!
 
 use crate::{
-    primitives::{Data, Func},
     runtimes::ClientRuntime,
+    signal::{Data, Func},
     Scope, Signal,
 };
 

@@ -2,11 +2,9 @@
 
 use std::hash::Hash;
 
-use crate::{
-    primitives::{Data, EqData, EqFunc, Func},
-    runtimes::Runtime,
-    Scope, Signal,
-};
+use crate::{runtimes::Runtime, Scope};
+
+use super::{Data, EqData, EqFunc, Func, Signal};
 
 // https://github.com/dtolnay/case-studies/tree/master/autoref-specialization
 

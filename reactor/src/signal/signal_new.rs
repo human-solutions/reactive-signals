@@ -1,13 +1,13 @@
 use std::{hash::Hash, marker::PhantomData};
 
 use crate::{
-    primitives::{AnyData, Data, DynFunc, EqData, EqFunc, Func, HashEqData, SignalType},
+    primitives::{AnyData, DynFunc},
     runtimes::Runtime,
     scope::Scope,
     Signal,
 };
 
-use super::{SignalInner, SignalValue};
+use super::{Data, EqData, EqFunc, Func, HashEqData, SignalInner, SignalType, SignalValue};
 
 impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
     pub(super) fn data(sx: Scope<RT>, data: AnyData) -> Signal<T, RT> {

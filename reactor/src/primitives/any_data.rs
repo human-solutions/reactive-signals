@@ -1,8 +1,6 @@
 use std::any::Any;
 
-use crate::CellType;
-
-use super::SignalType;
+use crate::{signal::SignalType, CellType};
 
 pub struct AnyData(pub(crate) Box<CellType<dyn Any>>);
 

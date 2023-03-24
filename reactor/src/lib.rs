@@ -43,12 +43,12 @@ mod macros;
 mod primitives;
 pub mod runtimes;
 mod scope;
-mod signal;
+pub mod signal;
 
+pub use crate::signal::Signal;
 use runtimes::Runtime;
 pub use scope::Scope;
 use scope::ScopeInner;
-pub use signal::*;
 use std::cell;
 
 #[cfg(not(feature = "unsafe-cell"))]

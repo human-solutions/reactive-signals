@@ -1,8 +1,11 @@
 use std::any::Any;
 
-use crate::CellType;
+use crate::{
+    signal::{EqFunc, Func, SignalType},
+    CellType,
+};
 
-use super::{AnyData, EqFunc, Func, SignalType};
+use super::AnyData;
 
 type BoxAnyData = Box<CellType<dyn Any>>;
 

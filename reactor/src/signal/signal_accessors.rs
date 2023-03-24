@@ -1,10 +1,6 @@
-use crate::{
-    primitives::{DataSignal, SignalType},
-    runtimes::Runtime,
-    Signal,
-};
+use crate::runtimes::Runtime;
 
-use super::{updater::propagate_change, SignalId, SignalInner};
+use super::{updater::propagate_change, DataSignal, Signal, SignalId, SignalInner, SignalType};
 
 impl<T, RT> Signal<T, RT>
 where

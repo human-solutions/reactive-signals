@@ -6,13 +6,16 @@ mod signal_id;
 mod signal_inner;
 mod signal_kind;
 mod signal_new;
+mod signal_type;
 mod updater;
 
 use std::marker::PhantomData;
 
-use crate::{primitives::SignalType, runtimes::Runtime};
+use crate::runtimes::Runtime;
 pub(crate) use signal_id::SignalId;
 pub(crate) use signal_inner::{SignalInner, SignalValue};
+pub(crate) use signal_type::*;
+
 #[allow(unused_imports)] // allowed because these are used by the signal! macro.
 #[doc(hidden)]
 pub use signal_kind::{EqDataKind, EqFuncKind, HashEqDataKind, TrueDataKind, TrueFuncKind};
@@ -31,7 +34,7 @@ pub use signal_kind::{EqDataKind, EqFuncKind, HashEqDataKind, TrueDataKind, True
 ///
 /// ### Example
 /// ```rust
-/// # use reactor::{runtimes::ClientRuntime, signal, TrueDataKind};
+/// # use reactor::{runtimes::ClientRuntime, signal};
 /// #
 /// # // signals are created in scopes
 /// # let sx = ClientRuntime::new_root_scope();
