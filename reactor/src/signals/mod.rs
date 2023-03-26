@@ -6,7 +6,7 @@ mod signal_accessors;
 mod signal_id;
 mod signal_inner;
 mod signal_new;
-mod types;
+pub mod types;
 mod updater;
 
 use std::marker::PhantomData;

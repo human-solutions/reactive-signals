@@ -14,7 +14,24 @@ macro_rules! signal {
             tuple => (&&tuple).server_kind().new(tuple),
         }
     }};
+    ($sx:ident, server, clone: $($clone:ident) +, $data:expr) => {{
+        $(let $clone = $clone.clone();)*
+        #[allow(unused_imports)]
+        use $crate::{ServerEqFuncKind, ServerTrueFuncKind};
+        match ($sx, $data) {
+            tuple => (&&tuple).server_kind().new(tuple),
+        }
+    }};
+
     ($sx:ident, client, $data:expr) => {{
+        #[allow(unused_imports)]
+        use $crate::{ClientEqFuncKind, ClientTrueFuncKind};
+        match ($sx, $data) {
+            tuple => (&&tuple).client_kind().new(tuple),
+        }
+    }};
+    ($sx:ident, client, clone: $($clone:ident) +, $data:expr) => {{
+        $(let $clone = $clone.clone();)*
         #[allow(unused_imports)]
         use $crate::{ClientEqFuncKind, ClientTrueFuncKind};
         match ($sx, $data) {
@@ -56,6 +73,7 @@ fn test() {
 
     let ne = NonEq;
     let _sig = signal!(sx, clone: ne, move || ne.clone());
+
     // assert!(!sig.eq);
 
     let _sit = signal!(sx, server, move || ne.clone());

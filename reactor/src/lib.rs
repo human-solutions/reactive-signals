@@ -45,13 +45,14 @@ pub mod runtimes;
 mod scope;
 mod signals;
 
+pub use scope::Scope;
 #[doc(hidden)]
 pub use signals::kinds::*;
+pub use signals::Signal;
 
-pub use crate::signals::Signal;
 use runtimes::Runtime;
-pub use scope::Scope;
 use scope::ScopeInner;
+pub use signals::types;
 use std::cell;
 
 #[cfg(not(feature = "unsafe-cell"))]
