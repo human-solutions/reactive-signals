@@ -32,8 +32,8 @@ where
     ///
     /// ```rust
     /// # use reactor::{signal, runtimes::ClientRuntime};
-    /// # let cx = ClientRuntime::new_root_scope();
-    /// let count = signal!(cx, 2);
+    /// # let sc = ClientRuntime::new_root_scope();
+    /// let count = signal!(sc, 2);
     /// let is_even = count.update(|val| {
     ///     *val += 1;
     ///     *val % 2 == 0
@@ -93,8 +93,8 @@ where
     ///
     /// ```rust
     /// # use reactor::{signal, runtimes::ClientRuntime};
-    /// # let cx = ClientRuntime::new_root_scope();
-    /// let count = signal!(cx, 2);
+    /// # let sc = ClientRuntime::new_root_scope();
+    /// let count = signal!(sc, 2);
     /// let is_even = count.with(|val| *val % 2 == 0);
     /// ```
     ///
@@ -152,8 +152,8 @@ where
     ///
     /// ```rust
     /// # use reactor::{signal, runtimes::ClientRuntime};
-    /// # let cx = ClientRuntime::new_root_scope();
-    /// let count = signal!(cx, 2);
+    /// # let sc = ClientRuntime::new_root_scope();
+    /// let count = signal!(sc, 2);
     /// let is_even = count.with(|val| *val % 2 == 0);
     /// ```
     ///

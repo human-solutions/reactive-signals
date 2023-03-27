@@ -10,13 +10,13 @@ use crate::{
 fn test_scopes_deep() {
     let root = ServerRuntime::new_root_scope();
 
-    let mut cx = root.clone();
-    let num_sig = signal!(cx, 5);
+    let mut sc = root.clone();
+    let num_sig = signal!(sc, 5);
 
-    (0..3).for_each(|_| cx = cx.new_child());
+    (0..3).for_each(|_| sc = sc.new_child());
 
     let output = Rc::new(StringStore::new());
-    let _str_sig = signal!(cx, clone: output, move || output
+    let _str_sig = signal!(sc, clone: output, move || output
         .push(format!("val: {}", num_sig.get())));
 
     num_sig.set(4);
@@ -28,22 +28,22 @@ fn test_scopes_deep() {
 fn test_scopes_discard() {
     let root = ServerRuntime::new_root_scope();
 
-    let cx0 = root.clone();
-    let num_sig = signal!(cx0, 5);
+    let sc0 = root.clone();
+    let num_sig = signal!(sc0, 5);
 
-    let cx1 = cx0.new_child();
-    let cx2 = cx1.new_child();
-    let cx3 = cx2.new_child();
+    let sc1 = sc0.new_child();
+    let sc2 = sc1.new_child();
+    let sc3 = sc2.new_child();
 
     let output = Rc::new(StringStore::new());
-    let _str_sig = signal!(cx3, clone: output, move || output
+    let _str_sig = signal!(sc3, clone: output, move || output
         .push(format!("val: {}", num_sig.get())));
 
     num_sig.set(4);
 
     assert_eq!(output.values(), "val: 5, val: 4");
 
-    cx2.discard();
+    sc2.discard();
 
     num_sig.set(4);
 

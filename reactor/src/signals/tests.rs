@@ -4,15 +4,15 @@ use crate::{runtimes::ServerRuntime, signal, tests::StringStore};
 
 #[test]
 fn test_signal_dep() {
-    let cx = ServerRuntime::new_root_scope();
+    let sc = ServerRuntime::new_root_scope();
 
-    let num_sig = signal!(cx, 5);
+    let num_sig = signal!(sc, 5);
     assert_eq!(num_sig.get(), 5);
 
     let output = Rc::new(StringStore::new());
     let out = output.clone();
 
-    let _str_sig = signal!(cx, move || out.push(format!("val: {}", num_sig.get())));
+    let _str_sig = signal!(sc, move || out.push(format!("val: {}", num_sig.get())));
 
     assert_eq!(output.values(), "val: 5");
     num_sig.set(4);
@@ -24,14 +24,14 @@ fn test_signal_dep() {
 fn test_signal_update() {
     use std::cell::RefCell;
 
-    let cx = ServerRuntime::new_root_scope();
+    let sc = ServerRuntime::new_root_scope();
 
     let history = Rc::new(RefCell::new(Vec::<String>::new()));
 
-    let string_sig = signal!(cx, "Hi 1".to_string());
+    let string_sig = signal!(sc, "Hi 1".to_string());
     assert_eq!(string_sig.cloned(), "Hi 1".to_string());
 
-    signal!(cx, clone: history, move || history
+    signal!(sc, clone: history, move || history
         .borrow_mut()
         .push(string_sig.cloned()));
 
@@ -48,16 +48,16 @@ fn test_signal_update() {
 
 #[test]
 fn test_signal_func_val() {
-    let cx = ServerRuntime::new_root_scope();
+    let sc = ServerRuntime::new_root_scope();
 
-    let num_sig = signal!(cx, 5);
+    let num_sig = signal!(sc, 5);
 
     let output = Rc::new(StringStore::new());
 
-    let a_sig = signal!(cx, move || format!("a{}", num_sig.get()));
-    let b_sig = signal!(cx, move || format!("b{}", num_sig.get()));
+    let a_sig = signal!(sc, move || format!("a{}", num_sig.get()));
+    let b_sig = signal!(sc, move || format!("b{}", num_sig.get()));
 
-    let _str_sig = signal!(cx, clone: output, move || {
+    let _str_sig = signal!(sc, clone: output, move || {
         output.push(format!("{}-{}", a_sig.cloned(), b_sig.cloned()))
     });
 
@@ -68,24 +68,24 @@ fn test_signal_func_val() {
 
 #[test]
 fn test_signal_func_skip_equal() {
-    let cx = ServerRuntime::new_root_scope();
+    let sc = ServerRuntime::new_root_scope();
 
-    let num_sig = signal!(cx, 10);
+    let num_sig = signal!(sc, 10);
 
     let a_call = Rc::new(Cell::new(0usize));
-    let a_sig = signal!(cx, clone: a_call, move || {
+    let a_sig = signal!(sc, clone: a_call, move || {
         a_call.inc();
         num_sig.get() + 1
     });
 
     let b_call = Rc::new(Cell::new(0usize));
-    let b_sig = signal!(cx, clone: b_call, move || {
+    let b_sig = signal!(sc, clone: b_call, move || {
         b_call.inc();
         100
     });
 
     let c_call = Rc::new(Cell::new(0usize));
-    let c_sig = signal!(cx, clone: c_call, move || {
+    let c_sig = signal!(sc, clone: c_call, move || {
         c_call.inc();
         b_sig.get() + 1
     });
