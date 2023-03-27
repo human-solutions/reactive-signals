@@ -3,36 +3,36 @@ use std::cell::RefCell;
 use super::{Runtime, RuntimeInner, Scope};
 
 thread_local! {
-  pub static RUNTIME_POOL: ServerRuntimePool = Default::default();
+  pub static RUNTIME_POOL: TestClientRuntimePool = Default::default();
 }
 
-/// A runtime meant to be used client-side because there can only be one per thread.
-///
+/// A runtime meant to be used for testing only. It uses a pool of runtimes,
+/// so that many runtimes can co-exist on one thread, but simulates running on a client.
 ///
 /// ```no_run
-/// use reactor::{Scope, signal, runtimes::ServerRuntime};
+/// use reactor::{Scope, signal, runtimes::TestClientRuntime};
 ///
-/// // when starting a server you create a root scope
-/// let sc = ServerRuntime::new_root_scope();
+/// // when starting a client you create the root scope
+/// let sc = TestClientRuntime::new_root_scope();
 ///
 /// // this scope is then used for building a tree of scopes.
 /// app(sc);
 ///
-/// // calling discard() on the root scope will discard the ServerRuntime as well.
+/// // calling discard() on the root scope will discard the TestClientRuntime as well.
 /// sc.discard();
 ///
-/// fn app(sc: Scope<ServerRuntime>) {
-///     // a signal marked with `client` will not run in a Scope<ServerRuntime>
-///     let sig = signal!(sc, client, move || println!("client!"));
+/// fn app(sc: Scope<TestClientRuntime>) {
+///     // a signal marked with `server` will not run in a Scope<TestClientRuntime>
+///     let sig = signal!(sc, server, move || println!("server!"));
 /// }
 /// ```
 ///
 /// See [runtimes](super) for full documentation.
 ///
 #[derive(Default, Clone, Copy)]
-pub struct ServerRuntime(u32);
+pub struct TestClientRuntime(u32);
 
-impl ServerRuntime {
+impl TestClientRuntime {
     pub(crate) fn from(idx: usize) -> Self {
         if idx >= u32::MAX as usize {
             panic!("Too many runtimes. Check your code for leaks. A runtime needs to be discarded");
@@ -41,12 +41,12 @@ impl ServerRuntime {
     }
 }
 
-impl Runtime for ServerRuntime {
-    const IS_SERVER: bool = true;
+impl Runtime for TestClientRuntime {
+    const IS_SERVER: bool = false;
 
     fn with_mut<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&mut RuntimeInner<ServerRuntime>) -> T,
+        F: FnOnce(&mut RuntimeInner<TestClientRuntime>) -> T,
     {
         RUNTIME_POOL.with(|pool| {
             let mut pool = pool.0.borrow_mut();
@@ -57,7 +57,7 @@ impl Runtime for ServerRuntime {
 
     fn with_ref<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&RuntimeInner<ServerRuntime>) -> T,
+        F: FnOnce(&RuntimeInner<TestClientRuntime>) -> T,
     {
         RUNTIME_POOL.with(|pool| {
             let pool = pool.0.borrow();
@@ -68,10 +68,10 @@ impl Runtime for ServerRuntime {
 }
 
 #[derive(Default)]
-pub struct ServerRuntimePool(RefCell<Vec<RuntimeInner<ServerRuntime>>>);
+pub struct TestClientRuntimePool(RefCell<Vec<RuntimeInner<TestClientRuntime>>>);
 
-impl ServerRuntime {
-    pub fn new_root_scope() -> Scope<ServerRuntime> {
+impl TestClientRuntime {
+    pub fn new_root_scope() -> Scope<TestClientRuntime> {
         RUNTIME_POOL.with(|rt| {
             let mut vec = rt.0.borrow_mut();
 
@@ -79,13 +79,13 @@ impl ServerRuntime {
                 if !rt.in_use() {
                     let id = rt.scope_tree.init(Default::default());
                     return Scope {
-                        rt: ServerRuntime(i as u32),
+                        rt: TestClientRuntime(i as u32),
                         sx: id,
                     };
                 }
             }
 
-            let id = ServerRuntime::from(vec.len());
+            let id = TestClientRuntime::from(vec.len());
             let mut rti = RuntimeInner::new();
             rti.scope_tree.init(Default::default());
             let sx = rti.scope_tree.root();
@@ -95,7 +95,7 @@ impl ServerRuntime {
     }
 
     #[cfg(any(test, feature = "profile"))]
-    pub fn bench_root_scope() -> Scope<ServerRuntime> {
+    pub fn bench_root_scope() -> Scope<TestClientRuntime> {
         RUNTIME_POOL.with(|rt| {
             drop(rt.0.borrow_mut().clear());
             Self::new_root_scope()

@@ -6,7 +6,7 @@ use crate::Runtime;
 /// [Signal](crate::Signal)s are created in scopes and can only be deleted by
 /// discarding the scope.
 ///
-/// Scopes are created in a tree structure, where the root scope is created by one of the [runtimes](crate::runtimes)s,
+/// Scopes are created in a tree structure, where the root scope is created by one of the [runtimes](crate::runtimes),
 /// and child scopes can be added to any Scope by calling the [new_child()](Self::new_child()) function on a scope.
 ///
 /// When calling a Scope's [discard()](Self::discard()) function, the Scope and it's child scopes are discarded
@@ -18,17 +18,18 @@ use crate::Runtime;
 ///
 /// There can be a maximum of 65k Scopes.
 ///
-/// ## Evolution
+/// ## Typed attached data
 ///
-/// **This has not been implemented**. A proof of concept has been implemented but the exact
-/// details of how the api will work are not cemented yet.
+/// > _**This has not been implemented!** A proof of concept has been done but the exact
+/// > details of how the api will work are not cemented yet._
 ///
-/// It is possible to attach data to a Scope and then, in a type-safe manner, access it.
+///
+/// It is possible to attach data to a Scope and then, in a type-safe and performant manner, access it.
 /// When attached to a Scope the data gets transformed into a Signal which can be retrieved
 /// with a function named as the data struct but snake-cased.
 ///
 /// You can add several nested data values to a scope. The cost of adding one is 2 bytes added
-/// to the scope id which is the vector index of the singal plus the cost of the Signal added to
+/// to the scope id which is the vector index of the signal plus the cost of the Signal added to
 /// the ScopeInner.
 ///
 /// ```ignore

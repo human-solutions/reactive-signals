@@ -9,6 +9,29 @@ thread_local! {
 #[derive(Default)]
 pub struct SingleClientRuntime(CellType<RuntimeInner<ClientRuntime>>);
 
+/// A runtime meant to be used client-side because there can only be one per thread.
+/// 
+/// 
+/// ```no_run
+/// use reactor::{Scope, signal, runtimes::ClientRuntime};
+/// 
+/// // when starting a client you create the root scope
+/// let sc = ClientRuntime::new_root_scope();
+/// 
+/// // this scope is then used for building a tree of scopes.
+/// app(sc);
+/// 
+/// // calling discard() on the root scope will discard the ClientRuntime as well.
+/// sc.discard();
+/// 
+/// fn app(sc: Scope<ClientRuntime>) {
+///     // a signal marked with `server` will not run in a Scope<ClientRuntime>
+///     let sig = signal!(sc, server, move || println!("server!"));
+/// }
+/// ```
+/// 
+/// See [runtimes](super) for full documentation.
+/// 
 #[derive(Default, Clone, Copy)]
 pub struct ClientRuntime;
 
