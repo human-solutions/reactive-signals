@@ -32,6 +32,7 @@ pub use kinds::*;
 /// It can only be deleted by discarding that [Scope](crate::Scope).
 ///
 /// ### Example
+///
 /// ```rust
 /// # use reactor::{runtimes::ClientRuntime, signal};
 /// #

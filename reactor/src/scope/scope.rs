@@ -33,8 +33,8 @@ use crate::Runtime;
 /// the ScopeInner.
 ///
 /// ```ignore
-/// // derive using Scoped with the input scope as argument
-/// // the name becomes MyCounterScope
+/// // derive using Scoped with the input scope type as argument
+/// // the generated scope wrapper is named MyCounterScope
 /// #[derive(Scoped(Scope), Clone, Copy)]
 /// struct MyCounter(u8);
 ///
