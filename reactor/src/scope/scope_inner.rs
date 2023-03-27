@@ -1,4 +1,4 @@
-use arena_link_tree::NodeBitVec;
+use arena_tree::NodeBitVec;
 
 use crate::{runtimes::Runtime, scope::Scope, signals::SignalId, signals::SignalInner, CellType};
 

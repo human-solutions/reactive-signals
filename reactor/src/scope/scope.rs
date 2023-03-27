@@ -1,4 +1,4 @@
-use arena_link_tree::NodeId;
+use arena_tree::NodeId;
 
 use crate::Runtime;
 

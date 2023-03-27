@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use arena_link_tree::NodeId;
+use arena_tree::NodeId;
 
 use crate::{primitives::u15Bool, runtimes::RuntimeInner, scope::Scope, Runtime};
 

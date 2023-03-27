@@ -1,4 +1,4 @@
-use arena_link_tree::{Node, Tree};
+use arena_tree::{Node, Tree};
 use criterion::{criterion_group, criterion_main, Criterion};
 
 pub fn create_1000_nodes(c: &mut Criterion) {

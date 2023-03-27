@@ -1,4 +1,4 @@
-use arena_link_tree::Tree;
+use arena_tree::Tree;
 use criterion::{criterion_group, criterion_main, Criterion};
 
 pub fn sum_1000_nodes(c: &mut Criterion) {

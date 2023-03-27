@@ -1,5 +1,5 @@
 [workspace]
-members = ["reactor", "benchmarks", "arena-link-tree"]
+members = ["reactor", "benchmarks", "arena-tree"]
 
 [profile.heap]
 inherits = "release"

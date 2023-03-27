@@ -3,7 +3,7 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use arena_link_tree::Tree;
+use arena_tree::Tree;
 
 use crate::{signals::SignalId, ScopeInner};
 

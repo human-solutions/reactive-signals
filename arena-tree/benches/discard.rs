@@ -1,4 +1,4 @@
-use arena_link_tree::Tree;
+use arena_tree::Tree;
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 
 pub fn discard_1000_nodes(c: &mut Criterion) {

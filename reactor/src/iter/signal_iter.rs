@@ -4,7 +4,7 @@ use crate::{
     signals::{SignalId, SignalInner},
     ScopeInner,
 };
-use arena_link_tree::Tree;
+use arena_tree::Tree;
 
 use super::NodeResolver;
 

@@ -68,7 +68,7 @@ fn test_retain() {
     use crate::primitives::u15Bool;
     use crate::runtimes::ServerRuntime;
     use crate::signals::SignalId;
-    use arena_link_tree::NodeId;
+    use arena_tree::NodeId;
 
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),
