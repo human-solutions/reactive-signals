@@ -22,4 +22,6 @@ fn test_use() {
     count.set(6);
     assert_eq!(count.get(), 6);
     assert_eq!(even.get(), 6);
+
+    let _string_sig = signal!(sx, "hi".to_string());
 }

@@ -2,6 +2,72 @@ use arena_link_tree::NodeId;
 
 use crate::Runtime;
 
+///
+/// [Signal](crate::Signal)s are created in scopes and can only be deleted by
+/// discarding the scope.
+///
+/// Scopes are created in a tree structure, where the root scope is created by one of the [runtimes](crate::runtimes)s,
+/// and child scopes can be added to any Scope by calling the [new_child()](Self::new_child()) function on a scope.
+///
+/// When calling a Scope's [discard()](Self::discard()) function, the Scope and it's child scopes are discarded
+/// together with their signals.
+///
+/// Internally, a Scope is really just a u16 index into an arena based tree which contains the
+/// full ScopeInner data (not exposed in the api doc). The Scope implements [Copy] which makes it
+/// much easier to use in closures.
+///
+/// There can be a maximum of 65k Scopes.
+///
+/// ## Evolution
+///
+/// **This has not been implemented**. A proof of concept has been implemented but the exact
+/// details of how the api will work are not cemented yet.
+///
+/// It is possible to attach data to a Scope and then, in a type-safe manner, access it.
+/// When attached to a Scope the data gets transformed into a Signal which can be retrieved
+/// with a function named as the data struct but snake-cased.
+///
+/// You can add several nested data values to a scope. The cost of adding one is 2 bytes added
+/// to the scope id which is the vector index of the singal plus the cost of the Signal added to
+/// the ScopeInner.
+///
+/// ```ignore
+/// // derive using Scoped with the input scope as argument
+/// // the name becomes MyCounterScope
+/// #[derive(Scoped(Scope), Clone, Copy)]
+/// struct MyCounter(u8);
+///
+/// // a derive with the name argument as well
+/// #[derive(Scoped(MyCounterScope, name = "BaseScope"), Clone)]
+/// struct MyGreeting(String);
+///
+/// fn some_func<RT: Runtime>(sc: Scope<RT>) {
+///     // create your data
+///     let count = MyCounter(0);
+///
+///     // attach it to the scope (type annotations not necessary)
+///     let sc: MyCounterScope<RT: Runtime> = count.attach_to(sc);
+///     
+///     // The MyCount instance can be accessed as a signal (type annotations not necessary)
+///     let count_signal: Signal<EqData<i32>, RT> = sc.my_counter();
+///     
+///     // Create a MyGreeting and attach it to the MyCounterScope
+///     let sc: BaseScope<RT: Runtime> = MyGreeting("hi ".to_string()).attach_to(sc);
+///
+///     next_func(sc);
+/// }
+///
+/// // The scope is passed as a typed parameter
+/// fn next_func<RT: Runtime>(sc: BaseScope<RT>) {
+///     // the scoped data can be modified
+///     sc.my_greeting().update(|s| *s = *s.trim());
+///
+///     signal!(sc, move || {
+///         sc.my_greeting().with(|greet| println!("{greet} {} times", sc.my_counter().get()))
+///     });
+/// }
+/// ```
+///
 #[derive(Copy, Clone)]
 pub struct Scope<RT: Runtime> {
     pub(crate) sx: NodeId,
