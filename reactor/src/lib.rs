@@ -12,22 +12,22 @@
 //! # Features
 //!
 //! - Extremely slim API surface that is really powerful.
-//! - Developer experience: You create reactive signals and they update automatically in a predictable manner. Little else you need to know.
+//! - Developer experience: You create reactive signals and they update automatically in a predictable manner. There's not much more to know.
 //! - Memory and performance overhead so low that a developer doesn't need to worry about it.
 //! - No external dependencies (<sup>TBD</sup> remove [bitvec](https://crates.io/crates/bitvec) which is slow and pulls in a lot of polluting dependencies).
 //! - An easy-to-use [signal!] macro for creating all kinds of signals including data and functional signals, _server_ and _client_ only signals etc.
 //! - [Signal]s produce a reactive value, for data signals it's the contained data and for functional signals it's the value produce by the function.
 //!   When the value implements [PartialEq] then the subscribers will be notified only if the value changes.
 //! - Type-safe attached data to scopes. See the [Scope] doc.<sup>TBD</sup>
-//! - 4 times less memory overhead and 3.5 times faster (worst case) than leptos_reactive. See [Benchmarks](Self#Benchmarks) below.
-//! - Top notch test-coverage<sup>TBD</sup>
+//! - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive). See [Benchmarks](Self#Benchmarks) below.
+//! - Production-class test-coverage<sup>TBD</sup>
 //! - Mirror the leptos_reactive api with deprecations that gives instructions on how to upgrade in order
 //!   to give a really smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
 //! - **Push-pull updates**: Guarantees that the nodes are only updated once and only if necessary.
-//!   See end of the [reactively](https://github.com/modderme123/reactively) readme for more information. <sup>TBC</sup>
+//!   See end of the [reactively](https://github.com/modderme123/reactively) readme for more information.<sup>TBC</sup>
 //! - **Tokio [tracing](https://crates.io/crates/tracing)** compatibility.<sup>TBC</sup>
 //! - **async** signals with runtimes using a custom async runtime when running in a web browser and
-//!   [tokio](https://crates.io/crates/tokio) when running in a server. See [signal!] for more information.<sup>TBC</sup>
+//!   [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!] doc.<sup>TBC</sup>
 //! - See [Evolutions](Self#Evolutions) for more possible features.
 //!
 //!
@@ -78,7 +78,7 @@
 //!
 //! # Evolutions
 //!
-//! - **Timetravel**. Due to how reactor is structured it is possible to create state snapshots that can
+//! - **Timetravel**. Due to how Reactor is structured it is possible to create state snapshots that can
 //!   be used to create a realtime visualization of the signals, grouped by their
 //!   scope with edges between connected signals. Each outside action or event would trigger
 //!   a new state snapshot. A state snapshot would be visualized by highlightning the
@@ -87,8 +87,8 @@
 //! - **Polled signals**. Option to register signals for polling so that a runtime vec will contain all changed signals
 //!   since last polling. This could be used
 //!   to group DOM updates into one update per frame avoiding the overhead of many small and costly calls out of the WASM.
-//!   Feasibility would need to be investigated.
-//! - **Remote shim** (deeply speculative). Everything that goes in or out of a WASM is converted between Rust and JS style data.
+//!   Usefulness for Leptos would need to be investigated.
+//! - **Remote shim** (speculative). Everything that goes in or out of a WASM is converted between Rust and JS style data.
 //!   It should be possible to put a shim in that serializes it to a remote app. Why do such a thing? It would help making
 //!   full hot-reloading possible and to apply various tricks for greatly speeding up the compile times.
 //!
@@ -111,7 +111,7 @@
 //! | Notify a subscriber  | 25 ns | 15 ns
 //!
 //! The leptos_reactive profiling example "Leptos create 1000 signals" measures 245 µs.
-//! The same measures 70 µs using reactor. That makes for a 3.5 times improvement.
+//! The same measures 70 µs using Reactor. That makes for a 3.5 times improvement.
 //!
 //! ## Memory use
 //!
@@ -127,8 +127,8 @@
 //! <sup>*</sup> The memory use for each signal subscription.
 //!
 //! In leptos_reactive, 1000 signals and one memo uses 400kb and
-//! in reactor creating 1000 function signals each with a subscription
-//! uses 100kb. In other words reactor uses 4 times less memory than
+//! in Reactor creating 1000 function signals each with a subscription
+//! uses 100kb. In other words Reactor uses 4 times less memory than
 //! leptos_reactive
 //!
 //! Please see the benches, examples and tests for full details.
@@ -138,7 +138,7 @@
 //! I have spent a lot of time on reactor which has been entirely self-funded. Unfortunately,
 //! it is not possible for me to continue like that (I would love to!).
 //!
-//! The future of reactor depends on your reactions and if you want to fund the really
+//! The future of Reactor depends on your reactions and if you want to fund the really
 //! cool features. The ones I listed with a <sup>TBC</sup>. I believe there's a huge potiential for
 //! Leptos and Reactor together.
 //!
