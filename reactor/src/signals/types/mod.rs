@@ -1,3 +1,6 @@
+//!
+//! Simple zero-cost abstractions that classifies signals based on the values they produce
+//!
 mod client;
 mod data;
 mod func;
@@ -8,6 +11,7 @@ pub use data::*;
 pub use func::*;
 pub use server::*;
 
+#[doc(hidden)]
 pub trait SignalType: 'static {
     type Inner;
 
@@ -23,10 +27,13 @@ pub trait SignalType: 'static {
     fn new(value: Self::Inner) -> Self;
 }
 
+#[doc(hidden)]
 pub trait Modifiable {}
 
+#[doc(hidden)]
 pub trait Readable {}
 
+#[doc(hidden)]
 pub trait OptReadable {
     const RUN_ON_SERVER: bool = true;
     const RUN_ON_CLIENT: bool = true;

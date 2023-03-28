@@ -1,5 +1,6 @@
 use super::{OptReadable, SignalType};
 
+/// A server-side function that produces a value that doesn't implement [PartialEq]
 pub struct ServerFunc<T>(pub(crate) T);
 
 impl<T> OptReadable for ServerFunc<T> {
@@ -20,6 +21,7 @@ impl<T: 'static> SignalType for ServerFunc<T> {
     }
 }
 
+/// A server-side function that produces a value that implements [PartialEq]
 pub struct ServerEqFunc<T>(pub(crate) T);
 
 impl<T> OptReadable for ServerEqFunc<T> {}

@@ -3,30 +3,36 @@
 //! [leptos_reactive](https://crates.io/crates/leptos_reactive) but is written from scratch in order to
 //! provide the simplest API and mental model possible for developers.
 //!
-//! This documentation assumes that you know [Leptos](https://crates.io/crates/leptos) and are familiar with the concepts of reactivity.
-//! - <sup>TBD</sup> (to be done) means that the feature will be added in the future.
-//! - <sup>TBC</sup> (to be confirmed) means that it is a possible future addition
+//! > This documentation assumes that you know [Leptos](https://crates.io/crates/leptos) and are familiar
+//! > with the concepts of reactivity.
+//! > - <sup>TBD</sup> (to be done) means that the feature will be added in the future.
+//! > - <sup>TBC</sup> (to be confirmed) means that it is a possible future addition
+//! >
+//! > Note: This project is not yet ready for use! It needs a full test coverage first.
 //!
-//! Note: This project is not yet ready for use! It needs a full test coverage first.
 //!
 //! # Features
 //!
-//! - Extremely slim API surface that is really powerful.
-//! - Developer experience: You create reactive signals and they update automatically in a predictable manner. There's not much more to know.
+//! - Extremely slim API surface that is really powerful. Essentially: [Scope], [Signal], [signal!].
+//! - Developer experience: You create reactive signals and they update automatically in a predictable manner.
+//!   There's not much more to know.
 //! - Memory and performance overhead so low that a developer doesn't need to worry about it.
-//! - An easy-to-use [signal!] macro for creating all kinds of signals including data and functional signals, _server_ and _client_ only signals etc.
-//! - [Signal]s produce a reactive value, for data signals it's the contained data and for functional signals it's the value produce by the function.
-//!   When the value implements [PartialEq] then the subscribers will be notified only if the value changes.
+//! - An easy-to-use [signal!] macro for creating all kinds of signals including data and functional signals,
+//!   server-side and client-side signals etc.
+//! - [Signal]s produce a reactive value, for data signals it's the inner data and for functional signals
+//!   it's the value produced by the function. Subscribers are notified when the value is updated,
+//!   or when the value implements [PartialEq], when it is changed.
 //! - Type-safe attached data to scopes. See the [Scope] doc.<sup>TBD</sup>
-//! - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive). See [Benchmarks](Self#Benchmarks) below.
-//! - Production-class test-coverage<sup>TBC</sup>
-//! - Mirror the leptos_reactive api with deprecations that gives instructions on how to upgrade in order
-//!   to give a really smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
+//! - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive).
+//!   See [Benchmarks](Self#Benchmarks) below.
 //! - Push-pull updates: Guarantees that the nodes are only updated once and only if necessary.
 //!   See end of the [reactively](https://github.com/modderme123/reactively) readme for more information.<sup>TBC</sup>
 //! - Tokio [tracing](https://crates.io/crates/tracing) compatibility.<sup>TBC</sup>
 //! - async signals with runtimes using a custom async runtime when running in a web browser and
 //!   [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!] doc.<sup>TBC</sup>
+//! - Mirror the leptos_reactive api with deprecations that gives instructions on how to upgrade in order
+//!   to give a really smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
+//! - Production-class test-coverage<sup>TBC</sup>
 //! - See [Evolutions](Self#Evolutions) for more possible features.
 //!
 //!
@@ -35,44 +41,72 @@
 //! ```rust ignore
 //! use reactor::{signal, Scope, Scoped, runtimes::ClientRuntime};
 //!
-//! // Let's do a simple fruit list app
+//! enum UserActions {
+//!     None,
+//!     StartClicked,
+//!     PlusClicked,
+//!     MinusClicked,
+//!     TextChanged(String),
+//! }
 //!
-//! // The entire app needs the fruit list
+//! // Let's do a simple "select your fruit and quantity in 30 seconds" app.
+//!
+//! // The entire app needs to know which fruit and the quantity
 //! #[derive(Default, Scoped)]
-//! struct FruitList(Vec<(String, usize)>);
-//! # struct FruitListScope(FruitList);
-//! # impl FruitList {
-//! #   fn attach_to(self, sc: Scope<ClientRuntime>) -> FruitListScope { todo!() }
-//! # }
+//! struct FruitSelection((Option<String>, usize));
 //!
 //! // create a root scope.
 //! let sc = ClientRuntime::new_root_scope();
 //!
-//! // let's attach the FruitList to the scope
-//! let sc = FruitList::default().attach_to(sc);
+//! // let's attach the FruitSelection to the scope
+//! let sc = FruitSelection((String, 0)).attach_to(sc);
 //!
 //!
 //!
-//! // run the app. This would normally be a Leptos component that
-//! // produces html output.
+//! // Run the app.
 //! fruit_list_app(sc);
 //!
-//! fn fruit_list_app(sc: FruitListScope) {
+//! fn fruit_list_app<RT: Runtime>(
+//!     sc: FruitSelectionScope<RT>,
+//!     actions: Signal<Data<UserActions>, RT>,
+//!     displayed: Signal<EqData<String>, RT>) {
+//!
+//!   let secs_remaning = signal!(sc, 30);
+//!   let count = signal!(sc, 0);
+//!   let name = signal!(sc, Option::<String>::None);
 //!   let fruit_history = signal!(sc, Vec::<String>::new())
-//!   let current_fruit = signal!(sc, String::new());
-//!   let current_count = signal!(sc, 0);
+//!   
+//!   let running = signal!(sc, false);
+//!
 //!   
 //!   signal!(sc, move || {
-//!     
+//!     match actions.get() {
+//!         UserActions::StartClicked if !running.get() => {
+//!             running.set(true);
+//!             signal!(sc, 1 sec, async move |&mut interval| {
+//!                 if secs_remaining.get() <= 0 {
+//!                     running.set(false);
+//!                     interval = None; // stop running
+//!                     int_sc.dispose(); // one of the few times you'll need to dispose a scope manually
+//!                 } else {
+//!                     secs_remaning.update(|s| *s += 1);
+//!                 }
+//!             });
+//!         }
+//!         UserActions::PlusClicked => count.update(|c| *c += 1),
+//!         UserActions::MinusClicked if count.get() > 0 => count.update(|c| *c -= 1),
+//!         UserActions::TextChanged(txt) => name.set(txt),
+//!         _ => {}
+//!     }
 //!   });
 //! }
 //! ```
 //!
 //! # Cargo features
 //!
-//! - `unsafe-cell`: Internally, reactor uses [RefCell](::core::cell::RefCell) for interior mutability. Once reactor is mature and if your app
-//!   is well tested, then [UnsafeCell](::core::cell::UnsafeCell) can be used, resulting in a performance improvement of around 40% and a reduction
-//!   in memory use by some 20%.
+//! - `unsafe-cell`: Internally, Reactor uses [RefCell](::core::cell::RefCell) for interior mutability.
+//!   Once Reactor is mature and if your app is well tested, then [UnsafeCell](::core::cell::UnsafeCell)
+//!   can be used, resulting in a performance improvement of around 40% and a reduction in memory use by some 20%.
 //!
 //!
 //! # Evolutions
@@ -175,7 +209,6 @@ pub use signals::Signal;
 
 use runtimes::Runtime;
 use scope::ScopeInner;
-#[doc(hidden)]
 pub use signals::types;
 use std::cell;
 

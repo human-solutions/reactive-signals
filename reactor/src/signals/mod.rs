@@ -34,11 +34,11 @@ pub use kinds::*;
 /// ### Example
 ///
 /// ```rust
-/// # use reactor::{runtimes::ClientRuntime, signal};
-/// #
-/// # // signals are created in scopes
-/// # let sx = ClientRuntime::new_root_scope();
-/// #
+/// use reactor::{runtimes::ClientRuntime, signal};
+///
+/// // signals are created in scopes
+/// let sx = ClientRuntime::new_root_scope();
+///
 /// // a simple data value
 /// let count = signal!(sx, 5);
 ///
@@ -80,6 +80,15 @@ pub use kinds::*;
 ///     history.with(|h| h.join(", ")),
 ///     "5 kiwis, 1 kiwi, 1 kiwi, 1 fig"
 /// );
+///
+/// with_signal_arg(count);
+///
+/// // when declaring functions some additional imports are necessary
+/// use reactor::{runtimes::Runtime, Signal, types::*};
+///
+/// fn with_signal_arg<RT: Runtime>(count: Signal<EqData<i32>, RT>) {
+/// }
+///
 /// ```
 pub struct Signal<T: SignalType, RT: Runtime> {
     id: SignalId<RT>,

@@ -5,6 +5,7 @@ use std::{
 
 use super::{Modifiable, Readable, SignalType};
 
+/// Data that doesn't implement [PartialEq]
 pub struct Data<T>(pub(crate) T);
 
 impl<T> Modifiable for Data<T> {}
@@ -24,6 +25,7 @@ impl<T: 'static> SignalType for Data<T> {
     }
 }
 
+/// Data that implements [PartialEq]
 pub struct EqData<T>(pub(crate) T);
 
 impl<T> Modifiable for EqData<T> {}
@@ -48,6 +50,7 @@ impl<T: 'static + PartialEq> SignalType for EqData<T> {
     }
 }
 
+/// Data that implements [PartialEq] and [Hash](std::hash::Hash)
 pub struct HashEqData<T>(pub(crate) T);
 
 impl<T> Modifiable for HashEqData<T> {}

@@ -1,5 +1,6 @@
 use super::{Readable, SignalType};
 
+/// A function that produces a value that doesn't implement [PartialEq]
 pub struct Func<T>(pub(crate) T);
 
 impl<T> Readable for Func<T> {}
@@ -18,6 +19,7 @@ impl<T: 'static> SignalType for Func<T> {
     }
 }
 
+/// A function that produces a value that implements [PartialEq]
 pub struct EqFunc<T>(pub(crate) T);
 
 impl<T> Readable for EqFunc<T> {}
