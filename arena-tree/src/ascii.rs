@@ -63,10 +63,10 @@ impl<T: Default> Tree<T> {
                 let mut children = self.siblings(child);
                 children.reverse();
                 let mut d = children.len();
-                if level.len() == 0 {
-                    write!(f, "{}\n", title)?;
+                if level.is_empty() {
+                    writeln!(f, "{}", title)?;
                 } else {
-                    write!(f, " {}\n", title)?;
+                    writeln!(f, " {}", title)?;
                 }
 
                 for s in children {

@@ -60,22 +60,7 @@ fn get_available(flags: &mut FlagArr, is_available: impl Fn(usize) -> bool) -> O
         }
         i += 1;
     }
-    // for i in slot_start..slot_end {
-    //     let available = is_available(i);
-    //     match (found, available) {
-    //         (true, true) => {
-    //             flags.set(slot_idx);
-    //             return Some(found_idx);
-    //         }
-    //         (false, true) => {
-    //             found = true;
-    //             found_idx = i;
-    //         }
-    //         _ => {}
-    //     }
-    // }
-
-    (found_idx != usize::MAX).then(|| found_idx)
+    (found_idx != usize::MAX).then_some(found_idx)
 }
 
 #[test]

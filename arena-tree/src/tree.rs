@@ -63,7 +63,7 @@ impl<T: Default> Tree<T> {
                 "BUG: node {} is already used",
                 id.index()
             );
-            return id;
+            id
         } else {
             let idx = self.nodes.len();
             debug_assert!(idx <= NodeId::MAX, "too many nodes");

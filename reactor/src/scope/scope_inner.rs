@@ -27,7 +27,7 @@ impl<RT: Runtime> ScopeInner<RT> {
     {
         let signals = self.vec_ref();
         let signal = signals.get(id.index()).unwrap();
-        f(&signal)
+        f(signal)
     }
 
     pub(crate) fn remove_scopes(&mut self, discarded_scopes: &FlagVec) {

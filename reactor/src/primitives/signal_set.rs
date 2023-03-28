@@ -59,7 +59,7 @@ impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
 
 impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
     fn default() -> Self {
-        return Self(CellType::new(Default::default()));
+        Self(CellType::new(Default::default()))
     }
 }
 

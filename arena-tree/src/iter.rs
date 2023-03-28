@@ -21,7 +21,7 @@ impl<'a, T> Iterator for DepthFirstIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         let (next, current) = next(self.tree, self.start, self.next);
         self.next = next;
-        return current;
+        current
     }
 }
 
@@ -62,7 +62,7 @@ fn next<T>(
         panic!("BUG: iteration ended up in a state that should be impossible");
     }
 
-    return (next, Some(current));
+    (next, Some(current))
 }
 
 pub struct MutDepthFirstIter<'a, T> {

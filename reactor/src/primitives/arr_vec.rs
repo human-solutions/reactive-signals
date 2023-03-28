@@ -116,11 +116,7 @@ impl<const N: usize, T: Ord + Eq + Copy> ArrVec<N, T> {
     #[inline]
     pub(crate) fn clear(&mut self) {
         match self {
-            Self::Arr(a) => {
-                for i in 0..N {
-                    a[i] = None
-                }
-            }
+            Self::Arr(a) => a.iter_mut().for_each(|entry| *entry = None),
             Self::Vec(v) => v.clear(),
         }
     }
@@ -151,15 +147,7 @@ impl<const N: usize, T: Ord + Eq + Copy> ArrVec<N, T> {
     #[inline]
     pub(crate) fn len(&self) -> usize {
         match self {
-            Self::Arr(a) => {
-                let mut len = 0;
-                for i in 0..N {
-                    if a[i].is_some() {
-                        len += 1;
-                    }
-                }
-                len
-            }
+            Self::Arr(a) => a.iter().filter(|e| e.is_some()).count(),
             Self::Vec(v) => v.len(),
         }
     }
@@ -167,14 +155,7 @@ impl<const N: usize, T: Ord + Eq + Copy> ArrVec<N, T> {
     #[inline]
     pub(crate) fn is_empty(&self) -> bool {
         match self {
-            Self::Arr(a) => {
-                for i in 0..N {
-                    if a[i].is_some() {
-                        return false;
-                    }
-                }
-                true
-            }
+            Self::Arr(a) => !a.iter().any(|elem| elem.is_some()),
             Self::Vec(v) => v.is_empty(),
         }
     }
