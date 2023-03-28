@@ -2,6 +2,10 @@
 name = "reactor"
 version = "0.1.0-alpha.1"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/human-solutions/reactor"
+description = "Reactor is a dx-first scope-based finegrained reactive system."
+categories = ["data-structures"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
