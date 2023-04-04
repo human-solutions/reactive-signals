@@ -21,7 +21,7 @@
 //!   server-side and client-side signals etc.
 //! - [Signal]s produce a reactive value, for data signals it's the inner data and for functional signals
 //!   it's the value produced by the function. Subscribers are notified when the value is updated,
-//!   or when the value implements [PartialEq], when it is changed.
+//!   or for value that implements [PartialEq], when it is changed.
 //! - Type-safe attached data to scopes. See the [Scope] doc.<sup>TBD</sup>
 //! - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive).
 //!   See [Benchmarks](Self#Benchmarks) below.

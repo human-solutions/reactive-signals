@@ -31,7 +31,19 @@ pub use kinds::*;
 /// A [Signal] is created in a reactive [Scope](crate::Scope) using the [signal!](crate::signal!) macro.
 /// It can only be deleted by discarding that [Scope](crate::Scope).
 ///
-/// ### Example
+/// ## Accessors
+///
+/// Only data signals can be manually changed. Func signals that only runs on `server` or `client`
+/// always return optional values which are some only when runninig on their side.
+///
+/// | Value implements | Data signal          | Func signal | Func signal with<br>`server` or `client` |
+/// | ---              | --                   | ---         | ---                                      |
+/// | -                | .set, .update, .with | .with       | .opt_with                                |
+/// | Clone            | .cloned              | .cloned     | .opt_cloned                              |
+/// | Copy             | .get                 | .get        | .opt_get                                 |
+///
+///
+/// ## Example
 ///
 /// ```rust
 /// use reactor::{runtimes::ClientRuntime, signal};
