@@ -1,1 +1,1 @@
-See https://docs.rs/reactor
+See https://docs.rs/reactive_signals

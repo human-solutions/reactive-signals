@@ -1,5 +1,5 @@
 //!
-//! Reactor is a dx-first scope-based finegrained reactive system. It is based on the excellent ideas in
+//! reactive-signals is a dx-first scope-based finegrained reactive system. It is based on the excellent ideas in
 //! [leptos_reactive](https://crates.io/crates/leptos_reactive) but is written from scratch in order to
 //! provide the simplest API and mental model possible for developers.
 //!
@@ -39,7 +39,7 @@
 //! # Example
 //!
 //! ```rust ignore
-//! use reactor::{signal, Scope, Scoped, runtimes::ClientRuntime};
+//! use reactive_signals::{signal, Scope, Scoped, runtimes::ClientRuntime};
 //!
 //! enum UserActions {
 //!     None,
@@ -104,14 +104,14 @@
 //!
 //! # Cargo features
 //!
-//! - `unsafe-cell`: Internally, Reactor uses [RefCell](::core::cell::RefCell) for interior mutability.
-//!   Once Reactor is mature and if your app is well tested, then [UnsafeCell](::core::cell::UnsafeCell)
+//! - `unsafe-cell`: Internally, reactive-signals uses [RefCell](::core::cell::RefCell) for interior mutability.
+//!   Once reactive-signals is mature and if your app is well tested, then [UnsafeCell](::core::cell::UnsafeCell)
 //!   can be used, resulting in a performance improvement of around 40% and a reduction in memory use by some 20%.
 //!
 //!
 //! # Evolutions
 //!
-//! - **Timetravel**. Due to how Reactor is structured it is possible to create state snapshots that can
+//! - **Timetravel**. Due to how reactive-signals is structured it is possible to create state snapshots that can
 //!   be used to create a realtime visualization of the signals, grouped by their
 //!   scope with edges between connected signals. Each outside action or event would trigger
 //!   a new state snapshot. A state snapshot would be visualized by highlightning the
@@ -144,7 +144,7 @@
 //! | Notify a subscriber  | 25 ns | 15 ns
 //!
 //! The leptos_reactive profiling example "Leptos create 1000 signals" measures 245 µs.
-//! The same measures 70 µs using Reactor. That makes for a 3.5 times improvement.
+//! The same measures 70 µs using reactive-signals. That makes for a 3.5 times improvement.
 //!
 //! ## Memory use
 //!
@@ -160,23 +160,23 @@
 //! <sup>*</sup> The memory use for each signal subscription.
 //!
 //! In leptos_reactive, 1000 signals and one memo uses 400kb and
-//! in Reactor creating 1000 function signals each with a subscription
-//! uses 100kb. In other words Reactor uses 4 times less memory than
+//! in reactive-signals creating 1000 function signals each with a subscription
+//! uses 100kb. In other words reactive-signals uses 4 times less memory than
 //! leptos_reactive
 //!
 //! Please see the benches, examples and tests for full details.
 //!
-//! # A personal note & the future of Reactor
+//! # A personal note & the future of reactive-signals
 //!
-//! I have spent a lot of time on Reactor which has been entirely self-funded. Unfortunately,
+//! I have spent a lot of time on reactive-signals which has been entirely self-funded. Unfortunately,
 //! it is not possible for me to continue like that (I would love to!).
 //!
-//! The future of Reactor depends on your reactions and if you want to fund the really
+//! The future of reactive-signals depends on your reactions and if you want to fund the really
 //! cool features, the ones I listed with a <sup>TBC</sup>. I believe there's a huge potiential for
-//! Leptos and Reactor together.
+//! Leptos and reactive-signals together.
 //!
-//! Reactor could also be used outside of Leptos, but for now, since my heart lies
-//! with Leptos, I won't put effort in making Reactor known.
+//! reactive-signals could also be used outside of Leptos, but for now, since my heart lies
+//! with Leptos, I won't put effort in making reactive-signals known.
 //!
 //! Also, I'm a seasoned (read 50 years old) developer with a lot of Team Leading
 //! and mentoring experience as well as my Rust & Swift development skills. I'm open

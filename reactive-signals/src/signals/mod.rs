@@ -46,7 +46,7 @@ pub use kinds::*;
 /// ## Example
 ///
 /// ```rust
-/// use reactor::{runtimes::ClientRuntime, signal};
+/// use reactive_signals::{runtimes::ClientRuntime, signal};
 ///
 /// // signals are created in scopes
 /// let sx = ClientRuntime::new_root_scope();
@@ -96,7 +96,7 @@ pub use kinds::*;
 /// with_signal_arg(count);
 ///
 /// // when declaring functions some additional imports are necessary
-/// use reactor::{runtimes::Runtime, Signal, types::*};
+/// use reactive_signals::{runtimes::Runtime, Signal, types::*};
 ///
 /// fn with_signal_arg<RT: Runtime>(count: Signal<EqData<i32>, RT>) {
 /// }

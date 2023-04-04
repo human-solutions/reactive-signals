@@ -31,7 +31,7 @@ where
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactor::{signal, runtimes::ClientRuntime};
+    /// # use reactive_signals::{signal, runtimes::ClientRuntime};
     /// # let sc = ClientRuntime::new_root_scope();
     /// let count = signal!(sc, 2);
     /// let is_even = count.update(|val| {
@@ -92,7 +92,7 @@ where
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactor::{signal, runtimes::ClientRuntime};
+    /// # use reactive_signals::{signal, runtimes::ClientRuntime};
     /// # let sc = ClientRuntime::new_root_scope();
     /// let count = signal!(sc, 2);
     /// let is_even = count.with(|val| *val % 2 == 0);
@@ -151,7 +151,7 @@ where
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactor::{signal, runtimes::ClientRuntime};
+    /// # use reactive_signals::{signal, runtimes::ClientRuntime};
     /// # let sc = ClientRuntime::new_root_scope();
     /// let count = signal!(sc, 2);
     /// let is_even = count.with(|val| *val % 2 == 0);

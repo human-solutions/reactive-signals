@@ -10,7 +10,7 @@ thread_local! {
 ///
 ///
 /// ```no_run
-/// use reactor::{Scope, signal, runtimes::ServerRuntime};
+/// use reactive_signals::{Scope, signal, runtimes::ServerRuntime};
 ///
 /// // when starting a server you create a root scope
 /// let sc = ServerRuntime::new_root_scope();

@@ -1,5 +1,5 @@
 //!
-//! Runtimes are the starting point of a reactor based application. Internally, the runtimes presents a
+//! Runtimes are the starting point of a reactive-signals based application. Internally, the runtimes presents a
 //! simple boolean constant to let the [Scope](crate::Scope)s and [Signal](crate::Signal)s know
 //! where they are running. Like that a signal marked with `server` or `client` knows if it should run.
 //!

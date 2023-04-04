@@ -1,4 +1,4 @@
-use reactor::{
+use reactive_signals::{
     runtimes::{ClientRuntime, Runtime},
     signal,
     types::EqData,

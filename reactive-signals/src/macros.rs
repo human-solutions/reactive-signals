@@ -16,8 +16,8 @@
 /// # Example of reactive data signals
 ///
 /// ```rust
-/// # use reactor::types::*;
-/// use reactor::{Scope, Signal, signal, runtimes::ClientRuntime};
+/// # use reactive_signals::types::*;
+/// use reactive_signals::{Scope, Signal, signal, runtimes::ClientRuntime};
 ///
 /// let sc = ClientRuntime::new_root_scope();
 ///
@@ -34,11 +34,11 @@
 /// # Example of functional reactive signals
 ///
 /// ```rust
-/// # use reactor::types::*;
+/// # use reactive_signals::types::*;
 /// # use std::cell::RefCell;
 /// # use std::rc::Rc;
 /// #
-/// use reactor::{Scope, Signal, signal, runtimes::ClientRuntime};
+/// use reactive_signals::{Scope, Signal, signal, runtimes::ClientRuntime};
 ///
 /// let sc = ClientRuntime::new_root_scope();
 ///

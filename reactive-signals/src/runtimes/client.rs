@@ -13,7 +13,7 @@ pub struct SingleClientRuntime(CellType<RuntimeInner<ClientRuntime>>);
 /// 
 /// 
 /// ```no_run
-/// use reactor::{Scope, signal, runtimes::ClientRuntime};
+/// use reactive_signals::{Scope, signal, runtimes::ClientRuntime};
 /// 
 /// // when starting a client you create the root scope
 /// let sc = ClientRuntime::new_root_scope();

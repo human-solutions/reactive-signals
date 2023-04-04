@@ -10,7 +10,7 @@ fn main() {
 
     let profile = dhat::Profiler::builder().testing().build();
 
-    reactor::tests::profile::create_1000_nested_scopes_each_with_a_signal();
+    reactive_signals::tests::profile::create_1000_nested_scopes_each_with_a_signal();
 
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
@@ -29,7 +29,7 @@ fn main() {
 
     let profile = dhat::Profiler::builder().testing().build();
 
-    reactor::tests::profile::create_1000_nested_scopes();
+    reactive_signals::tests::profile::create_1000_nested_scopes();
 
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
@@ -48,7 +48,7 @@ fn main() {
 
     let profile = dhat::Profiler::builder().testing().build();
 
-    reactor::tests::profile::create_1000_data_signals();
+    reactive_signals::tests::profile::create_1000_data_signals();
 
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
@@ -67,7 +67,7 @@ fn main() {
 
     let profile = dhat::Profiler::builder().testing().build();
 
-    reactor::tests::profile::create_1000_func_signals();
+    reactive_signals::tests::profile::create_1000_func_signals();
 
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
@@ -88,7 +88,7 @@ fn main() {
 
     let profile = dhat::Profiler::builder().testing().build();
 
-    reactor::tests::profile::create_1000_func_signals_with_one_subscription();
+    reactive_signals::tests::profile::create_1000_func_signals_with_one_subscription();
 
     let stats = dhat::HeapStats::get();
 

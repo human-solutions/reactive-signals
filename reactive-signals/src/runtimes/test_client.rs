@@ -10,7 +10,7 @@ thread_local! {
 /// so that many runtimes can co-exist on one thread, but simulates running on a client.
 ///
 /// ```no_run
-/// use reactor::{Scope, signal, runtimes::TestClientRuntime};
+/// use reactive_signals::{Scope, signal, runtimes::TestClientRuntime};
 ///
 /// // when starting a client you create the root scope
 /// let sc = TestClientRuntime::new_root_scope();
