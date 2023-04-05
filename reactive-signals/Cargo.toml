@@ -1,10 +1,10 @@
 [package]
 name = "reactive-signals"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/human-solutions/reactive-signals"
-description = "reactive-signals is a dx-first scope-based fine grained reactive system."
+description = "reactive-signals is a dx-first scope-based fine-grained reactive system."
 categories = ["data-structures"]
 readme = "../README.md"
 

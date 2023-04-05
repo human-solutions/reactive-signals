@@ -13,8 +13,10 @@ Please don't edit. This document has been generated from src/readme.tpl.md
     - [Memory use](#memory-use)
 - [A personal note & the future of reactive-signals](#a-personal-note-&-the-future-of-reactive-signals)
 
+FOR WORKING DOC LINKS, READ THIS AT [DOCS.RS](https://docs.rs/reactive-signals)
 
-reactive-signals is a dx-first scope-based fine grained reactive system. It is based on the excellent ideas in
+
+reactive-signals is a dx-first scope-based fine-grained reactive system. It is based on the excellent ideas in
 [leptos_reactive](https://crates.io/crates/leptos_reactive) but is written from scratch to
 provide the simplest API and mental model possible for developers.
 
