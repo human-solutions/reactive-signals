@@ -1,6 +1,6 @@
 //!
-//! reactive-signals is a dx-first scope-based finegrained reactive system. It is based on the excellent ideas in
-//! [leptos_reactive](https://crates.io/crates/leptos_reactive) but is written from scratch in order to
+//! reactive-signals is a dx-first scope-based fine grained reactive system. It is based on the excellent ideas in
+//! [leptos_reactive](https://crates.io/crates/leptos_reactive) but is written from scratch to
 //! provide the simplest API and mental model possible for developers.
 //!
 //! > This documentation assumes that you know [Leptos](https://crates.io/crates/leptos) and are familiar
@@ -212,6 +212,5 @@ type CellType<T> = cell::UnsafeCell<T>;
 #[cfg(test)]
 #[test]
 fn update_readme() {
-    println!("{:?}", std::env::current_dir());
     markdown_includes::update("src/readme.tpl.md", "../README.md").unwrap();
 }
