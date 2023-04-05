@@ -35,72 +35,9 @@
 //! - Production-class test-coverage.<sup>TBC</sup>
 //! - See [Evolutions](Self#Evolutions) for more possible features.
 //!
+//! # Examples
 //!
-//! # Example
-//!
-//! ```rust ignore
-//! use reactive_signals::{signal, Scope, Scoped, runtimes::ClientRuntime};
-//!
-//! enum UserActions {
-//!     None,
-//!     StartClicked,
-//!     PlusClicked,
-//!     MinusClicked,
-//!     TextChanged(String),
-//! }
-//!
-//! // Let's do a simple "select your fruit and quantity in 30 seconds" app.
-//!
-//! // The entire app needs to know which fruit and the quantity
-//! #[derive(Default, Scoped)]
-//! struct FruitSelection((Option<String>, usize));
-//!
-//! // create a root scope.
-//! let sc = ClientRuntime::new_root_scope();
-//!
-//! // let's attach the FruitSelection to the scope
-//! let sc = FruitSelection((String, 0)).attach_to(sc);
-//!
-//!
-//!
-//! // Run the app.
-//! fruit_list_app(sc);
-//!
-//! fn fruit_list_app<RT: Runtime>(
-//!     sc: FruitSelectionScope<RT>,
-//!     actions: Signal<Data<UserActions>, RT>,
-//!     displayed: Signal<EqData<String>, RT>) {
-//!
-//!   let secs_remaning = signal!(sc, 30);
-//!   let count = signal!(sc, 0);
-//!   let name = signal!(sc, Option::<String>::None);
-//!   let fruit_history = signal!(sc, Vec::<String>::new())
-//!   
-//!   let running = signal!(sc, false);
-//!
-//!   
-//!   signal!(sc, move || {
-//!     match actions.get() {
-//!         UserActions::StartClicked if !running.get() => {
-//!             running.set(true);
-//!             signal!(sc, 1 sec, async move |&mut interval| {
-//!                 if secs_remaining.get() <= 0 {
-//!                     running.set(false);
-//!                     interval = None; // stop running
-//!                     int_sc.dispose(); // one of the few times you'll need to dispose a scope manually
-//!                 } else {
-//!                     secs_remaning.update(|s| *s += 1);
-//!                 }
-//!             });
-//!         }
-//!         UserActions::PlusClicked => count.update(|c| *c += 1),
-//!         UserActions::MinusClicked if count.get() > 0 => count.update(|c| *c -= 1),
-//!         UserActions::TextChanged(txt) => name.set(txt),
-//!         _ => {}
-//!     }
-//!   });
-//! }
-//! ```
+//! See the examples in [Scope](crate::Scope), [Signal](crate::Signal), [signal!](crate::signal!).
 //!
 //! # Cargo features
 //!
