@@ -1,11 +1,12 @@
 [package]
 name = "reactive-signals"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/human-solutions/reactive-signals"
 description = "reactive-signals is a dx-first scope-based fine grained reactive system."
 categories = ["data-structures"]
+readme = "../README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
