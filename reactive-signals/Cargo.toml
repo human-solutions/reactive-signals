@@ -79,3 +79,8 @@ required-features = ["profile"]
 name = "tree_discard"
 harness = false
 required-features = ["profile"]
+
+[[bench]]
+name = "deep_update"
+harness = false
+required-features = ["profile"]

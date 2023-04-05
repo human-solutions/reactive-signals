@@ -104,7 +104,7 @@ fn set_last_bit_bool(base_one: u16, val: bool) -> NonZeroU16 {
     } else {
         base_one & NONE_LAST_BIT
     })
-    .unwrap()
+    .expect(&format!("base_one: {base_one}, val: {val}"))
 }
 
 #[inline]
