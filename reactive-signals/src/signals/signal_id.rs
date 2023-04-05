@@ -27,6 +27,12 @@ pub(crate) struct SignalId<RT: Runtime> {
 
 impl<RT: Runtime> SignalId<RT> {
     pub(crate) fn new(id: usize, sx: Scope<RT>) -> Self {
+        if id > u15Bool::MAX as usize {
+            panic!(
+                "There cannot be more than {} Signals attached to a Scope",
+                u15Bool::MAX
+            );
+        }
         Self {
             sx: sx.sx,
             id: u15Bool::new(id, false),
