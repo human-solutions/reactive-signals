@@ -149,8 +149,8 @@ type CellType<T> = cell::RefCell<T>;
 #[cfg(feature = "unsafe-cell")]
 type CellType<T> = cell::UnsafeCell<T>;
 
-#[cfg(test)]
-#[test]
-fn update_readme() {
-    markdown_includes::update("src/readme.tpl.md", "../README.md").unwrap();
-}
+// #[cfg(test)]
+// #[test]
+// fn update_readme() {
+//     markdown_includes::update("src/readme.tpl.md", "../README.md").unwrap();
+// }
