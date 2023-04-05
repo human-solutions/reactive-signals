@@ -1,6 +1,6 @@
 use std::{cell::RefCell, fmt::Display};
 
-use crate::Tree;
+use super::Tree;
 
 mod deep;
 mod iter;

@@ -1,5 +1,5 @@
-use arena_tree::Tree;
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
+use reactive_signals::Tree;
 
 pub fn discard_1000_nodes(c: &mut Criterion) {
     let mut wide_tree = Tree::create_and_init(0);

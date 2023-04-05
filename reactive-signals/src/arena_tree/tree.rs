@@ -1,8 +1,5 @@
-use crate::{
-    availability::NodeSlotAvailability,
-    flag_vec::FlagVec,
-    iter::{DepthFirstIter, MutDepthFirstIter},
-    Node, NodeId,
+use super::{
+    availability::NodeSlotAvailability, flag_vec::FlagVec, iter::MutDepthFirstIter, Node, NodeId,
 };
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
@@ -84,6 +81,7 @@ impl<T: Default> Tree<T> {
         }
     }
 
+    #[cfg(any(test, feature = "profile"))]
     pub fn create_and_init(data: T) -> Tree<T> {
         let mut me = Self::create();
         me.init(data);
@@ -106,8 +104,9 @@ impl<T: Default> Tree<T> {
         NodeId::root()
     }
 
-    pub fn iter_from(&self, id: NodeId) -> DepthFirstIter<T> {
-        DepthFirstIter::new(self, id)
+    #[cfg(any(test, feature = "profile"))]
+    pub fn iter_from(&self, id: NodeId) -> super::iter::DepthFirstIter<T> {
+        super::iter::DepthFirstIter::new(self, id)
     }
 
     pub fn iter_mut_from(&mut self, id: NodeId) -> MutDepthFirstIter<T> {

@@ -1,5 +1,5 @@
-use arena_tree::{Node, Tree};
 use criterion::{criterion_group, criterion_main, Criterion};
+use reactive_signals::{Node, Tree};
 
 pub fn create_1000_nodes(c: &mut Criterion) {
     c.bench_function("Create tree and node with 1,000 children", |b| {

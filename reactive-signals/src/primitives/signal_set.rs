@@ -65,10 +65,10 @@ impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
 
 #[test]
 fn test_retain() {
+    use crate::arena_tree::NodeId;
     use crate::primitives::u15Bool;
     use crate::runtimes::ServerRuntime;
     use crate::signals::SignalId;
-    use arena_tree::NodeId;
 
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),

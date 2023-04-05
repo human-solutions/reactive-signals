@@ -1,4 +1,4 @@
-use crate::Tree;
+use super::Tree;
 use insta::assert_snapshot;
 
 use super::StringStore;

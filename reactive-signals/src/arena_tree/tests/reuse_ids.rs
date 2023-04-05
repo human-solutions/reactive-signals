@@ -2,7 +2,7 @@ use insta::assert_snapshot;
 
 #[test]
 fn reuse_ids() {
-    use crate::Tree;
+    use super::Tree;
 
     let mut tree = Tree::create_and_init(0);
 

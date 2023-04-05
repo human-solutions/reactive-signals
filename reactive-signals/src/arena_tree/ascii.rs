@@ -1,6 +1,6 @@
 use std::fmt::{self, Write};
 
-use crate::{NodeId, Tree};
+use super::{NodeId, Tree};
 
 impl<T: Default> Tree<T> {
     pub fn ascii(&self, data_fmt: &impl Fn(&T) -> String) -> String {

@@ -1,10 +1,10 @@
 use crate::{
+    arena_tree::Tree,
     iter::{IdVec, RefVecElem},
     runtimes::Runtime,
     signals::{SignalId, SignalInner},
     ScopeInner,
 };
-use arena_tree::Tree;
 
 use super::NodeResolver;
 

@@ -4,7 +4,7 @@ version = "0.1.0-alpha.1"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/human-solutions/reactive-signals"
-description = "reactive-signals is a dx-first scope-based finegrained reactive system."
+description = "reactive-signals is a dx-first scope-based fine grained reactive system."
 categories = ["data-structures"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -15,7 +15,6 @@ profile = ["dep:pprof", "dep:criterion", "dep:dhat"]
 unsafe-cell = []
 
 [dependencies]
-arena-tree = { path = "../arena-tree" }
 
 # Optional: used only when benchmarking and running profiling examples
 criterion = { version = "0.4", features = ["html_reports"], optional = true }
@@ -31,6 +30,7 @@ insta = "1.28"
 wasm-bindgen-test = "0.3.34"
 wasm-bindgen = "0.2.84"
 markdown-includes = "0.1"
+criterion = { version = "0.4", features = ["html_reports"] }
 
 [[bench]]
 name = "create_scopes"
@@ -62,4 +62,19 @@ required-features = ["profile"]
 
 [[example]]
 name = "heap_profiling"
+required-features = ["profile"]
+
+[[bench]]
+name = "tree_create"
+harness = false
+required-features = ["profile"]
+
+[[bench]]
+name = "tree_sum"
+harness = false
+required-features = ["profile"]
+
+[[bench]]
+name = "tree_discard"
+harness = false
 required-features = ["profile"]

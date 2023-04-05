@@ -187,6 +187,7 @@
 #[cfg(any(test, feature = "profile"))]
 pub mod tests;
 
+mod arena_tree;
 mod iter;
 mod macros;
 mod primitives;
@@ -194,6 +195,8 @@ pub mod runtimes;
 mod scope;
 mod signals;
 
+#[doc(hidden)]
+pub use arena_tree::{Node, Tree};
 pub use scope::Scope;
 #[doc(hidden)]
 pub use signals::kinds::*;

@@ -1,4 +1,4 @@
-use crate::{flag_arr::FlagArr, Node, NodeId};
+use super::{flag_arr::FlagArr, Node, NodeId};
 
 #[derive(Debug, Default)]
 pub(crate) struct NodeSlotAvailability(pub(crate) FlagArr);

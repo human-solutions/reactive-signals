@@ -1,4 +1,4 @@
-use crate::{NodeId, Tree};
+use super::{NodeId, Tree};
 
 pub struct DepthFirstIter<'a, T> {
     tree: &'a Tree<T>,
@@ -8,6 +8,7 @@ pub struct DepthFirstIter<'a, T> {
 }
 
 impl<'a, T> DepthFirstIter<'a, T> {
+    #[cfg(any(test, feature = "profile"))]
     pub(crate) fn new(tree: &'a Tree<T>, start: NodeId) -> Self {
         let next = Some(drill_down(tree, start));
         DEBUG.then(|| println!("Start: {start:?}, Next: {next:?}"));

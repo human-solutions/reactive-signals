@@ -1,5 +1,5 @@
-use arena_tree::Tree;
 use criterion::{criterion_group, criterion_main, Criterion};
+use reactive_signals::Tree;
 
 pub fn sum_1000_nodes(c: &mut Criterion) {
     let mut wide_tree = Tree::create_and_init(0);

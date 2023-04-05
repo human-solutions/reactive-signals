@@ -1,6 +1,7 @@
-use arena_tree::FlagVec;
-
-use crate::{runtimes::Runtime, scope::Scope, signals::SignalId, signals::SignalInner, CellType};
+use crate::{
+    arena_tree::FlagVec, runtimes::Runtime, scope::Scope, signals::SignalId, signals::SignalInner,
+    CellType,
+};
 
 #[derive(Debug, Default)]
 pub(crate) struct ScopeInner<RT: Runtime> {

@@ -1,4 +1,4 @@
-use crate::Tree;
+use super::Tree;
 
 const ASCII_REF: &str = r###"0
  ├─ 1

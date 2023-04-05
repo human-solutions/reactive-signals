@@ -1,8 +1,7 @@
-#[cfg(all(test, feature = "ascii-tree"))]
-mod tests;
-
-#[cfg(feature = "ascii-tree")]
+#[cfg(test)]
 mod ascii;
+#[cfg(test)]
+mod tests;
 
 mod availability;
 mod flag_arr;
