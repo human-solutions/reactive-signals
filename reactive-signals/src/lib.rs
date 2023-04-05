@@ -13,26 +13,26 @@
 //!
 //! # Features
 //!
-//! - Extremely slim API surface that is really powerful. Essentially: [Scope], [Signal], [signal!].
+//! - Slim and powerful API surface. Essentially: [Scope](crate::Scope), [Signal](crate::Signal), [signal!](crate::signal!).
 //! - Developer experience: You create reactive signals and they update automatically in a predictable manner.
 //!   There's not much more to know.
-//! - Memory and performance overhead so low that a developer doesn't need to worry about it.
+//! - Memory and performance overhead that is so low that a developer doesn't need to worry about it.
 //! - An easy-to-use [signal!] macro for creating all kinds of signals including data and functional signals,
 //!   server-side and client-side signals etc.
-//! - [Signal]s produce a reactive value, for data signals it's the inner data and for functional signals
+//! - [Signal]s produce a reactive value, for data signals, it's the inner data and for functional signals,
 //!   it's the value produced by the function. Subscribers are notified when the value is updated,
-//!   or for value that implements [PartialEq], when it is changed.
+//!   or for a value that implements [PartialEq], when it is changed.
 //! - Type-safe attached data to scopes. See the [Scope] doc.<sup>TBD</sup>
 //! - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive).
 //!   See [Benchmarks](Self#Benchmarks) below.
 //! - Push-pull updates: Guarantees that the nodes are only updated once and only if necessary.
-//!   See end of the [reactively](https://github.com/modderme123/reactively) readme for more information.<sup>TBC</sup>
+//!   See the end of the [reactively](https://github.com/modderme123/reactively) readme for more information.<sup>TBC</sup>
 //! - Tokio [tracing](https://crates.io/crates/tracing) compatibility.<sup>TBC</sup>
 //! - async signals with runtimes using a custom async runtime when running in a web browser and
 //!   [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!] doc.<sup>TBC</sup>
-//! - Mirror the leptos_reactive api with deprecations that gives instructions on how to upgrade in order
-//!   to give a really smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
-//! - Production-class test-coverage<sup>TBC</sup>
+//! - Mirror the leptos_reactive API with deprecations that give instructions on how to upgrade
+//!   to give a smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
+//! - Production-class test-coverage.<sup>TBC</sup>
 //! - See [Evolutions](Self#Evolutions) for more possible features.
 //!
 //!
@@ -104,7 +104,7 @@
 //!
 //! # Cargo features
 //!
-//! - `unsafe-cell`: Internally, reactive-signals uses [RefCell](::core::cell::RefCell) for interior mutability.
+//! - `unsafe-cell`: Internally, the reactive-signals use [RefCell](::core::cell::RefCell) for interior mutability.
 //!   Once reactive-signals is mature and if your app is well tested, then [UnsafeCell](::core::cell::UnsafeCell)
 //!   can be used, resulting in a performance improvement of around 40% and a reduction in memory use by some 20%.
 //!
@@ -112,29 +112,28 @@
 //! # Evolutions
 //!
 //! - **Timetravel**. Due to how reactive-signals is structured it is possible to create state snapshots that can
-//!   be used to create a realtime visualization of the signals, grouped by their
+//!   be used to create a real-time visualization of the signals, grouped by their
 //!   scope with edges between connected signals. Each outside action or event would trigger
-//!   a new state snapshot. A state snapshot would be visualized by highlightning the
-//!   triggering signal and all it's dependencies recursively. When the signal's value implements Debug or Display
-//!   it can be used to visualize it's content.
+//!   a new state snapshot. A state snapshot would be visualized by highlighting the
+//!   triggering signal and all its dependencies recursively. When the signal's value implements Debug or Display
+//!   it can be used to visualize its content.
 //! - **Polled signals**. Option to register signals for polling so that a runtime vec will contain all changed signals
-//!   since last polling. This could be used
-//!   to group DOM updates into one update per frame avoiding the overhead of many small and costly calls out of the WASM.
-//!   Usefulness for Leptos would need to be investigated.
-//! - **Remote shim** (speculative). Everything that goes in or out of a WASM is converted between Rust and JS style data.
-//!   It should be possible to put a shim in that serializes it to a remote app. Why do such a thing? It would help making
+//!   since the last polling. This could be used to group DOM updates into one update per frame avoiding
+//!   the overhead of many small and costly calls out of the WASM. The usefulness of it for Leptos would need to be investigated.
+//! - **Remote shim** (speculative). Everything that goes in or out of a WASM is converted between Rust and JS data.
+//!   It should be possible to put a shim in that serializes it to a remote app. Why do such a thing? It would help to make
 //!   full hot-reloading possible and to apply various tricks for greatly speeding up the compile times.
 //!
 //!
 //! # Benchmarks
 //!
 //! Measurements have been rounded for ease of reading and reasoning. They measure ScopeInner and SignalInner
-//! (not part of public api) which are where the data is stored as Scope and Signal only has index (integer) data
+//! (not part of public API) which are where the data is stored as Scope and Signal only has index (integer) data
 //!
 //!
 //! ## Performance
 //!
-//! These measurements has been produced using [criterion](https://crates.io/crates/criterion) by measuring on
+//! These measurements have been produced using [criterion](https://crates.io/crates/criterion) by measuring on
 //! 1000 instances and calculating the time for one. It has been measured on a Macbook M1.
 //!
 //! | What                 | Time  | With `unsafe-cell`
@@ -161,33 +160,26 @@
 //!
 //! In leptos_reactive, 1000 signals and one memo uses 400kb and
 //! in reactive-signals creating 1000 function signals each with a subscription
-//! uses 100kb. In other words reactive-signals uses 4 times less memory than
+//! uses 100kb. In other words, reactive-signals use 4 times less memory than
 //! leptos_reactive
 //!
 //! Please see the benches, examples and tests for full details.
 //!
+//!
 //! # A personal note & the future of reactive-signals
 //!
-//! I have spent a lot of time on reactive-signals which has been entirely self-funded. Unfortunately,
-//! it is not possible for me to continue like that (I would love to!).
+//! I have spent a lot of time on reactive-signals which have been entirely self-funded. Unfortunately,
+//! I cannot continue like that (I would love to, though!).
 //!
-//! The future of reactive-signals depends on your reactions and if you want to fund the really
-//! cool features, the ones I listed with a <sup>TBC</sup>. I believe there's a huge potiential for
-//! Leptos and reactive-signals together.
+//! The future of reactive-signals depends on you and if you want to fund the features listed with a <sup>TBC</sup>.
 //!
-//! reactive-signals could also be used outside of Leptos, but for now, since my heart lies
-//! with Leptos, I won't put effort in making reactive-signals known.
+//! I have created a [fundraiser](https://opencollective.com/human-solutions/projects/reactive-signals) for it.
 //!
-//! Also, I'm a seasoned (read 50 years old) developer with a lot of Team Leading
-//! and mentoring experience as well as my Rust & Swift development skills. I'm open
-//! to any type of freelance contract work that would allow me to continue
-//! developing and maintaining the open source projects I have and plan to do.
+//! I'm open to any type of freelance contract work that would allow me to continue
+//! developing and maintaining the open-source projects I have and plan to do.
+//! See my [services](https://human.solutions/services/).
 //!
-//! Mentioning my other open source projects, there's a couple that I have been working
-//! on for a while in stealth mode:
-//! 1. an easy way to package Rust libraries as iOS and Android packages, including resources.
-//! 1. packaging Leptos apps into iOS and Android packages that can be used as a simple WebView
-//! from the native code with autogenerated hooks for a Web - Swift/Kotlin - Rust integration.
+//! See my other [open-source projects](https://human.solutions/opensource/).
 //!
 //! Feel free to reach out if you are interested!
 //!
@@ -216,3 +208,10 @@ use std::cell;
 type CellType<T> = cell::RefCell<T>;
 #[cfg(feature = "unsafe-cell")]
 type CellType<T> = cell::UnsafeCell<T>;
+
+#[cfg(test)]
+#[test]
+fn update_readme() {
+    println!("{:?}", std::env::current_dir());
+    markdown_includes::update("src/readme.tpl.md", "../README.md").unwrap();
+}

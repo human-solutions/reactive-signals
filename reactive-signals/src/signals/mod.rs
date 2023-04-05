@@ -39,8 +39,8 @@ pub use kinds::*;
 /// | Value implements | Data signal          | Func signal | Func signal with<br>`server` or `client` |
 /// | ---              | --                   | ---         | ---                                      |
 /// | -                | .set, .update, .with | .with       | .opt_with                                |
-/// | Clone            | .cloned              | .cloned     | .opt_cloned                              |
-/// | Copy             | .get                 | .get        | .opt_get                                 |
+/// | [Clone]          | .cloned              | .cloned     | .opt_cloned                              |
+/// | [Copy]           | .get                 | .get        | .opt_get                                 |
 ///
 ///
 /// ## Example
