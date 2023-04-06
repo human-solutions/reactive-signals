@@ -1,5 +1,5 @@
 <!-- 
-Please don't edit. This document has been generated from src/readme.tpl.md
+Please don't edit. This document has been generated from "src/readme.tpl.md"
 --> 
 # reactive-signals
 
@@ -12,8 +12,6 @@ Please don't edit. This document has been generated from src/readme.tpl.md
     - [Performance](#performance)
     - [Memory use](#memory-use)
 - [A personal note & the future of reactive-signals](#a-personal-note-&-the-future-of-reactive-signals)
-
-FOR WORKING DOC LINKS, READ THIS AT [DOCS.RS](https://docs.rs/reactive-signals)
 
 
 reactive-signals is a dx-first scope-based fine-grained reactive system. It is based on the excellent ideas in
@@ -30,23 +28,23 @@ provide the simplest API and mental model possible for developers.
 
 # Features
 
-- Slim and powerful API surface. Essentially: Scope, Signal, signal!.
+- Slim and powerful API surface. Essentially: [Scope](https://docs.rs/reactive-signals/latest/reactive_signals/scope/scope/struct.Scope.html), [Signal](https://docs.rs/reactive-signals/latest/reactive_signals/signals/struct.Signal.html), [signal!](https://docs.rs/reactive-signals/latest/reactive_signals/macros/macro.signal.html).
 - Developer experience: You create reactive signals and they update automatically in a predictable manner.
   There's not much more to know.
 - Memory and performance overhead that is so low that a developer doesn't need to worry about it.
-- An easy-to-use [signal!] macro for creating all kinds of signals including data and functional signals,
+- An easy-to-use [signal!](https://docs.rs/reactive-signals/latest/reactive_signals/macros/macro.signal.html) macro for creating all kinds of signals including data and functional signals,
   server-side and client-side signals etc.
-- [Signal]s produce a reactive value, for data signals, it's the inner data and for functional signals,
+- [Signal](https://docs.rs/reactive-signals/latest/reactive_signals/signals/struct.Signal.html)s produce a reactive value, for data signals, it's the inner data and for functional signals,
   it's the value produced by the function. Subscribers are notified when the value is updated,
-  or for a value that implements [PartialEq], when it is changed.
-- Type-safe attached data to scopes. See the [Scope] doc.<sup>TBD</sup>
+  or for a value that implements PartialEq, when it is changed.
+- Type-safe attached data to scopes. See the [Scope](https://docs.rs/reactive-signals/latest/reactive_signals/scope/scope/struct.Scope.html) doc.<sup>TBD</sup>
 - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive).
   See [Benchmarks](Self#Benchmarks) below.
 - Push-pull updates: Guarantees that the nodes are only updated once and only if necessary.
   See the end of the [reactively](https://github.com/modderme123/reactively) readme for more information.<sup>TBC</sup>
 - Tokio [tracing](https://crates.io/crates/tracing) compatibility.<sup>TBC</sup>
 - async signals with runtimes using a custom async runtime when running in a web browser and
-  [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!] doc.<sup>TBC</sup>
+  [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!](https://docs.rs/reactive-signals/latest/reactive_signals/macros/macro.signal.html) doc.<sup>TBC</sup>
 - Mirror the leptos_reactive API with deprecations that give instructions on how to upgrade
   to give a smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
 - Production-class test-coverage.<sup>TBC</sup>
@@ -54,7 +52,7 @@ provide the simplest API and mental model possible for developers.
 
 # Examples
 
-See the examples in Scope, Signal, signal!.
+See the examples in [Scope](https://docs.rs/reactive-signals/latest/reactive_signals/scope/scope/struct.Scope.html), [Signal](https://docs.rs/reactive-signals/latest/reactive_signals/signals/struct.Signal.html), [signal!](https://docs.rs/reactive-signals/latest/reactive_signals/macros/macro.signal.html).
 
 # Cargo features
 

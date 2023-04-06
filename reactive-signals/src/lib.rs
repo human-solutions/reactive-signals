@@ -13,23 +13,23 @@
 //!
 //! # Features
 //!
-//! - Slim and powerful API surface. Essentially: [Scope](crate::Scope), [Signal](crate::Signal), [signal!](crate::signal!).
+//! - Slim and powerful API surface. Essentially: [Scope](crate::scope::scope::Scope), [Signal](crate::signals::Signal), [signal!](crate::macros::signal).
 //! - Developer experience: You create reactive signals and they update automatically in a predictable manner.
 //!   There's not much more to know.
 //! - Memory and performance overhead that is so low that a developer doesn't need to worry about it.
-//! - An easy-to-use [signal!] macro for creating all kinds of signals including data and functional signals,
+//! - An easy-to-use [signal!](crate::macros::signal) macro for creating all kinds of signals including data and functional signals,
 //!   server-side and client-side signals etc.
-//! - [Signal]s produce a reactive value, for data signals, it's the inner data and for functional signals,
+//! - [Signal](crate::signals::Signal)s produce a reactive value, for data signals, it's the inner data and for functional signals,
 //!   it's the value produced by the function. Subscribers are notified when the value is updated,
-//!   or for a value that implements [PartialEq], when it is changed.
-//! - Type-safe attached data to scopes. See the [Scope] doc.<sup>TBD</sup>
+//!   or for a value that implements [PartialEq](::std::cmp::PartialEq), when it is changed.
+//! - Type-safe attached data to scopes. See the [Scope](crate::scope::scope::Scope) doc.<sup>TBD</sup>
 //! - 4 times less memory overhead and 3.5 times faster (worst case) than [leptos_reactive](https://crates.io/crates/leptos_reactive).
 //!   See [Benchmarks](Self#Benchmarks) below.
 //! - Push-pull updates: Guarantees that the nodes are only updated once and only if necessary.
 //!   See the end of the [reactively](https://github.com/modderme123/reactively) readme for more information.<sup>TBC</sup>
 //! - Tokio [tracing](https://crates.io/crates/tracing) compatibility.<sup>TBC</sup>
 //! - async signals with runtimes using a custom async runtime when running in a web browser and
-//!   [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!] doc.<sup>TBC</sup>
+//!   [tokio](https://crates.io/crates/tokio) when running in a server. See the [signal!](crate::macros::signal) doc.<sup>TBC</sup>
 //! - Mirror the leptos_reactive API with deprecations that give instructions on how to upgrade
 //!   to give a smooth upgrade experience. If there's interest, of course.<sup>TBC</sup>
 //! - Production-class test-coverage.<sup>TBC</sup>
@@ -37,7 +37,7 @@
 //!
 //! # Examples
 //!
-//! See the examples in [Scope](crate::Scope), [Signal](crate::Signal), [signal!](crate::signal!).
+//! See the examples in [Scope](crate::scope::scope::Scope), [Signal](crate::signals::Signal), [signal!](crate::macros::signal).
 //!
 //! # Cargo features
 //!
@@ -149,8 +149,10 @@ type CellType<T> = cell::RefCell<T>;
 #[cfg(feature = "unsafe-cell")]
 type CellType<T> = cell::UnsafeCell<T>;
 
-// #[cfg(test)]
-// #[test]
-// fn update_readme() {
-//     markdown_includes::update("src/readme.tpl.md", "../README.md").unwrap();
-// }
+#[cfg(test)]
+#[test]
+fn update_readme() {
+    use std::path::Path;
+
+    markdown_includes::update(Path::new("src/readme.tpl.md"), Path::new("../README.md")).unwrap();
+}
