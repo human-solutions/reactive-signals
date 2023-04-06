@@ -29,7 +29,7 @@ pub use test_client::TestClientRuntime;
 // pub use staticrt::{StaticRuntime, StaticRuntimeId};
 
 #[doc(hidden)]
-pub trait Runtime: Default + Copy + 'static {
+pub trait Runtime: Default + Copy {
     const IS_SERVER: bool;
 
     fn with_ref<F, T>(&self, f: F) -> T

@@ -24,7 +24,7 @@ impl<'a, RT: Runtime> IdVec for RefVecElem<'a, SignalInner<RT>> {
     }
 }
 
-impl<'a, RT: Runtime> NodeResolver<'a> for Tree<ScopeInner<RT>> {
+impl<'a, RT: Runtime + 'a> NodeResolver<'a> for Tree<ScopeInner<RT>> {
     type Id = SignalId<RT>;
     type Elem = RefVecElem<'a, SignalInner<RT>>;
     fn node(&'a self, id: SignalId<RT>) -> Self::Elem {
