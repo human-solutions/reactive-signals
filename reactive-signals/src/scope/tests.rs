@@ -1,15 +1,10 @@
-use std::{ops::Deref, rc::Rc};
+use std::rc::Rc;
 
-use crate::{
-    runtimes::{Runtime, RuntimeInner},
-    signal,
-    tests::StringStore,
-};
+use crate::{signal, tests::StringStore, Runtime};
 
 #[test]
 fn test_scopes_deep() {
-    let rti = RuntimeInner::new();
-    let rt = Runtime::new(&rti);
+    let rt = Runtime::new_client_side();
     let root = rt.new_root_scope();
 
     let mut sc = root.clone();
@@ -28,8 +23,7 @@ fn test_scopes_deep() {
 
 #[test]
 fn test_scopes_discard() {
-    let rti = RuntimeInner::new();
-    let rt = Runtime::new(&rti);
+    let rt = Runtime::new_client_side();
     let root = rt.new_root_scope();
 
     let sc0 = root.clone();

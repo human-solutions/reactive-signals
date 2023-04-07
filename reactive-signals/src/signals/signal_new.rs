@@ -8,8 +8,8 @@ use crate::{
 
 use super::{signal_inner::SignalValue, SignalInner, SignalType};
 
-impl<'rt, T: SignalType> Signal<'rt, T> {
-    pub(crate) fn data(sx: Scope<'rt>, data: AnyData) -> Signal<'rt, T> {
+impl<T: SignalType> Signal<T> {
+    pub(crate) fn data(sx: Scope, data: AnyData) -> Signal<T> {
         let rt = sx.rt.inner.borrow();
         let id = {
             let id = rt.scope_tree[sx.sx].next_signal_id(sx);
@@ -27,7 +27,7 @@ impl<'rt, T: SignalType> Signal<'rt, T> {
         }
     }
 
-    pub(crate) fn func(sx: Scope<'rt>, func: impl FnOnce() -> DynFunc) -> Signal<'rt, T> {
+    pub(crate) fn func(sx: Scope, func: impl FnOnce() -> DynFunc) -> Signal<T> {
         let rt = sx.rt.inner.borrow();
         let id = {
             let scope = &rt.scope_tree[sx.sx];

@@ -1,4 +1,4 @@
-use crate::{runtimes::RuntimeInner, CellType};
+use crate::CellType;
 
 use super::ArrVec;
 
@@ -20,10 +20,6 @@ impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
 
     pub(crate) fn len(&self) -> usize {
         self.vec_ref().len()
-    }
-
-    pub(crate) fn is_empty(&self) -> bool {
-        self.vec_ref().is_empty()
     }
 
     pub(crate) fn get(&self, index: usize) -> T {
@@ -67,11 +63,10 @@ impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
 fn test_retain() {
     use crate::arena_tree::NodeId;
     use crate::primitives::u15Bool;
-    use crate::runtimes::Runtime;
     use crate::signals::SignalId;
+    use crate::Runtime;
 
-    let rti = RuntimeInner::new();
-    let rt = Runtime::new(&rti);
+    let rt: &'static Runtime = Box::leak(Box::new(Runtime::new_client_side()));
 
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),

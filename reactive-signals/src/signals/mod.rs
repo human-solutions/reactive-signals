@@ -12,8 +12,11 @@ mod updater;
 use std::marker::PhantomData;
 
 pub(crate) use signal_id::SignalId;
-pub(crate) use signal_inner::{SignalInner, SignalValue};
+pub(crate) use signal_inner::SignalInner;
 pub(crate) use types::*;
+
+#[cfg(test)]
+pub(crate) use signal_inner::SignalValue;
 
 #[doc(hidden)]
 pub use kinds::*;
@@ -101,12 +104,12 @@ pub use kinds::*;
 /// }
 ///
 /// ```
-pub struct Signal<'rt, T: SignalType> {
-    id: SignalId<'rt>,
+pub struct Signal<T: SignalType> {
+    id: SignalId,
     ty: PhantomData<T>,
 }
 
-impl<'rt, T: SignalType> Clone for Signal<'rt, T> {
+impl<T: SignalType> Clone for Signal<T> {
     fn clone(&self) -> Self {
         Self {
             id: self.id,
@@ -115,17 +118,13 @@ impl<'rt, T: SignalType> Clone for Signal<'rt, T> {
     }
 }
 
-impl<'rt, T: SignalType> Copy for Signal<'rt, T> {}
+impl<T: SignalType> Copy for Signal<T> {}
 
 #[test]
 fn test_example() {
-    use crate::{
-        runtimes::{Runtime, RuntimeInner},
-        signal,
-    };
+    use crate::{signal, Runtime};
 
-    let rti = RuntimeInner::new();
-    let rt = Runtime::new(&rti);
+    let rt = Runtime::new_client_side();
     // signals are created in scopes
     let sx = rt.new_root_scope();
 
@@ -144,6 +143,7 @@ fn test_example() {
     let text = signal!(sx, move || {
         let ending = if is_plural.get() { "s" } else { "" };
         let txt = format!("{} {}{ending}", count.get(), name.get());
+        println!("text: {txt}");
         // using .update we can add the text to the vec without cloning the vec
         history.update(|hist| hist.push(txt.clone()));
         txt
@@ -166,8 +166,5 @@ fn test_example() {
     // 1 kiwi is repated because when changing count, is_plural changes as well
     // triggering a second update of the text. This will be detected in
     // future versions and only notified once.
-    assert_eq!(
-        history.with(|h| h.join(", ")),
-        "5 kiwis, 1 kiwi, 1 kiwi, 1 fig"
-    );
+    assert_eq!(history.with(|h| h.join(", ")), "5 kiwis, 1 kiwi, 1 fig");
 }

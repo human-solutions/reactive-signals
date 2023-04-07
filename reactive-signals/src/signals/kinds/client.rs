@@ -11,7 +11,7 @@ pub trait ClientEqFuncKind {
 }
 
 // Does not require any autoref if called as (&error).datakind().
-impl<'a, F, T> ClientEqFuncKind for (Scope<'a>, F)
+impl<F, T> ClientEqFuncKind for (Scope, F)
 where
     F: Fn() -> T + 'static,
     T: PartialEq + 'static,
@@ -26,7 +26,7 @@ pub trait ClientTrueFuncKind {
 }
 
 // Requires one extra autoref to call! Lower priority than EqKind.
-impl<'rt, F, T> ClientTrueFuncKind for &(Scope<'rt>, F)
+impl<'rt, F, T> ClientTrueFuncKind for &(Scope, F)
 where
     F: Fn() -> T + 'static,
     T: 'static,
@@ -37,7 +37,7 @@ pub struct ClientEqFuncSignal;
 
 impl ClientEqFuncSignal {
     #[inline]
-    pub fn new<'rt, F, T>(self, tuple: (Scope<'rt>, F)) -> Signal<ClientEqFunc<T>>
+    pub fn new<'rt, F, T>(self, tuple: (Scope, F)) -> Signal<ClientEqFunc<T>>
     where
         F: Fn() -> T + 'static,
         T: PartialEq + 'static,
@@ -50,7 +50,7 @@ pub struct ClientTrueFuncSignal;
 
 impl ClientTrueFuncSignal {
     #[inline]
-    pub fn new<'rt, F, T>(self, tuple: (Scope<'rt>, F)) -> Signal<ClientFunc<T>>
+    pub fn new<'rt, F, T>(self, tuple: (Scope, F)) -> Signal<ClientFunc<T>>
     where
         F: Fn() -> T + 'static,
         T: 'static,

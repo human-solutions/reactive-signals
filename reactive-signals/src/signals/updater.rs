@@ -3,21 +3,21 @@
 use std::{cell::Ref, mem};
 
 use crate::{
-    runtimes::RuntimeInner,
+    runtime::RuntimeInner,
     scope::ScopeInner,
     signals::{SignalId, SignalInner},
     Tree,
 };
 
-struct ListenerIter<'a, 'rt> {
+struct ListenerIter<'a> {
     idx: usize,
     pos: usize,
     len: usize,
-    vec: Ref<'a, Vec<SignalInner<'rt>>>,
+    vec: Ref<'a, Vec<SignalInner>>,
 }
 
-impl<'a, 'rt: 'a> ListenerIter<'a, 'rt> {
-    fn new(tree: &'a Tree<ScopeInner<'rt>>, sig: SignalId<'rt>) -> Self {
+impl<'a: 'a> ListenerIter<'a> {
+    fn new(tree: &'a Tree<ScopeInner>, sig: SignalId) -> Self {
         let vec = tree[sig.sx].vec_ref();
         let idx = sig.id.as_usize();
         let len = vec[idx].listeners.len();
@@ -37,7 +37,7 @@ impl<'a, 'rt: 'a> ListenerIter<'a, 'rt> {
         self.len == 0
     }
 
-    fn next(&mut self) -> Option<SignalId<'rt>> {
+    fn next(&mut self) -> Option<SignalId> {
         if self.pos < self.len {
             self.pos += 1;
             Some(self.vec[self.idx].listeners.get(self.pos - 1))
@@ -47,7 +47,7 @@ impl<'a, 'rt: 'a> ListenerIter<'a, 'rt> {
     }
 }
 
-pub(crate) fn propagate_change<'a, 'rt: 'a>(rt: &'a RuntimeInner<'rt>, sig: SignalId<'rt>) {
+pub(crate) fn propagate_change<'a: 'a>(rt: &'a RuntimeInner, sig: SignalId) {
     let tree = &rt.scope_tree;
 
     let mut iter: ListenerIter = ListenerIter::new(tree, sig);
@@ -62,12 +62,12 @@ pub(crate) fn propagate_change<'a, 'rt: 'a>(rt: &'a RuntimeInner<'rt>, sig: Sign
     }
 }
 
-fn next<'a, 'rt: 'a>(
-    tree: &'a Tree<ScopeInner<'rt>>,
-    iter: &mut ListenerIter<'a, 'rt>,
-    parents: &mut Vec<ListenerIter<'a, 'rt>>,
-    queued_children: &mut Option<ListenerIter<'a, 'rt>>,
-) -> Option<SignalId<'rt>> {
+fn next<'a: 'a>(
+    tree: &'a Tree<ScopeInner>,
+    iter: &mut ListenerIter<'a>,
+    parents: &mut Vec<ListenerIter<'a>>,
+    queued_children: &mut Option<ListenerIter<'a>>,
+) -> Option<SignalId> {
     if let Some(child_iter) = queued_children.take() {
         if iter.has_more() {
             parents.push(mem::replace(iter, child_iter));
@@ -90,11 +90,11 @@ fn next<'a, 'rt: 'a>(
     }
 }
 
-fn next_and_queue_child<'a, 'rt: 'a>(
-    tree: &'a Tree<ScopeInner<'rt>>,
-    iter: &mut ListenerIter<'a, 'rt>,
-    queued_children: &mut Option<ListenerIter<'a, 'rt>>,
-) -> Option<SignalId<'rt>> {
+fn next_and_queue_child<'a: 'a>(
+    tree: &'a Tree<ScopeInner>,
+    iter: &mut ListenerIter<'a>,
+    queued_children: &mut Option<ListenerIter<'a>>,
+) -> Option<SignalId> {
     if let Some(next) = iter.next() {
         let children = ListenerIter::new(tree, next);
         if !children.is_empty() {

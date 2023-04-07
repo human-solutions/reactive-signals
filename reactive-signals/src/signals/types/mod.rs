@@ -37,6 +37,10 @@ pub trait Readable {}
 pub trait OptReadable {
     const RUN_ON_SERVER: bool = true;
     const RUN_ON_CLIENT: bool = true;
+
+    fn should_run(client_side: bool) -> bool {
+        client_side && Self::RUN_ON_CLIENT || !client_side && Self::RUN_ON_SERVER
+    }
 }
 
 #[cfg(test)]

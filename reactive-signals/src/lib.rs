@@ -127,19 +127,18 @@ pub mod tests;
 mod arena_tree;
 mod macros;
 mod primitives;
-pub mod runtimes;
+mod runtime;
 mod scope;
 mod signals;
 
 #[doc(hidden)]
 pub use arena_tree::{Node, Tree};
+pub use runtime::Runtime;
 pub use scope::Scope;
 #[doc(hidden)]
 pub use signals::kinds::*;
 pub use signals::Signal;
 
-use runtimes::Runtime;
-use scope::ScopeInner;
 pub use signals::types;
 use std::cell;
 

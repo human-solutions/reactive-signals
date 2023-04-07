@@ -1,14 +1,8 @@
-use reactive_signals::{
-    runtimes::{Runtime, RuntimeInner},
-    signal,
-    types::EqData,
-    Signal,
-};
+use reactive_signals::{signal, types::EqData, Runtime, Signal};
 
 #[test]
 fn test_use() {
-    let rti = RuntimeInner::new();
-    let rt = Runtime::new(&rti);
+    let rt = Runtime::new_client_side();
 
     let sx = rt.new_root_scope();
 
@@ -36,4 +30,4 @@ fn test_use() {
     with_signal_arg(count);
 }
 
-fn with_signal_arg<'rt>(_sig: Signal<'rt, EqData<i32>>) {}
+fn with_signal_arg(_sig: Signal<EqData<i32>>) {}

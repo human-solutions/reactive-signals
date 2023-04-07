@@ -1,27 +1,27 @@
 use crate::{arena_tree::FlagVec, scope::Scope, signals::SignalId, signals::SignalInner, CellType};
 
 #[derive(Debug, Default)]
-pub(crate) struct ScopeInner<'rt> {
-    signals: CellType<Vec<SignalInner<'rt>>>,
+pub(crate) struct ScopeInner {
+    signals: CellType<Vec<SignalInner>>,
 }
 
-impl<'rt> ScopeInner<'rt> {
+impl ScopeInner {
     /// **Warning!**
     ///
     /// This signal id is not yet valid. There has to be a subsequent
     /// call to `insert_signal` before it is valid
-    pub fn next_signal_id(&self, sx: Scope<'rt>) -> SignalId<'rt> {
+    pub fn next_signal_id(&self, sx: Scope) -> SignalId {
         let idx = self.vec_ref().len();
         SignalId::new(idx, sx)
     }
 
-    pub fn insert_signal(&self, signal: SignalInner<'rt>) {
+    pub fn insert_signal(&self, signal: SignalInner) {
         self.vec_mut().push(signal);
     }
 
-    pub fn with_signal<F, T>(&self, id: SignalId<'rt>, f: F) -> T
+    pub fn with_signal<F, T>(&self, id: SignalId, f: F) -> T
     where
-        F: FnOnce(&SignalInner<'rt>) -> T,
+        F: FnOnce(&SignalInner) -> T,
     {
         let signals = self.vec_ref();
         let signal = signals.get(id.index()).unwrap();
@@ -47,14 +47,14 @@ impl<'rt> ScopeInner<'rt> {
 }
 
 #[cfg(not(feature = "unsafe-cell"))]
-impl<'rt> ScopeInner<'rt> {
+impl ScopeInner {
     #[inline]
-    pub(crate) fn vec_ref(&self) -> std::cell::Ref<Vec<SignalInner<'rt>>> {
+    pub(crate) fn vec_ref(&self) -> std::cell::Ref<Vec<SignalInner>> {
         self.signals.borrow()
     }
 
     #[inline]
-    fn vec_mut(&self) -> std::cell::RefMut<Vec<SignalInner<'rt>>> {
+    fn vec_mut(&self) -> std::cell::RefMut<Vec<SignalInner>> {
         self.signals.borrow_mut()
     }
 }

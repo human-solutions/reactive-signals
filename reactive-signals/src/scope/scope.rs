@@ -1,5 +1,5 @@
 use crate::arena_tree::NodeId;
-use crate::runtimes::Runtime;
+use crate::Runtime;
 
 ///
 /// [Signal](crate::Signal)s are created in scopes and can only be deleted by
@@ -69,12 +69,12 @@ use crate::runtimes::Runtime;
 /// ```
 ///
 #[derive(Copy, Clone)]
-pub struct Scope<'a> {
+pub struct Scope {
     pub(crate) sx: NodeId,
-    pub(crate) rt: &'a Runtime<'a>,
+    pub(crate) rt: &'static Runtime,
 }
 
-impl<'a> Scope<'a> {
+impl Scope {
     pub fn new_child(&self) -> Self {
         let mut rt = self.rt.inner.borrow_mut();
         let sx = rt.scope_tree.add_child(self.sx, Default::default());

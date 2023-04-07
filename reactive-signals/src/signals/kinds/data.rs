@@ -14,7 +14,7 @@ pub trait HashEqDataKind {
 }
 
 // Does not require any autoref if called as (&error).datakind().
-impl<'rt, T> HashEqDataKind for (Scope<'rt>, T) where T: Hash + PartialEq + 'static {}
+impl<T> HashEqDataKind for (Scope, T) where T: Hash + PartialEq + 'static {}
 
 pub trait EqDataKind {
     #[inline]
@@ -24,7 +24,7 @@ pub trait EqDataKind {
 }
 
 // Does not require any autoref if called as (&error).datakind().
-impl<'rt, T> EqDataKind for &(Scope<'rt>, T) where T: PartialEq + 'static {}
+impl<T> EqDataKind for &(Scope, T) where T: PartialEq + 'static {}
 
 pub trait TrueDataKind {
     #[inline]
@@ -34,13 +34,13 @@ pub trait TrueDataKind {
 }
 
 // Requires one extra autoref to call! Lower priority than EqKind.
-impl<'rt, T> TrueDataKind for &&(Scope<'rt>, T) where T: 'static {}
+impl<T> TrueDataKind for &&(Scope, T) where T: 'static {}
 
 pub struct HashEqSignal;
 
 impl HashEqSignal {
     #[inline]
-    pub fn new<'rt, T>(self, tuple: (Scope<'rt>, T)) -> Signal<HashEqData<T>>
+    pub fn new<T>(self, tuple: (Scope, T)) -> Signal<HashEqData<T>>
     where
         T: Hash + PartialEq + 'static,
     {
@@ -53,7 +53,7 @@ pub struct EqSignal;
 
 impl EqSignal {
     #[inline]
-    pub fn new<'rt, T>(self, tuple: (Scope<'rt>, T)) -> Signal<EqData<T>>
+    pub fn new<T>(self, tuple: (Scope, T)) -> Signal<EqData<T>>
     where
         T: PartialEq + 'static,
     {
@@ -65,7 +65,7 @@ pub struct TrueSignal;
 
 impl TrueSignal {
     #[inline]
-    pub fn new<'rt, T>(self, tuple: (Scope<'rt>, T)) -> Signal<Data<T>>
+    pub fn new<T>(self, tuple: (Scope, T)) -> Signal<Data<T>>
     where
         T: 'static,
     {

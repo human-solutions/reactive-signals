@@ -3,7 +3,7 @@ use super::{
     SignalType,
 };
 
-impl<'rt, T> Signal<'rt, T>
+impl<T> Signal<T>
 where
     T: SignalType + Modifiable,
 {
@@ -41,14 +41,14 @@ where
             let (is_equal, r) =
                 rt[self.id].with_signal(self.id, |sig| sig.value().update::<T, R>(f));
             if !is_equal {
-                // propagate_change(rt, self.id);
+                propagate_change(rt, self.id);
             }
             r
         })
     }
 }
 
-impl<'rt, T> Signal<'rt, T>
+impl<T> Signal<T>
 where
     T: SignalType + Readable,
     T::Inner: Copy,
@@ -59,7 +59,7 @@ where
     }
 }
 
-impl<'rt, T> Signal<'rt, T>
+impl<T> Signal<T>
 where
     T: SignalType + Readable,
     T::Inner: Clone,
@@ -72,7 +72,7 @@ where
     }
 }
 
-impl<'rt, T> Signal<'rt, T>
+impl<T> Signal<T>
 where
     T: SignalType + Readable,
 {
@@ -96,25 +96,20 @@ where
     }
 }
 
-impl<'rt, T> Signal<'rt, T>
-where
-    T: SignalType + OptReadable,
-{
-    // TODO
-    const SHOULD_RUN: bool = false;
-}
-impl<'rt, T> Signal<'rt, T>
+impl<T> Signal<T> where T: SignalType + OptReadable {}
+impl<T> Signal<T>
 where
     T: SignalType + OptReadable,
     T::Inner: Copy + Default,
 {
     /// Get a copy of the signal value (if the value implements [Copy])
     pub fn opt_get(&self) -> Option<T::Inner> {
-        Self::SHOULD_RUN.then(|| register_and_run(self.id, |sig| sig.value().get::<T>()))
+        let should_run = T::should_run(self.id.rt.client_side());
+        should_run.then(|| register_and_run(self.id, |sig| sig.value().get::<T>()))
     }
 }
 
-impl<'rt, T> Signal<'rt, T>
+impl<T> Signal<T>
 where
     T: SignalType + OptReadable,
     T::Inner: Clone,
@@ -123,11 +118,12 @@ where
     ///
     /// Use the `.with()` function if you can in order to avoid the clone.
     pub fn opt_cloned(&self) -> Option<T::Inner> {
-        Self::SHOULD_RUN.then(|| register_and_run(self.id, |sig| sig.value().cloned::<T>()))
+        let should_run = T::should_run(self.id.rt.client_side());
+        should_run.then(|| register_and_run(self.id, |sig| sig.value().cloned::<T>()))
     }
 }
 
-impl<'rt, T> Signal<'rt, T>
+impl<T> Signal<T>
 where
     T: SignalType + OptReadable,
 {
@@ -147,15 +143,16 @@ where
     /// ```
     ///
     pub fn opt_with<R: 'static>(&self, f: impl Fn(&T::Inner) -> R) -> Option<R> {
-        Self::SHOULD_RUN.then(|| register_and_run(self.id, |sig| sig.value().with::<T, R>(f)))
+        let should_run = T::should_run(self.id.rt.client_side());
+        should_run.then(|| register_and_run(self.id, |sig| sig.value().with::<T, R>(f)))
     }
 }
 
 #[inline]
-fn register_and_run<'rt, T, F>(id: SignalId<'rt>, f: F) -> T
+fn register_and_run<T, F>(id: SignalId, f: F) -> T
 where
     T: 'static,
-    F: FnOnce(&SignalInner<'rt>) -> T,
+    F: FnOnce(&SignalInner) -> T,
 {
     id.rt_ref(|rt| {
         if let Some(listener) = rt.get_running_signal() {

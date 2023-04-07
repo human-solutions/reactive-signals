@@ -4,7 +4,7 @@ use crate::arena_tree::NodeId;
 
 use crate::{
     primitives::u15Bool,
-    runtimes::{Runtime, RuntimeInner},
+    runtime::{Runtime, RuntimeInner},
     scope::Scope,
 };
 
@@ -23,14 +23,14 @@ use crate::{
 ///
 /// They are ordered by Scope and then by `id`.
 #[derive(Clone, Copy)]
-pub(crate) struct SignalId<'rt> {
+pub(crate) struct SignalId {
     pub(crate) id: u15Bool,
     pub(crate) sx: NodeId,
-    pub(crate) rt: &'rt Runtime<'rt>,
+    pub(crate) rt: &'static Runtime,
 }
 
-impl<'rt> SignalId<'rt> {
-    pub(crate) fn new(id: usize, sx: Scope<'rt>) -> Self {
+impl SignalId {
+    pub(crate) fn new(id: usize, sx: Scope) -> Self {
         if id > u15Bool::MAX as usize {
             panic!(
                 "There cannot be more than {} Signals attached to a Scope",
@@ -51,26 +51,26 @@ impl<'rt> SignalId<'rt> {
     #[inline]
     pub(crate) fn rt_ref<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&RuntimeInner<'rt>) -> T,
+        F: FnOnce(&RuntimeInner) -> T,
     {
         let rt = self.rt.inner.borrow();
         f(&rt)
     }
 }
 
-impl<'rt> PartialEq for SignalId<'rt> {
+impl PartialEq for SignalId {
     #[inline]
     fn eq(&self, other: &SignalId) -> bool {
         self.id == other.id && self.sx == other.sx
     }
 }
 
-impl<'rt> Eq for SignalId<'rt> {}
+impl Eq for SignalId {}
 
 // ordering by NodeId (Scope) and then id. The runtime is not considered
 // as it is assumed to be the same for all SignalId's running on the same
 // thread
-impl<'rt> PartialOrd for SignalId<'rt> {
+impl PartialOrd for SignalId {
     #[inline]
     fn partial_cmp(&self, other: &SignalId) -> Option<Ordering> {
         match self.sx.partial_cmp(&other.sx) {
@@ -80,7 +80,7 @@ impl<'rt> PartialOrd for SignalId<'rt> {
     }
 }
 
-impl<'rt> Ord for SignalId<'rt> {
+impl Ord for SignalId {
     #[inline]
     fn cmp(&self, other: &SignalId) -> Ordering {
         match self.sx.cmp(&other.sx) {
@@ -90,7 +90,7 @@ impl<'rt> Ord for SignalId<'rt> {
     }
 }
 
-impl<'rt> std::fmt::Debug for SignalId<'rt> {
+impl std::fmt::Debug for SignalId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}ˢⁱᵍ", self.sx, self.id.as_u15())
     }
