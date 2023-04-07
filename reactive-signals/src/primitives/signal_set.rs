@@ -1,4 +1,4 @@
-use crate::CellType;
+use crate::{runtimes::RuntimeInner, CellType};
 
 use super::ArrVec;
 
@@ -67,34 +67,37 @@ impl<const N: usize, T: Ord + Eq + Copy> Default for SignalSet<N, T> {
 fn test_retain() {
     use crate::arena_tree::NodeId;
     use crate::primitives::u15Bool;
-    use crate::runtimes::ServerRuntime;
+    use crate::runtimes::Runtime;
     use crate::signals::SignalId;
+
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
 
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(1),
-        rt: ServerRuntime::from(4),
+        rt: &rt,
     };
 
     let sig2_scope1 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(1),
-        rt: ServerRuntime::from(4),
+        rt: &rt,
     };
 
     let sig1_scope2 = SignalId {
         id: u15Bool::new(1, false),
         sx: NodeId::from(2),
-        rt: ServerRuntime::from(4),
+        rt: &rt,
     };
 
     let sig2_scope2 = SignalId {
         id: u15Bool::new(2, false),
         sx: NodeId::from(2),
-        rt: ServerRuntime::from(4),
+        rt: &rt,
     };
 
-    let vec = SignalSet::<3, SignalId<ServerRuntime>>::default();
+    let vec = SignalSet::<3, SignalId>::default();
     vec.insert(sig2_scope1);
     vec.insert(sig1_scope2);
     vec.insert(sig1_scope1);

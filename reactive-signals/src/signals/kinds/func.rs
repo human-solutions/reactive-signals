@@ -1,8 +1,7 @@
 use crate::{
     primitives::DynFunc,
-    runtimes::Runtime,
-    signals::{EqFunc, Func},
-    Scope, Signal,
+    scope::Scope,
+    signals::{EqFunc, Func, Signal},
 };
 
 pub trait EqFuncKind {
@@ -13,7 +12,7 @@ pub trait EqFuncKind {
 }
 
 // Does not require any autoref if called as (&error).datakind().
-impl<F, T, RT: Runtime> EqFuncKind for (Scope<RT>, F)
+impl<'rt, F, T> EqFuncKind for (Scope<'rt>, F)
 where
     F: Fn() -> T + 'static,
     T: PartialEq + 'static,
@@ -28,7 +27,7 @@ pub trait TrueFuncKind {
 }
 
 // Requires one extra autoref to call! Lower priority than EqKind.
-impl<F, T, RT: Runtime> TrueFuncKind for &(Scope<RT>, F)
+impl<'rt, F, T> TrueFuncKind for &(Scope<'rt>, F)
 where
     F: Fn() -> T + 'static,
     T: 'static,
@@ -39,7 +38,7 @@ pub struct EqFuncSignal;
 
 impl EqFuncSignal {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<EqFunc<T>, RT>
+    pub fn new<'rt, F, T>(self, tuple: (Scope<'rt>, F)) -> Signal<EqFunc<T>>
     where
         F: Fn() -> T + 'static,
         T: PartialEq + 'static,
@@ -52,7 +51,7 @@ pub struct TrueFunc;
 
 impl TrueFunc {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<Func<T>, RT>
+    pub fn new<'rt, F, T>(self, tuple: (Scope<'rt>, F)) -> Signal<Func<T>>
     where
         F: Fn() -> T + 'static,
         T: 'static,

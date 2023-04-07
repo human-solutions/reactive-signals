@@ -1,6 +1,6 @@
 use crate::primitives::DynFunc;
-use crate::{runtimes::Runtime, Scope};
 
+use crate::scope::Scope;
 use crate::signals::{ClientEqFunc, ClientFunc, Signal};
 
 pub trait ClientEqFuncKind {
@@ -11,7 +11,7 @@ pub trait ClientEqFuncKind {
 }
 
 // Does not require any autoref if called as (&error).datakind().
-impl<F, T, RT: Runtime> ClientEqFuncKind for (Scope<RT>, F)
+impl<'a, F, T> ClientEqFuncKind for (Scope<'a>, F)
 where
     F: Fn() -> T + 'static,
     T: PartialEq + 'static,
@@ -26,7 +26,7 @@ pub trait ClientTrueFuncKind {
 }
 
 // Requires one extra autoref to call! Lower priority than EqKind.
-impl<F, T, RT: Runtime> ClientTrueFuncKind for &(Scope<RT>, F)
+impl<'rt, F, T> ClientTrueFuncKind for &(Scope<'rt>, F)
 where
     F: Fn() -> T + 'static,
     T: 'static,
@@ -37,7 +37,7 @@ pub struct ClientEqFuncSignal;
 
 impl ClientEqFuncSignal {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<ClientEqFunc<T>, RT>
+    pub fn new<'rt, F, T>(self, tuple: (Scope<'rt>, F)) -> Signal<ClientEqFunc<T>>
     where
         F: Fn() -> T + 'static,
         T: PartialEq + 'static,
@@ -50,7 +50,7 @@ pub struct ClientTrueFuncSignal;
 
 impl ClientTrueFuncSignal {
     #[inline]
-    pub fn new<F, T, RT: Runtime>(self, tuple: (Scope<RT>, F)) -> Signal<ClientFunc<T>, RT>
+    pub fn new<'rt, F, T>(self, tuple: (Scope<'rt>, F)) -> Signal<ClientFunc<T>>
     where
         F: Fn() -> T + 'static,
         T: 'static,

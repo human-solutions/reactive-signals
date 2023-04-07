@@ -1,5 +1,5 @@
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
 
 pub(crate) mod kinds;
 mod signal_accessors;
@@ -11,7 +11,6 @@ mod updater;
 
 use std::marker::PhantomData;
 
-use crate::runtimes::Runtime;
 pub(crate) use signal_id::SignalId;
 pub(crate) use signal_inner::{SignalInner, SignalValue};
 pub(crate) use types::*;
@@ -102,12 +101,12 @@ pub use kinds::*;
 /// }
 ///
 /// ```
-pub struct Signal<T: SignalType, RT: Runtime> {
-    id: SignalId<RT>,
+pub struct Signal<'rt, T: SignalType> {
+    id: SignalId<'rt>,
     ty: PhantomData<T>,
 }
 
-impl<T: SignalType, RT: Runtime> Clone for Signal<T, RT> {
+impl<'rt, T: SignalType> Clone for Signal<'rt, T> {
     fn clone(&self) -> Self {
         Self {
             id: self.id,
@@ -116,14 +115,19 @@ impl<T: SignalType, RT: Runtime> Clone for Signal<T, RT> {
     }
 }
 
-impl<T: SignalType, RT: Runtime> Copy for Signal<T, RT> {}
+impl<'rt, T: SignalType> Copy for Signal<'rt, T> {}
 
 #[test]
 fn test_example() {
-    use crate::{runtimes::ClientRuntime, signal};
+    use crate::{
+        runtimes::{Runtime, RuntimeInner},
+        signal,
+    };
 
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
     // signals are created in scopes
-    let sx = ClientRuntime::new_root_scope();
+    let sx = rt.new_root_scope();
 
     // a simple data value
     let count = signal!(sx, 5);

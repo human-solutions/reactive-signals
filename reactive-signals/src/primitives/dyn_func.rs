@@ -2,7 +2,7 @@ use std::any::Any;
 
 use crate::{signals::SignalType, CellType};
 
-use super::AnyData;
+use super::any_data::AnyData;
 
 type BoxAnyData = Box<CellType<dyn Any>>;
 

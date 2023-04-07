@@ -7,7 +7,6 @@ use wasm_bindgen_test::*;
 
 use crate::{
     primitives::{AnyData, DynFunc, SignalSet},
-    runtimes::ClientRuntime,
     signals::SignalId,
     signals::{SignalInner, SignalValue},
 };
@@ -29,11 +28,11 @@ fn wasm_sizes() {
     assert_eq!(mem::size_of::<SignalValue>(), size);
 
     // SignalSet: RefCell & Vec
-    assert_eq!(mem::size_of::<SignalSet<3, SignalId<ClientRuntime>>>(), 20);
+    assert_eq!(mem::size_of::<SignalSet<3, SignalId>>(), 20);
 
     // SignalInner: SignalValue + SignalSet
     let size = if cfg!(debug_assertions) { 40 } else { 36 };
-    assert_eq!(mem::size_of::<SignalInner<ClientRuntime>>(), size);
+    assert_eq!(mem::size_of::<SignalInner>(), size);
 }
 
 /// Run with both:
@@ -53,11 +52,11 @@ fn wasm_sizes() {
     assert_eq!(mem::size_of::<SignalValue>(), size);
 
     // SignalSet: UnsafeCell & Vec
-    assert_eq!(mem::size_of::<SignalSet<3, SignalId<ClientRuntime>>>(), 16);
+    assert_eq!(mem::size_of::<SignalSet<3, SignalId>>(), 16);
 
     // SignalInner: SignalValue + SignalSet
     let size = if cfg!(debug_assertions) { 36 } else { 32 };
-    assert_eq!(mem::size_of::<SignalInner<ClientRuntime>>(), size);
+    assert_eq!(mem::size_of::<SignalInner>(), size);
 }
 
 /// Test sizes of ArrVec enum
@@ -65,7 +64,7 @@ fn wasm_sizes() {
 #[wasm_bindgen_test]
 fn test_subscriber_size() {
     // vec: a pointer, size and capacity
-    assert_eq!(mem::size_of::<Vec<SignalId<ClientRuntime>>>(), 12);
+    assert_eq!(mem::size_of::<Vec<SignalId>>(), 12);
     assert_eq!(mem::size_of::<[(u16, u16); 1]>(), 4);
 
     enum Store_u15_NoRT_big {

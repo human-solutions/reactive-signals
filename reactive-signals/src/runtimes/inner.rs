@@ -3,24 +3,23 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use crate::arena_tree::Tree;
+use crate::{arena_tree::Tree, CellType};
 
-use crate::{signals::SignalId, ScopeInner};
-
-use super::Runtime;
+use crate::scope::ScopeInner;
+use crate::signals::SignalId;
 
 #[derive(Default)]
-pub struct RuntimeInner<RT: Runtime> {
-    pub(crate) scope_tree: Tree<ScopeInner<RT>>,
-    running_signal: Cell<Option<SignalId<RT>>>,
+pub struct RuntimeInner<'rt> {
+    pub(crate) scope_tree: Tree<ScopeInner<'rt>>,
+    running_signal: Cell<Option<SignalId<'rt>>>,
 }
 
-impl<RT: Runtime> RuntimeInner<RT> {
-    pub(crate) fn new() -> Self {
-        Self {
+impl<'rt> RuntimeInner<'rt> {
+    pub fn new() -> CellType<Self> {
+        CellType::new(Self {
             scope_tree: Tree::create(),
             running_signal: Cell::new(None),
-        }
+        })
     }
 
     pub(crate) fn in_use(&self) -> bool {
@@ -34,27 +33,30 @@ impl<RT: Runtime> RuntimeInner<RT> {
         }
     }
 
-    pub(crate) fn get_running_signal(&self) -> Option<SignalId<RT>> {
+    pub(crate) fn get_running_signal(&self) -> Option<SignalId<'rt>> {
         self.running_signal.get()
     }
 
-    pub(crate) fn set_running_signal(&self, signal: Option<SignalId<RT>>) -> Option<SignalId<RT>> {
+    pub(crate) fn set_running_signal(
+        &self,
+        signal: Option<SignalId<'rt>>,
+    ) -> Option<SignalId<'rt>> {
         let previous = self.running_signal.take();
         self.running_signal.set(signal);
         previous
     }
 }
 
-impl<RT: Runtime> Index<SignalId<RT>> for RuntimeInner<RT> {
-    type Output = ScopeInner<RT>;
+impl<'rt> Index<SignalId<'rt>> for RuntimeInner<'rt> {
+    type Output = ScopeInner<'rt>;
 
-    fn index(&self, index: SignalId<RT>) -> &Self::Output {
+    fn index(&self, index: SignalId<'rt>) -> &Self::Output {
         &self.scope_tree[index.sx]
     }
 }
 
-impl<RT: Runtime> IndexMut<SignalId<RT>> for RuntimeInner<RT> {
-    fn index_mut(&mut self, index: SignalId<RT>) -> &mut Self::Output {
+impl<'rt> IndexMut<SignalId<'rt>> for RuntimeInner<'rt> {
+    fn index_mut(&mut self, index: SignalId) -> &mut Self::Output {
         &mut self.scope_tree[index.sx]
     }
 }

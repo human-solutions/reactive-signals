@@ -3,31 +3,36 @@
 
 use crate::{
     primitives::{AnyData, DynFunc},
-    runtimes::{ClientRuntime, Runtime},
+    runtimes::{Runtime, RuntimeInner},
     signals::{Data, Func},
     Scope, Signal,
 };
 
-impl<T: 'static, RT: Runtime> Signal<Func<T>, RT> {
+impl<'rt, T: 'static> Signal<'rt, Func<T>> {
     #[inline]
-    pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<Func<T>, RT> {
+    pub(crate) fn new_func<F: Fn() -> T + 'static>(
+        sx: Scope<'rt>,
+        func: F,
+    ) -> Signal<'rt, Func<T>> {
         Self::func(sx, || DynFunc::new::<F, T, Func<T>>(func))
     }
 }
 
-impl<T: 'static, RT: Runtime> Signal<Data<T>, RT> {
+impl<'rt, T: 'static> Signal<'rt, Data<T>> {
     #[inline]
-    pub(crate) fn new_data(sx: Scope<RT>, data: T) -> Signal<Data<T>, RT> {
+    pub(crate) fn new_data(sx: Scope<'rt>, data: T) -> Signal<'rt, Data<T>> {
         Self::data(sx, AnyData::new(Data(data)))
     }
 }
 
-pub fn create_1000_nested_scopes_each_with_a_signal() -> (
-    Scope<ClientRuntime>,
-    Signal<Data<usize>, ClientRuntime>,
-    Signal<Func<usize>, ClientRuntime>,
+pub fn create_1000_nested_scopes_each_with_a_signal<'rt>() -> (
+    Scope<'rt>,
+    Signal<'rt, Data<usize>>,
+    Signal<'rt, Func<usize>>,
 ) {
-    let mut scope = ClientRuntime::bench_root_scope();
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
 
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
@@ -44,12 +49,14 @@ pub fn create_1000_nested_scopes_each_with_a_signal() -> (
     (scope, start_sig, end_sig)
 }
 
-pub fn create_1000_nested_signals_in_a_scope() -> (
-    Scope<ClientRuntime>,
-    Signal<Data<usize>, ClientRuntime>,
-    Signal<Func<usize>, ClientRuntime>,
+pub fn create_1000_nested_signals_in_a_scope<'rt>() -> (
+    Scope<'rt>,
+    Signal<'rt, Data<usize>>,
+    Signal<'rt, Func<usize>>,
 ) {
-    let mut scope = ClientRuntime::bench_root_scope();
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
 
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
@@ -66,24 +73,30 @@ pub fn create_1000_nested_signals_in_a_scope() -> (
     (scope, start_sig, end_sig)
 }
 
-pub fn create_1000_nested_scopes() -> () {
-    let mut scope = ClientRuntime::bench_root_scope();
+pub fn create_1000_nested_scopes<'rt>() -> () {
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
 
     (0..1000).for_each(|_| {
         scope = scope.new_child();
     });
 }
 
-pub fn create_1000_data_signals() -> () {
-    let scope = ClientRuntime::bench_root_scope();
+pub fn create_1000_data_signals<'rt>() -> () {
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
 
     (0..1000).for_each(|_| {
         Signal::new_data(scope, 0usize);
     });
 }
 
-pub fn comparative_with_leptos_create_1000_signals() -> () {
-    let scope = ClientRuntime::bench_root_scope();
+pub fn comparative_with_leptos_create_1000_signals<'rt>() -> () {
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
 
     let sigs = (0..1000)
         .map(|n| Signal::new_data(scope, n))
@@ -92,8 +105,10 @@ pub fn comparative_with_leptos_create_1000_signals() -> () {
     assert_eq!(func.get(), 499500);
 }
 
-pub fn create_1000_func_signals() -> () {
-    let scope = ClientRuntime::bench_root_scope();
+pub fn create_1000_func_signals<'rt>() -> () {
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
 
     (0..1000).for_each(|_| {
         Signal::new_func(scope, || 1);
@@ -101,19 +116,23 @@ pub fn create_1000_func_signals() -> () {
 }
 
 pub fn create_1000_func_signals_with_one_subscription() -> () {
-    let scope = ClientRuntime::bench_root_scope();
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
     let sig = Signal::new_data(scope, 0usize);
     (0..1000).for_each(|_| {
         Signal::new_func(scope, move || sig.get());
     });
 }
 
-pub fn create_1000_siblings() -> (
-    Scope<ClientRuntime>,
-    Signal<Data<usize>, ClientRuntime>,
-    Signal<Func<usize>, ClientRuntime>,
+pub fn create_1000_siblings<'rt>() -> (
+    Scope<'rt>,
+    Signal<'rt, Data<usize>>,
+    Signal<'rt, Func<usize>>,
 ) {
-    let scope = ClientRuntime::bench_root_scope();
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let mut scope = rt.new_root_scope();
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen
     let start_sig = Signal::new_data(scope, 0usize);

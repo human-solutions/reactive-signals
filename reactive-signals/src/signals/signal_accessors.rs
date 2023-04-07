@@ -1,25 +1,21 @@
-use crate::runtimes::Runtime;
-
 use super::{
     updater::propagate_change, Modifiable, OptReadable, Readable, Signal, SignalId, SignalInner,
     SignalType,
 };
 
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + Modifiable,
-    RT: Runtime,
 {
     /// Set the signal's value and notifies subscribers
     /// if the value changed when it implements `PartialEq`
     /// otherwise it always notifies.
     pub fn set(&self, val: T::Inner) {
-        self.id.rt_ref(|rt| {
-            let is_equal = rt[self.id].with_signal(self.id, |sig| sig.value().set::<T>(val));
-            if !is_equal {
-                propagate_change(rt, self.id);
-            }
-        });
+        let rt = self.id.rt.inner.borrow();
+        let is_equal = rt[self.id].with_signal(self.id, |sig| sig.value().set::<T>(val));
+        if !is_equal {
+            propagate_change(&rt, self.id);
+        }
     }
 
     /// Applies a function to the current value to mutate it in place and returns
@@ -45,18 +41,17 @@ where
             let (is_equal, r) =
                 rt[self.id].with_signal(self.id, |sig| sig.value().update::<T, R>(f));
             if !is_equal {
-                propagate_change(rt, self.id);
+                // propagate_change(rt, self.id);
             }
             r
         })
     }
 }
 
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + Readable,
     T::Inner: Copy,
-    RT: Runtime,
 {
     /// Get a copy of the signal value (if the value implements [Copy])
     pub fn get(&self) -> T::Inner {
@@ -64,11 +59,10 @@ where
     }
 }
 
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + Readable,
     T::Inner: Clone,
-    RT: Runtime,
 {
     /// Get a clone of the signal value (if the value implements [Clone])
     ///
@@ -78,10 +72,9 @@ where
     }
 }
 
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + Readable,
-    RT: Runtime,
 {
     /// Applies a function to the current value to mutate it in place and returns
     /// whatever that function returns.
@@ -103,19 +96,17 @@ where
     }
 }
 
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + OptReadable,
-    RT: Runtime,
 {
-    const SHOULD_RUN: bool =
-        (RT::IS_SERVER && T::RUN_ON_SERVER) || (!RT::IS_SERVER && T::RUN_ON_CLIENT);
+    // TODO
+    const SHOULD_RUN: bool = false;
 }
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + OptReadable,
     T::Inner: Copy + Default,
-    RT: Runtime,
 {
     /// Get a copy of the signal value (if the value implements [Copy])
     pub fn opt_get(&self) -> Option<T::Inner> {
@@ -123,11 +114,10 @@ where
     }
 }
 
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + OptReadable,
     T::Inner: Clone,
-    RT: Runtime,
 {
     /// Get a clone of the signal value (if the value implements [Clone])
     ///
@@ -137,10 +127,9 @@ where
     }
 }
 
-impl<T, RT> Signal<T, RT>
+impl<'rt, T> Signal<'rt, T>
 where
     T: SignalType + OptReadable,
-    RT: Runtime,
 {
     /// Applies a function to the current value to mutate it in place and returns
     /// whatever that function returns.
@@ -163,10 +152,11 @@ where
 }
 
 #[inline]
-fn register_and_run<RT: Runtime, T: 'static, F: FnOnce(&SignalInner<RT>) -> T>(
-    id: SignalId<RT>,
-    f: F,
-) -> T {
+fn register_and_run<'rt, T, F>(id: SignalId<'rt>, f: F) -> T
+where
+    T: 'static,
+    F: FnOnce(&SignalInner<'rt>) -> T,
+{
     id.rt_ref(|rt| {
         if let Some(listener) = rt.get_running_signal() {
             rt[id].with_signal(id, |signal| {

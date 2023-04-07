@@ -1,30 +1,27 @@
-use crate::{
-    arena_tree::FlagVec, runtimes::Runtime, scope::Scope, signals::SignalId, signals::SignalInner,
-    CellType,
-};
+use crate::{arena_tree::FlagVec, scope::Scope, signals::SignalId, signals::SignalInner, CellType};
 
 #[derive(Debug, Default)]
-pub(crate) struct ScopeInner<RT: Runtime> {
-    signals: CellType<Vec<SignalInner<RT>>>,
+pub(crate) struct ScopeInner<'rt> {
+    signals: CellType<Vec<SignalInner<'rt>>>,
 }
 
-impl<RT: Runtime> ScopeInner<RT> {
+impl<'rt> ScopeInner<'rt> {
     /// **Warning!**
     ///
     /// This signal id is not yet valid. There has to be a subsequent
     /// call to `insert_signal` before it is valid
-    pub fn next_signal_id(&self, sx: Scope<RT>) -> SignalId<RT> {
+    pub fn next_signal_id(&self, sx: Scope<'rt>) -> SignalId<'rt> {
         let idx = self.vec_ref().len();
         SignalId::new(idx, sx)
     }
 
-    pub fn insert_signal(&self, signal: SignalInner<RT>) {
+    pub fn insert_signal(&self, signal: SignalInner<'rt>) {
         self.vec_mut().push(signal);
     }
 
-    pub fn with_signal<F, T>(&self, id: SignalId<RT>, f: F) -> T
+    pub fn with_signal<F, T>(&self, id: SignalId<'rt>, f: F) -> T
     where
-        F: FnOnce(&SignalInner<RT>) -> T,
+        F: FnOnce(&SignalInner<'rt>) -> T,
     {
         let signals = self.vec_ref();
         let signal = signals.get(id.index()).unwrap();
@@ -50,26 +47,26 @@ impl<RT: Runtime> ScopeInner<RT> {
 }
 
 #[cfg(not(feature = "unsafe-cell"))]
-impl<RT: Runtime> ScopeInner<RT> {
+impl<'rt> ScopeInner<'rt> {
     #[inline]
-    pub(crate) fn vec_ref(&self) -> std::cell::Ref<Vec<SignalInner<RT>>> {
+    pub(crate) fn vec_ref(&self) -> std::cell::Ref<Vec<SignalInner<'rt>>> {
         self.signals.borrow()
     }
 
     #[inline]
-    fn vec_mut(&self) -> std::cell::RefMut<Vec<SignalInner<RT>>> {
+    fn vec_mut(&self) -> std::cell::RefMut<Vec<SignalInner<'rt>>> {
         self.signals.borrow_mut()
     }
 }
 #[cfg(feature = "unsafe-cell")]
-impl<RT: Runtime> ScopeInner<RT> {
+impl ScopeInner {
     #[inline]
-    pub(crate) fn vec_ref(&self) -> &Vec<SignalInner<RT>> {
+    pub(crate) fn vec_ref(&self) -> &Vec<SignalInner> {
         unsafe { &*self.signals.get() }
     }
 
     #[inline]
-    fn vec_mut(&self) -> &mut Vec<SignalInner<RT>> {
+    fn vec_mut(&self) -> &mut Vec<SignalInner> {
         unsafe { &mut *self.signals.get() }
     }
 }

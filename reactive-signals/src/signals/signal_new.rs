@@ -2,33 +2,34 @@ use std::marker::PhantomData;
 
 use crate::{
     primitives::{AnyData, DynFunc},
-    runtimes::Runtime,
     scope::Scope,
-    Signal,
+    signals::Signal,
 };
 
-use super::{SignalInner, SignalType, SignalValue};
+use super::{signal_inner::SignalValue, SignalInner, SignalType};
 
-impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
-    pub(crate) fn data(sx: Scope<RT>, data: AnyData) -> Signal<T, RT> {
-        let id = sx.rt.with_ref(|rt| {
-            let scope = &rt.scope_tree[sx.sx];
-            let id = scope.next_signal_id(sx);
+impl<'rt, T: SignalType> Signal<'rt, T> {
+    pub(crate) fn data(sx: Scope<'rt>, data: AnyData) -> Signal<'rt, T> {
+        let rt = sx.rt.inner.borrow();
+        let id = {
+            let id = rt.scope_tree[sx.sx].next_signal_id(sx);
+            // let id = scope.next_signal_id(sx);
             let signal = SignalInner {
                 value: SignalValue::Data(data),
                 listeners: Default::default(),
             };
-            scope.insert_signal(signal);
+            rt.scope_tree[sx.sx].insert_signal(signal);
             id
-        });
+        };
         Signal {
             id,
             ty: PhantomData,
         }
     }
 
-    pub(crate) fn func(sx: Scope<RT>, func: impl FnOnce() -> DynFunc) -> Signal<T, RT> {
-        let id = sx.rt.with_ref(|rt| {
+    pub(crate) fn func(sx: Scope<'rt>, func: impl FnOnce() -> DynFunc) -> Signal<'rt, T> {
+        let rt = sx.rt.inner.borrow();
+        let id = {
             let scope = &rt.scope_tree[sx.sx];
             let id = scope.next_signal_id(sx);
 
@@ -41,7 +42,7 @@ impl<T: 'static + SignalType, RT: Runtime> Signal<T, RT> {
 
             scope.insert_signal(signal);
             id
-        });
+        };
         Signal {
             id,
             ty: PhantomData,

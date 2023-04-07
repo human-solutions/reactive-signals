@@ -1,6 +1,6 @@
 use std::{cell::Cell, rc::Rc};
 
-use crate::{runtimes::ServerRuntime, signal, tests::StringStore};
+use crate::{runtimes2::ServerRuntime, signal, tests::StringStore};
 
 #[test]
 fn test_signal_dep() {

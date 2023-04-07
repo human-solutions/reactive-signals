@@ -1,14 +1,16 @@
-use std::{marker::PhantomData, ops::Deref, rc::Rc};
+use std::{ops::Deref, rc::Rc};
 
 use crate::{
-    runtimes::{Runtime, ServerRuntime},
+    runtimes::{Runtime, RuntimeInner},
     signal,
     tests::StringStore,
 };
 
 #[test]
 fn test_scopes_deep() {
-    let root = ServerRuntime::new_root_scope();
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let root = rt.new_root_scope();
 
     let mut sc = root.clone();
     let num_sig = signal!(sc, 5);
@@ -26,7 +28,9 @@ fn test_scopes_deep() {
 
 #[test]
 fn test_scopes_discard() {
-    let root = ServerRuntime::new_root_scope();
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+    let root = rt.new_root_scope();
 
     let sc0 = root.clone();
     let num_sig = signal!(sc0, 5);
@@ -50,115 +54,107 @@ fn test_scopes_discard() {
     assert_eq!(output.values(), "val: 5, val: 4");
 }
 
-#[derive(Copy, Clone)]
-pub struct ScopeId<RT: Runtime> {
-    pub(crate) _sx: usize,
-    pub(crate) _rt: RT,
-}
+// #[derive(Copy, Clone)]
+// pub struct ScopeId<'rt> {
+//     pub(crate) _sx: usize,
+//     pub(crate) _rt: Runtime<'rt>,
+// }
 
-impl<RT: Runtime> Scope<RT> for ScopeId<RT> {
-    fn get_id(&self) -> usize {
-        self._sx
-    }
-}
-pub trait Scope<RT: Runtime> {
-    fn get_id(&self) -> usize;
-}
+// impl<'rt> Scope<'rt> for ScopeId<'rt> {
+//     fn get_id(&self) -> usize {
+//         self._sx
+//     }
+// }
+// pub trait Scope<'rt> {
+//     fn get_id(&self) -> usize;
+// }
 
-pub struct ScopeWrap1<I, RT>
-where
-    I: Scope<RT>,
-    RT: Runtime,
-{
-    inner: I,
-    pos: usize,
-    rt: PhantomData<RT>,
-}
+// pub struct ScopeWrap1<I>
+// where
+//     I: for<'rt> Scope<'rt>,
+// {
+//     inner: I,
+//     pos: usize,
+// }
 
-impl<I, RT> ScopeWrap1<I, RT>
-where
-    I: Scope<RT>,
-    RT: Runtime,
-{
-    fn get_pos(&self) -> usize {
-        self.pos
-    }
-}
+// impl<I> ScopeWrap1<I>
+// where
+//     I: for<'rt> Scope<'rt>,
+// {
+//     fn get_pos(&self) -> usize {
+//         self.pos
+//     }
+// }
 
-impl<I: Scope<RT>, RT: Runtime> Scope<RT> for ScopeWrap1<I, RT> {
-    fn get_id(&self) -> usize {
-        self.inner.get_id()
-    }
-}
+// impl<I: Scope<'rt>> Scope<'rt> for ScopeWrap1<'rt, I> {
+//     fn get_id(&self) -> usize {
+//         self.inner.get_id()
+//     }
+// }
 
-impl<I: Scope<RT>, RT: Runtime> Deref for ScopeWrap1<I, RT> {
-    type Target = I;
+// impl<'rt, I: Scope<'rt>> Deref for ScopeWrap1<'rt, I> {
+//     type Target = I;
 
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
+//     fn deref(&self) -> &Self::Target {
+//         &self.inner
+//     }
+// }
 
-pub struct ScopeWrap2<I, RT>
-where
-    I: Scope<RT>,
-    RT: Runtime,
-{
-    inner: I,
-    some_data: usize,
-    rt: PhantomData<RT>,
-}
+// pub struct ScopeWrap2<'rt, I>
+// where
+//     I: Scope<'rt>,
+// {
+//     inner: I,
+//     some_data: usize,
+// }
 
-impl<I: Scope<RT>, RT: Runtime> Scope<RT> for ScopeWrap2<I, RT> {
-    fn get_id(&self) -> usize {
-        self.inner.get_id()
-    }
-}
+// impl<'rt, I: Scope<'rt>> Scope<'rt> for ScopeWrap2<'rt, I> {
+//     fn get_id(&self) -> usize {
+//         self.inner.get_id()
+//     }
+// }
 
-impl<I, RT> ScopeWrap2<I, RT>
-where
-    I: Scope<RT>,
-    RT: Runtime,
-{
-    #[allow(dead_code)]
-    fn get_some_data(&self) -> usize {
-        self.some_data
-    }
-}
-impl<I: Scope<RT>, RT: Runtime> Deref for ScopeWrap2<I, RT> {
-    type Target = I;
+// impl<'rt, I> ScopeWrap2<'rt, I>
+// where
+//     I: Scope<'rt>,
+// {
+//     #[allow(dead_code)]
+//     fn get_some_data(&self) -> usize {
+//         self.some_data
+//     }
+// }
+// impl<'rt, I: Scope<'rt>> Deref for ScopeWrap2<'rt, I> {
+//     type Target = I;
 
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
+//     fn deref(&self) -> &Self::Target {
+//         &self.inner
+//     }
+// }
 
-fn get_scope_id<RT: Runtime>() -> ScopeId<RT> {
-    unimplemented!()
-}
+// fn get_scope_id<'rt>() -> ScopeId<'rt> {
+//     unimplemented!()
+// }
 
-fn some_func<RT: Runtime, SC: Scope<RT>>(_sc: SC) {}
+// fn some_func<'rt, SC: Scope<'rt>>(_sc: SC) {}
 
-#[allow(dead_code)]
-fn chained_deref() {
-    let scope = get_scope_id::<ServerRuntime>();
+// #[allow(dead_code)]
+// fn chained_deref() {
+//     let scope = get_scope_id();
 
-    let wrap1 = ScopeWrap1 {
-        inner: scope,
-        pos: 2,
-        rt: PhantomData,
-    };
+//     let wrap1 = ScopeWrap1 {
+//         inner: scope,
+//         pos: 2,
+//     };
 
-    wrap1.get_id();
+//     wrap1.get_id();
 
-    let wrap2 = ScopeWrap2 {
-        inner: wrap1,
-        some_data: 4,
-        rt: PhantomData,
-    };
+//     let wrap2 = ScopeWrap2 {
+//         inner: wrap1,
+//         some_data: 4,
+//     };
 
-    wrap2.get_id();
-    wrap2.get_pos();
-    wrap2.get_some_data();
-    some_func(wrap2);
-}
+//     wrap2.get_id();
+//     wrap2.get_pos();
+//     wrap2.get_some_data();
+//     some_func(wrap2);
+// }

@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use super::SignalId;
 use crate::{
     primitives::{AnyData, DynFunc, SignalSet},
-    runtimes::{Runtime, RuntimeInner},
+    runtimes::RuntimeInner,
 };
 
 #[derive(Debug)]
@@ -15,12 +15,12 @@ pub enum SignalValue {
 }
 
 #[derive(Debug)]
-pub(crate) struct SignalInner<RT: Runtime> {
+pub(crate) struct SignalInner<'a> {
     pub(super) value: SignalValue,
-    pub(crate) listeners: SignalSet<3, SignalId<RT>>,
+    pub(crate) listeners: SignalSet<3, SignalId<'a>>,
 }
 
-impl<RT: Runtime> SignalInner<RT> {
+impl<'a> SignalInner<'a> {
     pub(crate) fn value(&self) -> &AnyData {
         match self.value {
             SignalValue::Data(ref value) | SignalValue::Func(DynFunc { ref value, .. }) => value,
@@ -29,7 +29,7 @@ impl<RT: Runtime> SignalInner<RT> {
         }
     }
 
-    pub(crate) fn run(&self, rt: &RuntimeInner<RT>, id: SignalId<RT>) -> bool {
+    pub(crate) fn run(&self, rt: &RuntimeInner<'a>, id: SignalId<'a>) -> bool {
         if let SignalValue::Func(func) = &self.value {
             let previous = rt.set_running_signal(Some(id));
             let changed = func.run();

@@ -1,5 +1,5 @@
 use reactive_signals::{
-    runtimes::{ClientRuntime, Runtime},
+    runtimes::{Runtime, RuntimeInner},
     signal,
     types::EqData,
     Signal,
@@ -7,7 +7,10 @@ use reactive_signals::{
 
 #[test]
 fn test_use() {
-    let sx = ClientRuntime::new_root_scope();
+    let rti = RuntimeInner::new();
+    let rt = Runtime::new(&rti);
+
+    let sx = rt.new_root_scope();
 
     let count = signal!(sx, 5);
     let even = signal!(sx, 2);
@@ -33,4 +36,4 @@ fn test_use() {
     with_signal_arg(count);
 }
 
-fn with_signal_arg<RT: Runtime>(_sig: Signal<EqData<i32>, RT>) {}
+fn with_signal_arg<'rt>(_sig: Signal<'rt, EqData<i32>>) {}

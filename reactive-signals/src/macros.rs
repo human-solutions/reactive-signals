@@ -146,8 +146,11 @@ macro_rules! signal {
 
 #[test]
 fn test() {
-    use crate::runtimes::ServerRuntime;
-    let sx = ServerRuntime::new_root_scope();
+    use crate::runtimes::{Runtime, RuntimeInner};
+    let inner = RuntimeInner::new();
+    let rt = Runtime::new(&inner);
+
+    let sx = rt.new_root_scope();
     let _sig = signal!(sx, 32);
     // assert!(!sig.eq);
 

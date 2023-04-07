@@ -2,9 +2,8 @@ use std::hash::Hash;
 
 use crate::{
     primitives::AnyData,
-    runtimes::Runtime,
-    signals::{Data, EqData, HashEqData},
-    Scope, Signal,
+    scope::Scope,
+    signals::{Data, EqData, HashEqData, Signal},
 };
 
 pub trait HashEqDataKind {
@@ -15,7 +14,7 @@ pub trait HashEqDataKind {
 }
 
 // Does not require any autoref if called as (&error).datakind().
-impl<T, RT: Runtime> HashEqDataKind for (Scope<RT>, T) where T: Hash + PartialEq + 'static {}
+impl<'rt, T> HashEqDataKind for (Scope<'rt>, T) where T: Hash + PartialEq + 'static {}
 
 pub trait EqDataKind {
     #[inline]
@@ -25,7 +24,7 @@ pub trait EqDataKind {
 }
 
 // Does not require any autoref if called as (&error).datakind().
-impl<T, RT: Runtime> EqDataKind for &(Scope<RT>, T) where T: PartialEq + 'static {}
+impl<'rt, T> EqDataKind for &(Scope<'rt>, T) where T: PartialEq + 'static {}
 
 pub trait TrueDataKind {
     #[inline]
@@ -35,13 +34,13 @@ pub trait TrueDataKind {
 }
 
 // Requires one extra autoref to call! Lower priority than EqKind.
-impl<T, RT: Runtime> TrueDataKind for &&(Scope<RT>, T) where T: 'static {}
+impl<'rt, T> TrueDataKind for &&(Scope<'rt>, T) where T: 'static {}
 
 pub struct HashEqSignal;
 
 impl HashEqSignal {
     #[inline]
-    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<HashEqData<T>, RT>
+    pub fn new<'rt, T>(self, tuple: (Scope<'rt>, T)) -> Signal<HashEqData<T>>
     where
         T: Hash + PartialEq + 'static,
     {
@@ -54,7 +53,7 @@ pub struct EqSignal;
 
 impl EqSignal {
     #[inline]
-    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<EqData<T>, RT>
+    pub fn new<'rt, T>(self, tuple: (Scope<'rt>, T)) -> Signal<EqData<T>>
     where
         T: PartialEq + 'static,
     {
@@ -66,7 +65,7 @@ pub struct TrueSignal;
 
 impl TrueSignal {
     #[inline]
-    pub fn new<T, RT: Runtime>(self, tuple: (Scope<RT>, T)) -> Signal<Data<T>, RT>
+    pub fn new<'rt, T>(self, tuple: (Scope<'rt>, T)) -> Signal<Data<T>>
     where
         T: 'static,
     {
