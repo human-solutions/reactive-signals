@@ -132,6 +132,10 @@ pub mod runtimes;
 mod scope;
 mod signals;
 
+mod runtimes2;
+mod scope2;
+mod signals2;
+
 #[doc(hidden)]
 pub use arena_tree::{Node, Tree};
 pub use scope::Scope;

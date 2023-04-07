@@ -171,7 +171,10 @@ impl<T: Default> Tree<T> {
         self.initialized = false;
     }
 
-    pub fn discard(&mut self, node: NodeId, reuse_data: impl Fn(&mut T)) -> FlagVec {
+    pub fn discard<F>(&mut self, node: NodeId, reuse_data: F) -> FlagVec
+    where
+        F: for<'a> Fn(&'a mut T),
+    {
         self.detach(node);
 
         let ids = FlagVec::with_size(self.nodes.len());

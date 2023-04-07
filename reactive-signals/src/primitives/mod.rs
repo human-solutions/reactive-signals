@@ -1,6 +1,8 @@
 mod any_data;
+pub(crate) mod any_data2;
 mod arr_vec;
 mod dyn_func;
+pub(crate) mod dyn_func2;
 mod signal_set;
 mod u15_bool;
 
