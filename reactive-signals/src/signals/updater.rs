@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
-use std::{cell::Ref, mem};
+use std::mem;
 
 use crate::{
     runtime::RuntimeInner,
-    scope::ScopeInner,
-    signals::{SignalId, SignalInner},
+    scope::{RefVec, ScopeInner},
+    signals::SignalId,
     Tree,
 };
 
@@ -13,7 +13,7 @@ struct ListenerIter<'a> {
     idx: usize,
     pos: usize,
     len: usize,
-    vec: Ref<'a, Vec<SignalInner>>,
+    vec: RefVec<'a>,
 }
 
 impl<'a: 'a> ListenerIter<'a> {

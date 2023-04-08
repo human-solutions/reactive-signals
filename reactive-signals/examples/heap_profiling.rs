@@ -15,13 +15,13 @@ fn main() {
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 301_044);
-        assert_eq!(stats.max_blocks, 3_005);
+        assert_eq!(stats.max_bytes, 409_720);
+        assert_eq!(stats.max_blocks, 3_006);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 349_284);
-        assert_eq!(stats.max_blocks, 3_005);
+        assert_eq!(stats.max_bytes, 457_968);
+        assert_eq!(stats.max_blocks, 3_006);
     }
     drop(profile);
 
@@ -34,13 +34,13 @@ fn main() {
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 32_768);
-        assert_eq!(stats.max_blocks, 1);
+        assert_eq!(stats.max_bytes, 33_336);
+        assert_eq!(stats.max_blocks, 2);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 40_960);
-        assert_eq!(stats.max_blocks, 1);
+        assert_eq!(stats.max_bytes, 41_536);
+        assert_eq!(stats.max_blocks, 2);
     }
     drop(profile);
 
@@ -53,13 +53,13 @@ fn main() {
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 73_664);
-        assert_eq!(stats.max_blocks, 1002);
+        assert_eq!(stats.max_bytes, 98_842);
+        assert_eq!(stats.max_blocks, 1004);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 89_888);
-        assert_eq!(stats.max_blocks, 1002);
+        assert_eq!(stats.max_bytes, 115_074);
+        assert_eq!(stats.max_blocks, 1004);
     }
     drop(profile);
 
@@ -72,13 +72,13 @@ fn main() {
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 69_664);
-        assert_eq!(stats.max_blocks, 1002);
+        assert_eq!(stats.max_bytes, 94_838);
+        assert_eq!(stats.max_blocks, 1003);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 89_888);
-        assert_eq!(stats.max_blocks, 1002);
+        assert_eq!(stats.max_bytes, 115_058);
+        assert_eq!(stats.max_blocks, 1003);
     }
     drop(profile);
 
@@ -94,13 +94,13 @@ fn main() {
 
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 81_768);
-        assert_eq!(stats.max_bytes - stats_no_deps.max_bytes, 12_104);
+        assert_eq!(stats.max_bytes, 131_210);
+        assert_eq!(stats.max_bytes - stats_no_deps.max_bytes, 36_372);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 98_000);
-        assert_eq!(stats.max_bytes - stats_no_deps.max_bytes, 8_112);
+        assert_eq!(stats.max_bytes, 147_442);
+        assert_eq!(stats.max_bytes - stats_no_deps.max_bytes, 32_384);
     }
     drop(profile);
 }

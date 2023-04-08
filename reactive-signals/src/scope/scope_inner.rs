@@ -47,6 +47,12 @@ impl ScopeInner {
 }
 
 #[cfg(not(feature = "unsafe-cell"))]
+pub(crate) type RefVec<'a> = std::cell::Ref<'a, Vec<SignalInner>>;
+
+#[cfg(feature = "unsafe-cell")]
+pub(crate) type RefVec<'a> = &'a Vec<SignalInner>;
+
+#[cfg(not(feature = "unsafe-cell"))]
 impl ScopeInner {
     #[inline]
     pub(crate) fn vec_ref(&self) -> std::cell::Ref<Vec<SignalInner>> {
@@ -61,7 +67,7 @@ impl ScopeInner {
 #[cfg(feature = "unsafe-cell")]
 impl ScopeInner {
     #[inline]
-    pub(crate) fn vec_ref(&self) -> &Vec<SignalInner> {
+    pub(crate) fn vec_ref(&self) -> RefVec {
         unsafe { &*self.signals.get() }
     }
 

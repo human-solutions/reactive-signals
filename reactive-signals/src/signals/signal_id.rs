@@ -2,11 +2,7 @@ use std::cmp::Ordering;
 
 use crate::arena_tree::NodeId;
 
-use crate::{
-    primitives::u15Bool,
-    runtime::{Runtime, RuntimeInner},
-    scope::Scope,
-};
+use crate::{primitives::u15Bool, runtime::Runtime, scope::Scope};
 
 /// The SignalId has three components:
 ///
@@ -46,15 +42,6 @@ impl SignalId {
 
     pub(crate) fn index(&self) -> usize {
         self.id.as_usize()
-    }
-
-    #[inline]
-    pub(crate) fn rt_ref<F, T>(&self, f: F) -> T
-    where
-        F: FnOnce(&RuntimeInner) -> T,
-    {
-        let rt = self.rt.inner.borrow();
-        f(&rt)
     }
 }
 

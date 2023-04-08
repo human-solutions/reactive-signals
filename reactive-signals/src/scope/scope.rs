@@ -75,7 +75,7 @@ pub struct RootScopeGuard(&'static Runtime);
 
 impl Drop for RootScopeGuard {
     fn drop(&mut self) {
-        self.0.inner.borrow_mut().discard();
+        self.0.with_mut(|inner| inner.discard());
         // the official rust docs proposes to use this to
         // drop something previously leaked
         // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak
@@ -94,23 +94,26 @@ pub struct Scope {
 
 impl Scope {
     pub fn new_child(&self) -> Self {
-        let mut rt = self.rt.inner.borrow_mut();
-        let sx = rt.scope_tree.add_child(self.sx, Default::default());
+        let sx = self
+            .rt
+            .with_mut(|rt| rt.scope_tree.add_child(self.sx, Default::default()));
+
         Self { sx, rt: self.rt }
     }
 
     pub fn discard(self) {
-        let mut rt = self.rt.inner.borrow_mut();
-        let is_root = rt.scope_tree.root() == self.sx;
-        if is_root {
-            rt.discard();
-        } else {
-            let discarded = rt.scope_tree.discard(self.sx, |s| s.reuse());
-            let id = rt.scope_tree.root();
-            rt.scope_tree
-                .iter_mut_from(id)
-                .for_each(|tree, node| tree[node].remove_scopes(&discarded));
-        }
+        self.rt.with_mut(|rt| {
+            let is_root = rt.scope_tree.root() == self.sx;
+            if is_root {
+                rt.discard();
+            } else {
+                let discarded = rt.scope_tree.discard(self.sx, |s| s.reuse());
+                let id = rt.scope_tree.root();
+                rt.scope_tree
+                    .iter_mut_from(id)
+                    .for_each(|tree, node| tree[node].remove_scopes(&discarded));
+            }
+        });
     }
 
     pub fn new_client_side_root_scope() -> (RootScopeGuard, Scope) {

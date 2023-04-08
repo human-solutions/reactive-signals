@@ -11,11 +11,12 @@ where
     /// if the value changed when it implements `PartialEq`
     /// otherwise it always notifies.
     pub fn set(&self, val: T::Inner) {
-        let rt = self.id.rt.inner.borrow();
-        let is_equal = rt[self.id].with_signal(self.id, |sig| sig.value().set::<T>(val));
-        if !is_equal {
-            propagate_change(&rt, self.id);
-        }
+        self.id.rt.with_ref(|rt| {
+            let is_equal = rt[self.id].with_signal(self.id, |sig| sig.value().set::<T>(val));
+            if !is_equal {
+                propagate_change(&rt, self.id);
+            }
+        });
     }
 
     /// Applies a function to the current value to mutate it in place and returns
@@ -37,7 +38,7 @@ where
     /// ```
     ///
     pub fn update<R: 'static>(&self, f: impl Fn(&mut T::Inner) -> R) -> R {
-        self.id.rt_ref(|rt| {
+        self.id.rt.with_ref(|rt| {
             let (is_equal, r) =
                 rt[self.id].with_signal(self.id, |sig| sig.value().update::<T, R>(f));
             if !is_equal {
@@ -154,7 +155,7 @@ where
     T: 'static,
     F: FnOnce(&SignalInner) -> T,
 {
-    id.rt_ref(|rt| {
+    id.rt.with_ref(|rt| {
         if let Some(listener) = rt.get_running_signal() {
             rt[id].with_signal(id, |signal| {
                 signal.listeners.insert(listener);

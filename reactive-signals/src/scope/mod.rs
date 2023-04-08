@@ -6,4 +6,4 @@ mod scope;
 mod scope_inner;
 
 pub use scope::{RootScopeGuard, Scope};
-pub(crate) use scope_inner::ScopeInner;
+pub(crate) use scope_inner::{RefVec, ScopeInner};

@@ -17,7 +17,7 @@
 //!
 
 use std::{
-    cell::{Cell, RefCell},
+    cell::Cell,
     ops::{Index, IndexMut},
     ptr::NonNull,
 };
@@ -40,7 +40,7 @@ impl Drop for RuntimeGuard {
 
 #[doc(hidden)]
 pub(crate) struct Runtime {
-    pub(crate) inner: RefCell<RuntimeInner>,
+    inner: CellType<RuntimeInner>,
 }
 
 impl Runtime {
@@ -49,15 +49,36 @@ impl Runtime {
         Box::leak(Box::new(Self { inner }))
     }
 
+    pub(crate) fn with_ref<F, T>(&self, f: F) -> T
+    where
+        F: FnOnce(&RuntimeInner) -> T,
+    {
+        #[cfg(not(feature = "unsafe-cell"))]
+        let inner = self.inner.borrow();
+        #[cfg(feature = "unsafe-cell")]
+        let inner = unsafe { &*self.inner.get() };
+        f(&inner)
+    }
+
+    pub(crate) fn with_mut<F, T>(&self, f: F) -> T
+    where
+        F: FnOnce(&mut RuntimeInner) -> T,
+    {
+        #[cfg(not(feature = "unsafe-cell"))]
+        let mut inner = self.inner.borrow_mut();
+        #[cfg(feature = "unsafe-cell")]
+        let mut inner = unsafe { &mut *self.inner.get() };
+        f(&mut inner)
+    }
+
     pub fn new_root_scope(&'static self) -> Scope {
-        let mut rti = self.inner.borrow_mut();
-        let sx = rti.scope_tree.init(Default::default());
+        let sx = self.with_mut(|inner| inner.scope_tree.init(Default::default()));
 
         Scope { sx, rt: self }
     }
 
     pub(crate) fn client_side(&self) -> bool {
-        self.inner.borrow().client_side
+        self.with_ref(|rt| rt.client_side)
     }
 }
 
