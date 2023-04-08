@@ -7,7 +7,9 @@ use crate::Runtime;
 /// [Signal](crate::Signal)s are created in scopes and can only be deleted by
 /// discarding the scope.
 ///
-/// Scopes are created in a tree structure, where the root scope is created by one of the [runtimes](crate::runtimes),
+/// Scopes are created in a tree structure, where the root scope is created with
+/// [Scope::new_client_side_root_scope()](Self::new_client_side_root_scope()) or ,
+/// [Scope::new_server_side_root_scope()](Self::new_server_side_root_scope())
 /// and child scopes can be added to any Scope by calling the [new_child()](Self::new_child()) function on a scope.
 ///
 /// When calling a Scope's [discard()](Self::discard()) function, the Scope and it's child scopes are discarded
@@ -71,21 +73,6 @@ use crate::Runtime;
 /// ```
 ///
 
-pub struct RootScopeGuard(&'static Runtime);
-
-impl Drop for RootScopeGuard {
-    fn drop(&mut self) {
-        self.0.with_mut(|inner| inner.discard());
-        // the official rust docs proposes to use this to
-        // drop something previously leaked
-        // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak
-        // but on the rust discord there's many different opinions.
-        let nn = NonNull::from(self.0);
-        let b = unsafe { Box::from_raw(nn.as_ptr()) };
-        drop(b);
-    }
-}
-
 #[derive(Copy, Clone)]
 pub struct Scope {
     pub(crate) sx: NodeId,
@@ -129,5 +116,20 @@ impl Scope {
         let guard = RootScopeGuard(rt);
         let scope = rt.new_root_scope();
         (guard, scope)
+    }
+}
+
+pub struct RootScopeGuard(&'static Runtime);
+
+impl Drop for RootScopeGuard {
+    fn drop(&mut self) {
+        self.0.with_mut(|inner| inner.discard());
+        // the official rust docs proposes to use this to
+        // drop something previously leaked
+        // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak
+        // but on the rust discord there's many different opinions.
+        let nn = NonNull::from(self.0);
+        let b = unsafe { Box::from_raw(nn.as_ptr()) };
+        drop(b);
     }
 }
