@@ -33,6 +33,22 @@ wasm-bindgen = "0.2.84"
 markdown-includes = "0.1"
 criterion = { version = "0.4", features = ["html_reports"] }
 
+#### EXAMPLES #####
+
+[[example]]
+name = "propagation_flamegraph"
+required-features = ["profile"]
+
+[[example]]
+name = "creation_flamegraph"
+required-features = ["profile"]
+
+[[example]]
+name = "heap_profiling"
+required-features = ["profile"]
+
+#### DEFAULT BENCHES #####
+
 [[bench]]
 name = "create_scopes"
 harness = false
@@ -53,34 +69,28 @@ name = "discard_scopes"
 harness = false
 required-features = ["profile"]
 
-[[example]]
-name = "propagation_flamegraph"
-required-features = ["profile"]
+#### BENCHES #####
 
-[[example]]
-name = "creation_flamegraph"
-required-features = ["profile"]
-
-[[example]]
-name = "heap_profiling"
+[[bench]]
+name = "deep_update"
+harness = false
+bench = false
 required-features = ["profile"]
 
 [[bench]]
 name = "tree_create"
 harness = false
+bench = false
 required-features = ["profile"]
 
 [[bench]]
 name = "tree_sum"
 harness = false
+bench = false
 required-features = ["profile"]
 
 [[bench]]
 name = "tree_discard"
 harness = false
-required-features = ["profile"]
-
-[[bench]]
-name = "deep_update"
-harness = false
+bench = false
 required-features = ["profile"]

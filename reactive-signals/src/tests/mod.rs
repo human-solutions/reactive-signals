@@ -1,4 +1,4 @@
-// pub mod profile;
+pub mod profile;
 #[cfg(test)]
 mod size_test;
 

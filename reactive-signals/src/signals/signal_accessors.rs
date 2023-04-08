@@ -27,8 +27,8 @@ where
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactive_signals::{signal, runtimes::ClientRuntime};
-    /// # let sc = ClientRuntime::new_root_scope();
+    /// # use reactive_signals::{signal, Scope};
+    /// # let (_guard, sc) = Scope::new_client_side_root_scope();
     /// let count = signal!(sc, 2);
     /// let is_even = count.update(|val| {
     ///     *val += 1;
@@ -85,8 +85,8 @@ where
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactive_signals::{signal, runtimes::ClientRuntime};
-    /// # let sc = ClientRuntime::new_root_scope();
+    /// # use reactive_signals::{signal, Scope};
+    /// # let (_guard, sc) = Scope::new_client_side_root_scope();
     /// let count = signal!(sc, 2);
     /// let is_even = count.with(|val| *val % 2 == 0);
     /// ```
@@ -136,8 +136,8 @@ where
     /// **Example of using the return value**
     ///
     /// ```rust
-    /// # use reactive_signals::{signal, runtimes::ClientRuntime};
-    /// # let sc = ClientRuntime::new_root_scope();
+    /// # use reactive_signals::{signal, Scope};
+    /// # let (_guard, sc) = Scope::new_client_side_root_scope();
     /// let count = signal!(sc, 2);
     /// let is_even = count.with(|val| *val % 2 == 0);
     /// ```

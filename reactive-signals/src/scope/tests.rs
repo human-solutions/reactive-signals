@@ -1,11 +1,10 @@
 use std::rc::Rc;
 
-use crate::{signal, tests::StringStore, Runtime};
+use crate::{signal, tests::StringStore, Scope};
 
 #[test]
 fn test_scopes_deep() {
-    let rt = Runtime::new_client_side();
-    let root = rt.new_root_scope();
+    let (_guard, root) = Scope::new_client_side_root_scope();
 
     let mut sc = root.clone();
     let num_sig = signal!(sc, 5);
@@ -23,8 +22,7 @@ fn test_scopes_deep() {
 
 #[test]
 fn test_scopes_discard() {
-    let rt = Runtime::new_client_side();
-    let root = rt.new_root_scope();
+    let (_guard, root) = Scope::new_client_side_root_scope();
 
     let sc0 = root.clone();
     let num_sig = signal!(sc0, 5);

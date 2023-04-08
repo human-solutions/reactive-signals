@@ -6,9 +6,10 @@ pub fn signal_propagation(c: &mut Criterion) {
         |b| {
             b.iter_batched(
                 reactive_signals::tests::profile::create_1000_nested_scopes_each_with_a_signal,
-                |(_scope, start_sig, end_sig)| {
+                |(guard, _, start_sig, end_sig)| {
                     start_sig.set(2);
-                    black_box(end_sig.get())
+                    black_box(end_sig.get());
+                    guard
                 },
                 BatchSize::SmallInput,
             );
@@ -23,9 +24,10 @@ pub fn signal_propagation(c: &mut Criterion) {
         |b| {
             b.iter_batched(
                 reactive_signals::tests::profile::create_1000_siblings,
-                |(_scope, start_sig, end_sig)| {
+                |(guard, start_sig, end_sig)| {
                     start_sig.set(2);
-                    black_box(end_sig.get())
+                    black_box(end_sig.get());
+                    guard
                 },
                 BatchSize::SmallInput,
             );

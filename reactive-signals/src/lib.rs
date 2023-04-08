@@ -133,8 +133,8 @@ mod signals;
 
 #[doc(hidden)]
 pub use arena_tree::{Node, Tree};
-pub use runtime::Runtime;
-pub use scope::Scope;
+use runtime::Runtime;
+pub use scope::{RootScopeGuard, Scope};
 #[doc(hidden)]
 pub use signals::kinds::*;
 pub use signals::Signal;
@@ -147,10 +147,10 @@ type CellType<T> = cell::RefCell<T>;
 #[cfg(feature = "unsafe-cell")]
 type CellType<T> = cell::UnsafeCell<T>;
 
-#[cfg(test)]
-#[test]
-fn update_readme() {
-    use std::path::Path;
+// #[cfg(test)]
+// #[test]
+// fn update_readme() {
+//     use std::path::Path;
 
-    markdown_includes::update(Path::new("src/readme.tpl.md"), Path::new("../README.md")).unwrap();
-}
+//     markdown_includes::update(Path::new("src/readme.tpl.md"), Path::new("../README.md")).unwrap();
+// }

@@ -48,10 +48,10 @@ pub use kinds::*;
 /// ## Example
 ///
 /// ```rust
-/// use reactive_signals::{runtimes::ClientRuntime, signal};
+/// use reactive_signals::{Scope, signal};
 ///
 /// // signals are created in scopes
-/// let sx = ClientRuntime::new_root_scope();
+/// let (_guard, sx) = Scope::new_client_side_root_scope();
 ///
 /// // a simple data value
 /// let count = signal!(sx, 5);
@@ -92,15 +92,15 @@ pub use kinds::*;
 /// // future versions and only notified once.
 /// assert_eq!(
 ///     history.with(|h| h.join(", ")),
-///     "5 kiwis, 1 kiwi, 1 kiwi, 1 fig"
+///     "5 kiwis, 1 kiwi, 1 fig"
 /// );
 ///
 /// with_signal_arg(count);
 ///
 /// // when declaring functions some additional imports are necessary
-/// use reactive_signals::{runtimes::Runtime, Signal, types::*};
+/// use reactive_signals::{Signal, types::*};
 ///
-/// fn with_signal_arg<RT: Runtime>(count: Signal<EqData<i32>, RT>) {
+/// fn with_signal_arg(count: Signal<EqData<i32>>) {
 /// }
 ///
 /// ```
@@ -122,11 +122,9 @@ impl<T: SignalType> Copy for Signal<T> {}
 
 #[test]
 fn test_example() {
-    use crate::{signal, Runtime};
+    use crate::{signal, Scope};
 
-    let rt = Runtime::new_client_side();
-    // signals are created in scopes
-    let sx = rt.new_root_scope();
+    let (_guard, sx) = Scope::new_client_side_root_scope();
 
     // a simple data value
     let count = signal!(sx, 5);

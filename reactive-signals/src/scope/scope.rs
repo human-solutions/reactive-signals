@@ -1,3 +1,5 @@
+use std::ptr::NonNull;
+
 use crate::arena_tree::NodeId;
 use crate::Runtime;
 
@@ -68,6 +70,22 @@ use crate::Runtime;
 /// }
 /// ```
 ///
+
+pub struct RootScopeGuard(&'static Runtime);
+
+impl Drop for RootScopeGuard {
+    fn drop(&mut self) {
+        self.0.inner.borrow_mut().discard();
+        // the official rust docs proposes to use this to
+        // drop something previously leaked
+        // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak
+        // but on the rust discord there's many different opinions.
+        let nn = NonNull::from(self.0);
+        let b = unsafe { Box::from_raw(nn.as_ptr()) };
+        drop(b);
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct Scope {
     pub(crate) sx: NodeId,
@@ -93,5 +111,20 @@ impl Scope {
                 .iter_mut_from(id)
                 .for_each(|tree, node| tree[node].remove_scopes(&discarded));
         }
+    }
+
+    pub fn new_client_side_root_scope() -> (RootScopeGuard, Scope) {
+        Self::new(true)
+    }
+
+    pub fn new_server_side_root_scope() -> (RootScopeGuard, Scope) {
+        Self::new(false)
+    }
+
+    fn new(client_side: bool) -> (RootScopeGuard, Scope) {
+        let rt = Runtime::new(client_side);
+        let guard = RootScopeGuard(rt);
+        let scope = rt.new_root_scope();
+        (guard, scope)
     }
 }

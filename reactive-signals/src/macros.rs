@@ -17,9 +17,9 @@
 ///
 /// ```rust
 /// # use reactive_signals::types::*;
-/// use reactive_signals::{Scope, Signal, signal, runtimes::ClientRuntime};
+/// use reactive_signals::{Scope, Signal, signal};
 ///
-/// let sc = ClientRuntime::new_root_scope();
+/// let (_guard, sc) = Scope::new_client_side_root_scope();
 ///
 /// // Create a string signal. Since string implements PartialEq the
 /// // signal will only notify it's subscribers if it's value change.
@@ -38,9 +38,9 @@
 /// # use std::cell::RefCell;
 /// # use std::rc::Rc;
 /// #
-/// use reactive_signals::{Scope, Signal, signal, runtimes::ClientRuntime};
+/// use reactive_signals::{Scope, Signal, signal};
 ///
-/// let sc = ClientRuntime::new_root_scope();
+/// let (_guard, sc) = Scope::new_client_side_root_scope();
 ///
 /// struct MyNoEqData;
 ///
@@ -146,10 +146,8 @@ macro_rules! signal {
 
 #[test]
 fn test() {
-    use crate::Runtime;
-    let rt = Runtime::new_server_side();
-
-    let sx = rt.new_root_scope();
+    use crate::Scope;
+    let (_guard, sx) = Scope::new_server_side_root_scope();
     let _sig = signal!(sx, 32);
     // assert!(!sig.eq);
 

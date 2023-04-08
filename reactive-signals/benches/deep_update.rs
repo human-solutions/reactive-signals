@@ -1,13 +1,13 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 
 fn rs_deep_update(b: &mut Criterion) {
-    use reactive_signals::{runtimes2::ClientRuntime, signal, types::Func, Signal};
+    use reactive_signals::{signal, types::Func, Scope, Signal};
 
     b.bench_function("rs_deep_update", |b| {
         b.iter(|| {
-            let sc = ClientRuntime::bench_root_scope();
+            let (guard, sc) = Scope::new_client_side_root_scope();
             let signal = signal!(sc, 0);
-            let mut memos = Vec::<Signal<Func<i32>, ClientRuntime>>::new();
+            let mut memos = Vec::<Signal<Func<i32>>>::new();
             for i in 0..1000usize {
                 let prev = memos.get(i.saturating_sub(1)).copied();
                 if let Some(prev) = prev {
@@ -18,6 +18,7 @@ fn rs_deep_update(b: &mut Criterion) {
             }
             signal.set(1);
             assert_eq!(memos[999].get(), 1001);
+            guard
         })
     });
 }

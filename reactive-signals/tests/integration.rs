@@ -1,10 +1,8 @@
-use reactive_signals::{signal, types::EqData, Runtime, Signal};
+use reactive_signals::{signal, types::EqData, Scope, Signal};
 
 #[test]
 fn test_use() {
-    let rt = Runtime::new_client_side();
-
-    let sx = rt.new_root_scope();
+    let (_guard, sx) = Scope::new_client_side_root_scope();
 
     let count = signal!(sx, 5);
     let even = signal!(sx, 2);

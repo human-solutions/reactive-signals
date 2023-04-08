@@ -4,7 +4,7 @@ pub fn discard_scopes_with_signals(c: &mut Criterion) {
     c.bench_function("Discard 1,000 nested scopes with 1 func signal each", |b| {
         b.iter_batched(
             reactive_signals::tests::profile::create_1000_nested_scopes_each_with_a_signal,
-            |(scope, _start, _end)| scope.discard(),
+            |(_g, scope, _start, _end)| scope.discard(),
             BatchSize::SmallInput,
         );
     });
@@ -14,7 +14,7 @@ pub fn discard_scopes_with_signals(c: &mut Criterion) {
         |b| {
             b.iter_batched(
                 reactive_signals::tests::profile::create_1000_nested_scopes_each_with_a_signal,
-                |(scope, _, _)| scope.discard(),
+                |(_g, scope, _, _)| scope.discard(),
                 BatchSize::SmallInput,
             );
         },

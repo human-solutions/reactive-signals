@@ -64,9 +64,10 @@ fn test_retain() {
     use crate::arena_tree::NodeId;
     use crate::primitives::u15Bool;
     use crate::signals::SignalId;
-    use crate::Runtime;
+    use crate::Scope;
 
-    let rt: &'static Runtime = Box::leak(Box::new(Runtime::new_client_side()));
+    let (_guard, scope) = Scope::new_client_side_root_scope();
+    let rt = scope.rt;
 
     let sig1_scope1 = SignalId {
         id: u15Bool::new(1, false),

@@ -19,28 +19,34 @@
 use std::{
     cell::{Cell, RefCell},
     ops::{Index, IndexMut},
+    ptr::NonNull,
 };
 
 use crate::{scope::ScopeInner, signals::SignalId, CellType, Scope, Tree};
 
+pub struct RuntimeGuard(&'static Runtime);
+
+impl Drop for RuntimeGuard {
+    fn drop(&mut self) {
+        // the official rust docs proposes to use this to
+        // drop something previously leaked
+        // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak
+        // but on the rust discord there's many different opinions.
+        let nn = NonNull::from(self.0);
+        let b = unsafe { Box::from_raw(nn.as_ptr()) };
+        drop(b);
+    }
+}
+
 #[doc(hidden)]
-pub struct Runtime {
+pub(crate) struct Runtime {
     pub(crate) inner: RefCell<RuntimeInner>,
 }
 
 impl Runtime {
-    pub fn new_client_side() -> &'static Self {
-        Self::new(true)
-    }
-
-    pub fn new_server_side() -> &'static Self {
-        Self::new(false)
-    }
-
-    fn new(client_side: bool) -> &'static Self {
+    pub(crate) fn new(client_side: bool) -> &'static Runtime {
         let inner = RuntimeInner::new(client_side);
-        let rt: &'static Self = Box::leak(Box::new(Self { inner }));
-        rt
+        Box::leak(Box::new(Self { inner }))
     }
 
     pub fn new_root_scope(&'static self) -> Scope {
@@ -50,7 +56,7 @@ impl Runtime {
         Scope { sx, rt: self }
     }
 
-    pub fn client_side(&self) -> bool {
+    pub(crate) fn client_side(&self) -> bool {
         self.inner.borrow().client_side
     }
 }
@@ -71,15 +77,8 @@ impl RuntimeInner {
         })
     }
 
-    pub(crate) fn in_use(&self) -> bool {
-        self.scope_tree.is_initialized()
-    }
-
     pub fn discard(&mut self) {
-        if self.in_use() {
-            // also sets the tree to not initialized
-            self.scope_tree.discard_all();
-        }
+        self.scope_tree.discard_all();
     }
 
     pub(crate) fn get_running_signal(&self) -> Option<SignalId> {
