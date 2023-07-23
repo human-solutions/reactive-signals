@@ -6,7 +6,7 @@ thread_local! {
   pub static RUNTIME_POOL: ServerRuntimePool = Default::default();
 }
 
-/// A runtime meant to be used client-side because there can only be one per thread.
+/// A runtime meant to be used server-side because there can be multiple threads
 ///
 ///
 /// ```no_run
