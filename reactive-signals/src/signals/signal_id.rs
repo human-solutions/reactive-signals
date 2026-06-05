@@ -68,10 +68,7 @@ impl<RT: Runtime> Eq for SignalId<RT> {}
 impl<RT: Runtime> PartialOrd for SignalId<RT> {
     #[inline]
     fn partial_cmp(&self, other: &SignalId<RT>) -> Option<Ordering> {
-        match self.sx.partial_cmp(&other.sx) {
-            Some(Ordering::Equal) => self.id.partial_cmp(&other.id),
-            cmp => cmp,
-        }
+        Some(self.cmp(other))
     }
 }
 

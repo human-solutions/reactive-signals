@@ -35,9 +35,13 @@ pub struct SingleClientRuntime(CellType<RuntimeInner<ClientRuntime>>);
 #[derive(Default, Clone, Copy)]
 pub struct ClientRuntime;
 
+// Under `unsafe-cell`, `rt_mut`/`rt_ref` return plain references, so the borrows below
+// are redundant; under the default `RefCell` path they're required to deref-coerce the
+// Ref/RefMut guard into `&/&mut RuntimeInner`.
+#[cfg_attr(feature = "unsafe-cell", allow(clippy::needless_borrow))]
 impl Runtime for ClientRuntime {
     const IS_SERVER: bool = false;
-    
+
     fn with_mut<F, T>(&self, f: F) -> T
     where
         F: FnOnce(&mut RuntimeInner<ClientRuntime>) -> T,
@@ -77,7 +81,7 @@ impl  ClientRuntime {
     #[cfg(any(test, feature = "profile"))]
     pub fn bench_root_scope() -> Scope<ClientRuntime> {
         RUNTIME.with(|rt| {
-            drop(rt.rt_mut().discard());
+            rt.rt_mut().discard();
             Self::new_root_scope()
         })
     }
@@ -86,12 +90,12 @@ impl  ClientRuntime {
 #[cfg(not(feature = "unsafe-cell"))]
 impl SingleClientRuntime {
     #[inline]
-    fn rt_ref(&self) -> std::cell::Ref<RuntimeInner<ClientRuntime>> {
+    fn rt_ref(&self) -> std::cell::Ref<'_, RuntimeInner<ClientRuntime>> {
         self.0.borrow()
     }
 
     #[inline]
-    fn rt_mut(&self) -> std::cell::RefMut<RuntimeInner<ClientRuntime>> {
+    fn rt_mut(&self) -> std::cell::RefMut<'_, RuntimeInner<ClientRuntime>> {
         self.0.borrow_mut()
     }
 
@@ -103,7 +107,9 @@ impl SingleClientRuntime {
         unsafe { &*self.0.get() }
     }
 
+    // `&mut` from `&self` is intentional under the `unsafe-cell` feature (UnsafeCell interior mutability).
     #[inline]
+    #[allow(clippy::mut_from_ref)]
     fn rt_mut(&self) -> &mut RuntimeInner<ClientRuntime> {
         unsafe { &mut *self.0.get() }
     }

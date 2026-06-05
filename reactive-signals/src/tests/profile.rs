@@ -8,6 +8,13 @@ use crate::{
     Scope, Signal,
 };
 
+/// A root scope plus the start (data) and end (func) signals of a built signal graph.
+type BenchGraph = (
+    Scope<ClientRuntime>,
+    Signal<Data<usize>, ClientRuntime>,
+    Signal<Func<usize>, ClientRuntime>,
+);
+
 impl<T: 'static, RT: Runtime> Signal<Func<T>, RT> {
     #[inline]
     pub(crate) fn new_func<F: Fn() -> T + 'static>(sx: Scope<RT>, func: F) -> Signal<Func<T>, RT> {
@@ -22,11 +29,7 @@ impl<T: 'static, RT: Runtime> Signal<Data<T>, RT> {
     }
 }
 
-pub fn create_1000_nested_scopes_each_with_a_signal() -> (
-    Scope<ClientRuntime>,
-    Signal<Data<usize>, ClientRuntime>,
-    Signal<Func<usize>, ClientRuntime>,
-) {
+pub fn create_1000_nested_scopes_each_with_a_signal() -> BenchGraph {
     let mut scope = ClientRuntime::bench_root_scope();
 
     // don't use the signal! macro, because we want to force the signals to
@@ -44,11 +47,7 @@ pub fn create_1000_nested_scopes_each_with_a_signal() -> (
     (scope, start_sig, end_sig)
 }
 
-pub fn create_1000_nested_signals_in_a_scope() -> (
-    Scope<ClientRuntime>,
-    Signal<Data<usize>, ClientRuntime>,
-    Signal<Func<usize>, ClientRuntime>,
-) {
+pub fn create_1000_nested_signals_in_a_scope() -> BenchGraph {
     let mut scope = ClientRuntime::bench_root_scope();
 
     // don't use the signal! macro, because we want to force the signals to
@@ -66,7 +65,7 @@ pub fn create_1000_nested_signals_in_a_scope() -> (
     (scope, start_sig, end_sig)
 }
 
-pub fn create_1000_nested_scopes() -> () {
+pub fn create_1000_nested_scopes() {
     let mut scope = ClientRuntime::bench_root_scope();
 
     (0..1000).for_each(|_| {
@@ -74,7 +73,7 @@ pub fn create_1000_nested_scopes() -> () {
     });
 }
 
-pub fn create_1000_data_signals() -> () {
+pub fn create_1000_data_signals() {
     let scope = ClientRuntime::bench_root_scope();
 
     (0..1000).for_each(|_| {
@@ -82,7 +81,7 @@ pub fn create_1000_data_signals() -> () {
     });
 }
 
-pub fn comparative_with_leptos_create_1000_signals() -> () {
+pub fn comparative_with_leptos_create_1000_signals() {
     let scope = ClientRuntime::bench_root_scope();
 
     let sigs = (0..1000)
@@ -92,7 +91,7 @@ pub fn comparative_with_leptos_create_1000_signals() -> () {
     assert_eq!(func.get(), 499500);
 }
 
-pub fn create_1000_func_signals() -> () {
+pub fn create_1000_func_signals() {
     let scope = ClientRuntime::bench_root_scope();
 
     (0..1000).for_each(|_| {
@@ -100,7 +99,7 @@ pub fn create_1000_func_signals() -> () {
     });
 }
 
-pub fn create_1000_func_signals_with_one_subscription() -> () {
+pub fn create_1000_func_signals_with_one_subscription() {
     let scope = ClientRuntime::bench_root_scope();
     let sig = Signal::new_data(scope, 0usize);
     (0..1000).for_each(|_| {
@@ -108,11 +107,7 @@ pub fn create_1000_func_signals_with_one_subscription() -> () {
     });
 }
 
-pub fn create_1000_siblings() -> (
-    Scope<ClientRuntime>,
-    Signal<Data<usize>, ClientRuntime>,
-    Signal<Func<usize>, ClientRuntime>,
-) {
+pub fn create_1000_siblings() -> BenchGraph {
     let scope = ClientRuntime::bench_root_scope();
     // don't use the signal! macro, because we want to force the signals to
     // be non equals. Otherwise a propagation wouldn't happen

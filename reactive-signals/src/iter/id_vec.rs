@@ -92,20 +92,20 @@ fn test_id_vec() {
     let val = iter.next();
     assert_eq!(val, Some(0));
     assert_eq!(iter.remaining(), 2);
-    assert_eq!(iter.has_more(), true);
+    assert!(iter.has_more());
 
     let val = iter.next();
     assert_eq!(val, Some(1));
-    assert_eq!(iter.has_more(), true);
+    assert!(iter.has_more());
     assert_eq!(iter.remaining(), 1);
 
     let val = iter.next();
     assert_eq!(val, Some(2));
-    assert_eq!(iter.has_more(), false);
+    assert!(!iter.has_more());
     assert_eq!(iter.remaining(), 0);
 
     let val = iter.next();
     assert_eq!(val, None);
-    assert_eq!(iter.has_more(), false);
+    assert!(!iter.has_more());
     assert_eq!(iter.remaining(), 0);
 }

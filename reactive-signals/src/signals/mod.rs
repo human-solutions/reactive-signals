@@ -109,10 +109,7 @@ pub struct Signal<T: SignalType, RT: Runtime> {
 
 impl<T: SignalType, RT: Runtime> Clone for Signal<T, RT> {
     fn clone(&self) -> Self {
-        Self {
-            id: self.id,
-            ty: self.ty,
-        }
+        *self
     }
 }
 

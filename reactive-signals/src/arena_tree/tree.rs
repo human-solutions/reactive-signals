@@ -105,11 +105,11 @@ impl<T: Default> Tree<T> {
     }
 
     #[cfg(any(test, feature = "profile"))]
-    pub fn iter_from(&self, id: NodeId) -> super::iter::DepthFirstIter<T> {
+    pub fn iter_from(&self, id: NodeId) -> super::iter::DepthFirstIter<'_, T> {
         super::iter::DepthFirstIter::new(self, id)
     }
 
-    pub fn iter_mut_from(&mut self, id: NodeId) -> MutDepthFirstIter<T> {
+    pub fn iter_mut_from(&mut self, id: NodeId) -> MutDepthFirstIter<'_, T> {
         MutDepthFirstIter::new(self, id)
     }
 

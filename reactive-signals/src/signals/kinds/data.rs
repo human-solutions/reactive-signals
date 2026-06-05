@@ -1,3 +1,8 @@
+// `fn new(self, ..) -> Signal` is the `signal!` macro's autoref-specialization dispatch
+// (`(&&tuple).signal_kind().new(tuple)`), not a conventional constructor — the `self`
+// receiver and non-`Self` return are deliberate.
+#![allow(clippy::new_ret_no_self, clippy::wrong_self_convention)]
+
 use std::hash::Hash;
 
 use crate::{
