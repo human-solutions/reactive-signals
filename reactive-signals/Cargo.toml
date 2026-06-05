@@ -3,7 +3,7 @@ name = "reactive-signals"
 version = "0.1.0-alpha.4"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/human-solutions/reactive-signals"
+repository = "https://github.com/akesson/reactive-signals"
 description = "reactive-signals is a dx-first scope-based fine-grained reactive system."
 categories = ["data-structures"]
 readme = "../README.md"
@@ -18,20 +18,22 @@ unsafe-cell = []
 [dependencies]
 
 # Optional: used only when benchmarking and running profiling examples
-criterion = { version = "0.4", features = ["html_reports"], optional = true }
-pprof = { version = "0.11", features = [
+# Note: criterion is capped at 0.5 because pprof's `criterion` integration
+# (PProfProfiler implements criterion's Profiler trait) depends on criterion ^0.5.
+criterion = { version = "0.5", features = ["html_reports"], optional = true }
+pprof = { version = "0.15", features = [
   "flamegraph",
   "frame-pointer",
   "criterion",
 ], optional = true }
-dhat = { version = "0.3", optional = true }
+dhat = { version = "0.3.3", optional = true }
 
 [dev-dependencies]
-insta = "1.28"
-wasm-bindgen-test = "0.3.34"
-wasm-bindgen = "0.2.84"
-markdown-includes = "0.1"
-criterion = { version = "0.4", features = ["html_reports"] }
+insta = "1.47"
+wasm-bindgen-test = "0.3.50"
+wasm-bindgen = "0.2.100"
+markdown-includes = "0.1.1"
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [[bench]]
 name = "create_scopes"
