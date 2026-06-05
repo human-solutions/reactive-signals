@@ -2,6 +2,9 @@
 //! Run with:
 //!  - cargo run --example heap_profiling --features=profile --profile=heap
 //!
+//! The expected byte-counts below were recalibrated against rustc 1.95 (2026-06).
+//! Block counts and the with-subscription deltas are unchanged from the previous
+//! calibration; only absolute `max_bytes` dropped (a toolchain memory improvement).
 #[global_allocator]
 static ALLOC: dhat::Alloc = dhat::Alloc;
 
@@ -15,12 +18,12 @@ fn main() {
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 301_044);
+        assert_eq!(stats.max_bytes, 269_012);
         assert_eq!(stats.max_blocks, 3_005);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 349_284);
+        assert_eq!(stats.max_bytes, 317_252);
         assert_eq!(stats.max_blocks, 3_005);
     }
     drop(profile);
@@ -53,12 +56,12 @@ fn main() {
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 73_664);
+        assert_eq!(stats.max_bytes, 65_472);
         assert_eq!(stats.max_blocks, 1002);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 89_888);
+        assert_eq!(stats.max_bytes, 81_696);
         assert_eq!(stats.max_blocks, 1002);
     }
     drop(profile);
@@ -72,12 +75,12 @@ fn main() {
     let stats = dhat::HeapStats::get();
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 69_664);
+        assert_eq!(stats.max_bytes, 61_472);
         assert_eq!(stats.max_blocks, 1002);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 89_888);
+        assert_eq!(stats.max_bytes, 81_696);
         assert_eq!(stats.max_blocks, 1002);
     }
     drop(profile);
@@ -94,12 +97,12 @@ fn main() {
 
     #[cfg(feature = "unsafe-cell")]
     {
-        assert_eq!(stats.max_bytes, 81_768);
+        assert_eq!(stats.max_bytes, 73_576);
         assert_eq!(stats.max_bytes - stats_no_deps.max_bytes, 12_104);
     }
     #[cfg(not(feature = "unsafe-cell"))]
     {
-        assert_eq!(stats.max_bytes, 98_000);
+        assert_eq!(stats.max_bytes, 89_808);
         assert_eq!(stats.max_bytes - stats_no_deps.max_bytes, 8_112);
     }
     drop(profile);
