@@ -36,9 +36,7 @@ fn set_available(flags: &mut FlagArr, idx: usize) {
 
 #[inline]
 fn get_available(flags: &mut FlagArr, is_available: impl Fn(usize) -> bool) -> Option<usize> {
-    let Some(slot_idx) = flags.take_last() else {
-        return None;
-    };
+    let slot_idx = flags.take_last()?;
     let mut i = slot_idx * SLOT_SIZE;
     let slot_end = i + SLOT_SIZE;
 

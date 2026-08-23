@@ -116,22 +116,3 @@ uses 100kb. In other words, reactive-signals use 4 times less memory than
 leptos_reactive
 
 Please see the benches, examples and tests for full details.
-
-
-# A personal note & the future of reactive-signals
-
-I have spent a lot of time on reactive-signals which have been entirely self-funded. Unfortunately,
-I cannot continue like that (I would love to, though!).
-
-The future of reactive-signals depends on you and if you want to fund the features listed with a <sup>TBC</sup>.
-
-I have created a [fundraiser](https://opencollective.com/human-solutions/projects/reactive-signals) for it.
-
-I'm open to any type of freelance contract work that would allow me to continue
-developing and maintaining the open-source projects I have and plan to do.
-See my [services](https://human.solutions/services/).
-
-See my other [open-source projects](https://human.solutions/opensource/).
-
-Feel free to reach out if you are interested!
-

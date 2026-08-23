@@ -149,8 +149,16 @@ type CellType<T> = cell::RefCell<T>;
 #[cfg(feature = "unsafe-cell")]
 type CellType<T> = cell::UnsafeCell<T>;
 
+/// Regenerates `../README.md` from `src/readme.tpl.md`.
+///
+/// Ignored by default: it mutates a tracked file as a side effect, and
+/// markdown-includes 0.1.1's `rustdoc` extraction is currently broken on recent
+/// toolchains (it emits `expected identifier` instead of the lib.rs docs, which
+/// truncates the README). Run manually with `cargo test -- --ignored update_readme`
+/// only once README generation is working again (e.g. after replacing markdown-includes).
 #[cfg(test)]
 #[test]
+#[ignore = "regenerates README.md; markdown-includes 0.1.1 rustdoc extraction is broken on recent toolchains"]
 fn update_readme() {
     use std::path::Path;
 

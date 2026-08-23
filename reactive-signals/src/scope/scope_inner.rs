@@ -52,12 +52,12 @@ impl<RT: Runtime> ScopeInner<RT> {
 #[cfg(not(feature = "unsafe-cell"))]
 impl<RT: Runtime> ScopeInner<RT> {
     #[inline]
-    pub(crate) fn vec_ref(&self) -> std::cell::Ref<Vec<SignalInner<RT>>> {
+    pub(crate) fn vec_ref(&self) -> std::cell::Ref<'_, Vec<SignalInner<RT>>> {
         self.signals.borrow()
     }
 
     #[inline]
-    fn vec_mut(&self) -> std::cell::RefMut<Vec<SignalInner<RT>>> {
+    fn vec_mut(&self) -> std::cell::RefMut<'_, Vec<SignalInner<RT>>> {
         self.signals.borrow_mut()
     }
 }
@@ -68,7 +68,9 @@ impl<RT: Runtime> ScopeInner<RT> {
         unsafe { &*self.signals.get() }
     }
 
+    // `&mut` from `&self` is intentional under the `unsafe-cell` feature (UnsafeCell interior mutability).
     #[inline]
+    #[allow(clippy::mut_from_ref)]
     fn vec_mut(&self) -> &mut Vec<SignalInner<RT>> {
         unsafe { &mut *self.signals.get() }
     }

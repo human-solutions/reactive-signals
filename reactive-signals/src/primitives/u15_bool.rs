@@ -76,7 +76,7 @@ impl Eq for u15Bool {}
 impl PartialOrd for u15Bool {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        unshift_one(self.0).partial_cmp(&unshift_one(other.0))
+        Some(self.cmp(other))
     }
 }
 
@@ -104,7 +104,7 @@ fn set_last_bit_bool(base_one: u16, val: bool) -> NonZeroU16 {
     } else {
         base_one & NONE_LAST_BIT
     })
-    .expect(&format!("base_one: {base_one}, val: {val}"))
+    .unwrap_or_else(|| panic!("base_one: {base_one}, val: {val}"))
 }
 
 #[inline]
@@ -115,41 +115,41 @@ fn get_bool(non_zero: NonZeroU16) -> bool {
 #[test]
 fn test_0_bool() {
     let val = u15Bool::new(0, false);
-    assert_eq!(val.bool(), false);
+    assert!(!val.bool());
     assert_eq!(val.as_u15(), 0);
 
     let val = u15Bool::new(0, true);
-    assert_eq!(val.bool(), true);
+    assert!(val.bool());
     assert_eq!(val.as_u15(), 0);
 }
 
 #[test]
 fn test_1_bool() {
     let val = u15Bool::new(1, false);
-    assert_eq!(val.bool(), false);
+    assert!(!val.bool());
     assert_eq!(val.as_u15(), 1);
 
     let val = u15Bool::new(1, true);
-    assert_eq!(val.bool(), true);
+    assert!(val.bool());
     assert_eq!(val.as_u15(), 1);
 }
 
 #[test]
 fn test_max_bool() {
     let mut val = u15Bool::new(u15Bool::MAX as usize, false);
-    assert_eq!(val.bool(), false);
+    assert!(!val.bool());
     assert_eq!(val.as_u15(), u15Bool::MAX);
 
     val.set_bool(true);
-    assert_eq!(val.bool(), true);
+    assert!(val.bool());
     assert_eq!(val.as_u15(), u15Bool::MAX);
 
     let mut val = u15Bool::new(u15Bool::MAX as usize, true);
-    assert_eq!(val.bool(), true);
+    assert!(val.bool());
     assert_eq!(val.as_u15(), u15Bool::MAX);
 
     val.set_bool(false);
-    assert_eq!(val.bool(), false);
+    assert!(!val.bool());
     assert_eq!(val.as_u15(), u15Bool::MAX);
 }
 
@@ -157,10 +157,10 @@ fn test_max_bool() {
 fn test_eq() {
     let max_true = u15Bool::new(u15Bool::MAX as usize, true);
     let max_false = u15Bool::new(u15Bool::MAX as usize, false);
-    let zero_true = u15Bool::new(0 as usize, true);
-    let zero_false = u15Bool::new(0 as usize, false);
-    let one_true = u15Bool::new(1 as usize, true);
-    let one_false = u15Bool::new(1 as usize, false);
+    let zero_true = u15Bool::new(0_usize, true);
+    let zero_false = u15Bool::new(0_usize, false);
+    let one_true = u15Bool::new(1_usize, true);
+    let one_false = u15Bool::new(1_usize, false);
 
     assert_eq!(max_true, max_false);
     assert_eq!(zero_true, zero_false);

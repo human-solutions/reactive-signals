@@ -1,5 +1,7 @@
 use super::{NodeId, Tree};
 
+// Only constructed by `Tree::iter_from`, which is gated to test/profile builds.
+#[cfg(any(test, feature = "profile"))]
 pub struct DepthFirstIter<'a, T> {
     tree: &'a Tree<T>,
     start: NodeId,
@@ -7,8 +9,8 @@ pub struct DepthFirstIter<'a, T> {
     next: Option<NodeId>,
 }
 
+#[cfg(any(test, feature = "profile"))]
 impl<'a, T> DepthFirstIter<'a, T> {
-    #[cfg(any(test, feature = "profile"))]
     pub(crate) fn new(tree: &'a Tree<T>, start: NodeId) -> Self {
         let next = Some(drill_down(tree, start));
         DEBUG.then(|| println!("Start: {start:?}, Next: {next:?}"));
@@ -16,6 +18,7 @@ impl<'a, T> DepthFirstIter<'a, T> {
     }
 }
 
+#[cfg(any(test, feature = "profile"))]
 impl<'a, T> Iterator for DepthFirstIter<'a, T> {
     type Item = NodeId;
 

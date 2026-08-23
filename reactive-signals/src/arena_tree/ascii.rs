@@ -12,7 +12,7 @@ impl<T: Default> Tree<T> {
     }
     pub fn ascii_node(&self, id: NodeId, data_fmt: &impl Fn(&T) -> String) -> String {
         let mut s = String::new();
-        self.write_elem(&mut s, id, &vec![], data_fmt).unwrap();
+        self.write_elem(&mut s, id, &[], data_fmt).unwrap();
         s
     }
 
@@ -29,7 +29,7 @@ impl<T: Default> Tree<T> {
         &self,
         f: &mut dyn Write,
         id: NodeId,
-        level: &Vec<usize>,
+        level: &[usize],
         data_fmt: &impl Fn(&T) -> String,
     ) -> fmt::Result {
         const EMPTY: &str = "    ";
@@ -70,7 +70,7 @@ impl<T: Default> Tree<T> {
                 }
 
                 for s in children {
-                    let mut lnext = level.clone();
+                    let mut lnext = level.to_vec();
                     lnext.push(d);
                     d -= 1;
                     self.write_elem(f, s, &lnext, data_fmt)?;

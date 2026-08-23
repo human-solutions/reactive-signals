@@ -74,11 +74,11 @@ impl AnyData {
 #[cfg(not(feature = "unsafe-cell"))]
 impl AnyData {
     #[inline]
-    fn val_ref(&self) -> std::cell::Ref<dyn Any> {
+    fn val_ref(&self) -> std::cell::Ref<'_, dyn Any> {
         self.0.borrow()
     }
     #[inline]
-    fn val_mut(&self) -> std::cell::RefMut<dyn Any> {
+    fn val_mut(&self) -> std::cell::RefMut<'_, dyn Any> {
         self.0.borrow_mut()
     }
 }
@@ -90,7 +90,10 @@ impl AnyData {
         unsafe { &*self.0.get() }
     }
 
+    // Returning `&mut` from `&self` is the whole point of the `unsafe-cell` feature:
+    // interior mutability via `UnsafeCell` without `RefCell`'s runtime checks.
     #[inline]
+    #[allow(clippy::mut_from_ref)]
     fn val_mut(&self) -> &mut dyn Any {
         unsafe { &mut *self.0.get() }
     }

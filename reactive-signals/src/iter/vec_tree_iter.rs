@@ -86,7 +86,7 @@ where
                 .expect("BUG: An empty parent iterator was queued");
 
             DEBUG.then(|| println!("[{next:?}] Parent"));
-            return Some(next);
+            Some(next)
         } else {
             DEBUG.then(|| println!("Stop"));
             None

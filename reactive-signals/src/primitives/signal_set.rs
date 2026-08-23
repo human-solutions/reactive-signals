@@ -34,19 +34,21 @@ impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
 #[cfg(not(feature = "unsafe-cell"))]
 impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
     #[inline]
-    fn vec_mut(&self) -> std::cell::RefMut<ArrVec<N, T>> {
+    fn vec_mut(&self) -> std::cell::RefMut<'_, ArrVec<N, T>> {
         self.0.borrow_mut()
     }
 
     #[inline]
-    fn vec_ref(&self) -> std::cell::Ref<ArrVec<N, T>> {
+    fn vec_ref(&self) -> std::cell::Ref<'_, ArrVec<N, T>> {
         self.0.borrow()
     }
 }
 
 #[cfg(feature = "unsafe-cell")]
 impl<const N: usize, T: Ord + Eq + Copy> SignalSet<N, T> {
+    // `&mut` from `&self` is intentional under the `unsafe-cell` feature (UnsafeCell interior mutability).
     #[inline]
+    #[allow(clippy::mut_from_ref)]
     fn vec_mut(&self) -> &mut ArrVec<N, T> {
         unsafe { &mut *self.0.get() }
     }

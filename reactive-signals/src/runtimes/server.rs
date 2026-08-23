@@ -97,7 +97,7 @@ impl ServerRuntime {
     #[cfg(any(test, feature = "profile"))]
     pub fn bench_root_scope() -> Scope<ServerRuntime> {
         RUNTIME_POOL.with(|rt| {
-            drop(rt.0.borrow_mut().clear());
+            rt.0.borrow_mut().clear();
             Self::new_root_scope()
         })
     }

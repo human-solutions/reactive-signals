@@ -6,6 +6,12 @@ use std::cell::RefCell;
 
 pub struct StringStore(RefCell<Vec<String>>);
 
+impl Default for StringStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StringStore {
     pub fn new() -> Self {
         Self(RefCell::new(Vec::new()))

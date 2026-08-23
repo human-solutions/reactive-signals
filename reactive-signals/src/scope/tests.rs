@@ -10,7 +10,7 @@ use crate::{
 fn test_scopes_deep() {
     let root = ServerRuntime::new_root_scope();
 
-    let mut sc = root.clone();
+    let mut sc = root;
     let num_sig = signal!(sc, 5);
 
     (0..3).for_each(|_| sc = sc.new_child());
@@ -28,7 +28,7 @@ fn test_scopes_deep() {
 fn test_scopes_discard() {
     let root = ServerRuntime::new_root_scope();
 
-    let sc0 = root.clone();
+    let sc0 = root;
     let num_sig = signal!(sc0, 5);
 
     let sc1 = sc0.new_child();

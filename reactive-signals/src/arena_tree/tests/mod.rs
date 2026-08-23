@@ -16,7 +16,7 @@ impl<T: Display> Tree<T> {
             .iter()
             .enumerate()
             .filter(|(i, n)| n.parent.is_some() || *i == 0)
-            .map(|(i, n)| format!("[{i}] {}", n.data.to_string()))
+            .map(|(i, n)| format!("[{i}] {}", n.data))
             .collect::<Vec<_>>()
             .join(", ")
     }

@@ -41,7 +41,7 @@ pub trait OptReadable {
 
 #[cfg(test)]
 fn set<T: 'static + SignalType>(val1: &T, val2: &T::Inner) -> bool {
-    val1.is_eq(&val2)
+    val1.is_eq(val2)
 }
 
 #[test]
@@ -51,12 +51,12 @@ fn cmp_test() {
     let d1 = Data(3);
     let d2 = Data(2);
 
-    assert_eq!(set(&d1, &d2.inner()), false);
-    assert_eq!(set(&d1, &d1.inner()), false);
+    assert!(!set(&d1, d2.inner()));
+    assert!(!set(&d1, d1.inner()));
 
     let d1 = EqData(3);
     let d2 = EqData(2);
 
-    assert_eq!(set(&d1, &d2.inner()), false);
-    assert_eq!(set(&d1, &d1.inner()), true);
+    assert!(!set(&d1, d2.inner()));
+    assert!(set(&d1, d1.inner()));
 }

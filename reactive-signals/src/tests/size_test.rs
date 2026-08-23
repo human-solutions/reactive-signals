@@ -1,6 +1,6 @@
 ///
-/// You need the wasm-bindgen-cli installed:
-///  - cargo install wasm-bindgen-cli --vers "0.2.84"
+/// You need the wasm-bindgen-cli installed (version must match the wasm-bindgen dep):
+///  - cargo install wasm-bindgen-cli --vers "0.2.100"
 ///
 use std::{mem, num::NonZeroU16};
 use wasm_bindgen_test::*;
