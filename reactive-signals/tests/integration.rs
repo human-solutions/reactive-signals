@@ -1,7 +1,7 @@
 use reactive_signals::{
     runtimes::{ClientRuntime, Runtime},
     signal,
-    types::EqData,
+    types::HashEqData,
     Signal,
 };
 
@@ -33,4 +33,4 @@ fn test_use() {
     with_signal_arg(count);
 }
 
-fn with_signal_arg<RT: Runtime>(_sig: Signal<EqData<i32>, RT>) {}
+fn with_signal_arg<RT: Runtime>(_sig: Signal<HashEqData<i32>, RT>) {}

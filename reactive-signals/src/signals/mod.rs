@@ -98,7 +98,7 @@ pub use kinds::*;
 /// // when declaring functions some additional imports are necessary
 /// use reactive_signals::{runtimes::Runtime, Signal, types::*};
 ///
-/// fn with_signal_arg<RT: Runtime>(count: Signal<EqData<i32>, RT>) {
+/// fn with_signal_arg<RT: Runtime>(count: Signal<HashEqData<i32>, RT>) {
 /// }
 ///
 /// ```

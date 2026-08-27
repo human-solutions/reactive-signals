@@ -32,9 +32,13 @@ impl DynFunc {
             #[cfg(feature = "unsafe-cell")]
             let old_any: &mut dyn Any = unsafe { &mut *val.get() };
 
-            let old: &mut T = old_any.downcast_mut::<W>().unwrap().inner_mut();
-            *old = new;
-            true
+            let old = old_any.downcast_mut::<W>().unwrap();
+            // Eq signal types compare the new value against the old one so
+            // that unchanged values don't propagate. Non-Eq types report
+            // `is_eq` as always false, meaning every run counts as a change.
+            let changed = !old.is_eq(&new);
+            *old.inner_mut() = new;
+            changed
         });
         Self { func, value: val }
     }

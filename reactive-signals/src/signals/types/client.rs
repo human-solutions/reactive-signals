@@ -24,7 +24,9 @@ impl<T: 'static> SignalType for ClientFunc<T> {
 /// A client-side function that produces a value that implements [PartialEq]
 pub struct ClientEqFunc<T>(pub(crate) T);
 
-impl<T> OptReadable for ClientEqFunc<T> {}
+impl<T> OptReadable for ClientEqFunc<T> {
+    const RUN_ON_SERVER: bool = false;
+}
 
 impl<T: 'static + PartialEq> SignalType for ClientEqFunc<T> {
     type Inner = T;
