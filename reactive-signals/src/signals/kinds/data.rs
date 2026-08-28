@@ -19,8 +19,9 @@ pub trait HashEqDataKind {
     }
 }
 
-// Does not require any autoref if called as (&error).datakind().
-impl<T, RT: Runtime> HashEqDataKind for (Scope<RT>, T) where T: Hash + PartialEq + 'static {}
+// Highest priority: with a `&&tuple` receiver, `&self` on `&(Scope, T)` gives a
+// receiver type of `&&(Scope, T)` — an exact match needing no adjustment.
+impl<T, RT: Runtime> HashEqDataKind for &(Scope<RT>, T) where T: Hash + PartialEq + 'static {}
 
 pub trait EqDataKind {
     #[inline]
@@ -29,8 +30,8 @@ pub trait EqDataKind {
     }
 }
 
-// Does not require any autoref if called as (&error).datakind().
-impl<T, RT: Runtime> EqDataKind for &(Scope<RT>, T) where T: PartialEq + 'static {}
+// Second priority: needs one autoref of the `&&tuple` receiver.
+impl<T, RT: Runtime> EqDataKind for &&(Scope<RT>, T) where T: PartialEq + 'static {}
 
 pub trait TrueDataKind {
     #[inline]
@@ -39,8 +40,8 @@ pub trait TrueDataKind {
     }
 }
 
-// Requires one extra autoref to call! Lower priority than EqKind.
-impl<T, RT: Runtime> TrueDataKind for &&(Scope<RT>, T) where T: 'static {}
+// Lowest priority: only reachable after a deref step of the `&&tuple` receiver.
+impl<T, RT: Runtime> TrueDataKind for (Scope<RT>, T) where T: 'static {}
 
 pub struct HashEqSignal;
 

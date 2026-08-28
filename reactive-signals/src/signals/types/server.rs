@@ -24,7 +24,9 @@ impl<T: 'static> SignalType for ServerFunc<T> {
 /// A server-side function that produces a value that implements [PartialEq]
 pub struct ServerEqFunc<T>(pub(crate) T);
 
-impl<T> OptReadable for ServerEqFunc<T> {}
+impl<T> OptReadable for ServerEqFunc<T> {
+    const RUN_ON_CLIENT: bool = false;
+}
 
 impl<T: 'static + PartialEq> SignalType for ServerEqFunc<T> {
     type Inner = T;

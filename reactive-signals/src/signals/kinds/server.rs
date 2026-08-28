@@ -15,8 +15,9 @@ pub trait ServerEqFuncKind {
     }
 }
 
-// Does not require any autoref if called as (&error).datakind().
-impl<F, T, RT: Runtime> ServerEqFuncKind for (Scope<RT>, F)
+// Highest priority: with a `&&tuple` receiver, `&self` on `&(Scope, F)` gives a
+// receiver type of `&&(Scope, F)` — an exact match needing no adjustment.
+impl<F, T, RT: Runtime> ServerEqFuncKind for &(Scope<RT>, F)
 where
     F: Fn() -> T + 'static,
     T: PartialEq + 'static,
@@ -30,8 +31,8 @@ pub trait ServerTrueFuncKind {
     }
 }
 
-// Requires one extra autoref to call! Lower priority than EqKind.
-impl<F, T, RT: Runtime> ServerTrueFuncKind for &(Scope<RT>, F)
+// Lower priority than ServerEqFuncKind: needs one autoref of the `&&tuple` receiver.
+impl<F, T, RT: Runtime> ServerTrueFuncKind for &&(Scope<RT>, F)
 where
     F: Fn() -> T + 'static,
     T: 'static,

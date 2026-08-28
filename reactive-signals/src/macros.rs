@@ -144,40 +144,87 @@ macro_rules! signal {
     }};
 }
 
+/// Pins the signal type the macro's autoref-specialization dispatch resolves to
+/// for every kind. These are compile-time checks: if the dispatch priority in
+/// `signals::kinds` regresses, the type annotations stop compiling.
 #[test]
 fn test() {
     use crate::runtimes::ServerRuntime;
+    use crate::signals::{
+        ClientEqFunc, ClientFunc, Data, EqData, EqFunc, Func, HashEqData, ServerEqFunc, ServerFunc,
+    };
+    use crate::Signal;
+
     let sx = ServerRuntime::new_root_scope();
-    let _sig = signal!(sx, 32);
-    // assert!(!sig.eq);
+
+    // Hash + PartialEq data -> HashEqData
+    let _sig: Signal<HashEqData<i32>, _> = signal!(sx, 32);
 
     let x = 5;
-    let _sig = signal!(sx, x);
-    // assert!(!sig.eq);
+    let _sig: Signal<HashEqData<i32>, _> = signal!(sx, x);
 
-    let _sig = signal!(sx, || 32);
-    // assert!(sig.eq);
+    let _sig: Signal<HashEqData<String>, _> = signal!(sx, "hi".to_string());
+
+    // PartialEq-only data (f64 is not Hash) -> EqData
+    let _sig: Signal<EqData<f64>, _> = signal!(sx, 1.5f64);
 
     #[derive(Clone)]
     struct NonEq;
-    let _sig = signal!(sx, || NonEq);
-    // assert!(!sig.eq);
+
+    // Data without PartialEq -> Data
+    let _sig: Signal<Data<NonEq>, _> = signal!(sx, NonEq);
+
+    // Function returning a PartialEq value -> EqFunc
+    let _sig: Signal<EqFunc<i32>, _> = signal!(sx, || 32);
+
+    // Function returning a non-PartialEq value -> Func
+    let _sig: Signal<Func<NonEq>, _> = signal!(sx, || NonEq);
 
     let ne = NonEq;
-    let _sig = signal!(sx, move || ne.clone());
-    // assert!(!sig.eq);
+    let _sig: Signal<Func<NonEq>, _> = signal!(sx, move || ne.clone());
 
     let ne = NonEq;
-    let _sig = signal!(sx, clone: ne, move || ne.clone());
+    let _sig: Signal<Func<NonEq>, _> = signal!(sx, clone: ne, move || ne.clone());
+    let _sig: Signal<EqFunc<i32>, _> = signal!(sx, clone: ne, move || {
+        let _ = ne.clone();
+        1
+    });
 
-    // assert!(!sig.eq);
+    // server / client variants follow the same Eq / non-Eq split
+    let _sig: Signal<ServerFunc<NonEq>, _> = signal!(sx, server, move || ne.clone());
 
-    let _sit = signal!(sx, server, move || ne.clone());
-
-    let srv = signal!(sx, server, move || 1);
+    let srv: Signal<ServerEqFunc<i32>, _> = signal!(sx, server, move || 1);
     assert_eq!(srv.opt_get(), Some(1));
 
-    let clnt = signal!(sx, client, move || 1);
-
+    let clnt: Signal<ClientEqFunc<i32>, _> = signal!(sx, client, move || 1);
     assert_eq!(clnt.opt_get(), None);
+
+    let ne = NonEq;
+    let _sig: Signal<ClientFunc<NonEq>, _> = signal!(sx, client, move || ne.clone());
+}
+
+/// An [EqFunc] signal must not re-notify subscribers when its computed value
+/// is unchanged.
+#[test]
+fn test_eq_func_gates_propagation() {
+    use std::cell::Cell;
+    use std::rc::Rc;
+
+    let sx = crate::runtimes::ClientRuntime::new_root_scope();
+
+    let src = signal!(sx, 1i32);
+    let derived = signal!(sx, move || src.get() / 10);
+
+    let runs = Rc::new(Cell::new(0u32));
+    let runs2 = runs.clone();
+    signal!(sx, move || {
+        derived.get();
+        runs2.set(runs2.get() + 1);
+    });
+
+    assert_eq!(runs.get(), 1);
+    src.set(2); // derived stays 0 -> subscriber must not re-run
+    assert_eq!(runs.get(), 1);
+    src.set(20); // derived becomes 2 -> subscriber re-runs
+    assert_eq!(runs.get(), 2);
 }
